@@ -29,12 +29,12 @@ class OpenAiCompatibleAiServiceTest {
 			OpenAiCompatibleAiService service = createService(gateway.baseUrl());
 
 			AiReply reply = service.generateInterviewReply(new InterviewReplyCommand(
-					"问题",
-					"候选人的回答",
-					"OPENING",
-					0,
+					"请解释什么是幂等性？",
+					"幂等就是多次调用结果一致。",
+					"TECHNICAL",
+					1,
 					2,
-					List.of()
+					List.of("定义准确", "举一个接口示例")
 			));
 
 			assertThat(reply.spokenText()).isEqualTo("好的，我们继续。");
@@ -45,6 +45,12 @@ class OpenAiCompatibleAiServiceTest {
 			assertThat(gateway.lastResponsesRequestBody()).contains("\"stream\":true");
 			assertThat(gateway.lastResponsesRequestBody()).contains("\"instructions\"");
 			assertThat(gateway.lastResponsesRequestBody()).doesNotContain("\"messages\"");
+			assertThat(gateway.lastResponsesRequestBody()).contains("question: 请解释什么是幂等性？");
+			assertThat(gateway.lastResponsesRequestBody()).contains("answer: 幂等就是多次调用结果一致。");
+			assertThat(gateway.lastResponsesRequestBody()).contains("stage: TECHNICAL");
+			assertThat(gateway.lastResponsesRequestBody()).contains("followUpIndex: 1");
+			assertThat(gateway.lastResponsesRequestBody()).contains("maxFollowUpPerQuestion: 2");
+			assertThat(gateway.lastResponsesRequestBody()).contains("expectedPoints: 定义准确；举一个接口示例");
 		}
 	}
 
