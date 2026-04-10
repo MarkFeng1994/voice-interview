@@ -5,10 +5,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.langchain4j.ai")
 public class LangChain4jAiProperties {
 
-	private double temperature = 0.7;
-	private int timeoutSeconds = 30;
+	private double temperature = 0.2;
+	private int timeoutSeconds = 60;
 	private boolean strictJsonSchema = true;
-	private int maxRetries = 2;
+	private int maxRetries = 1;
 
 	public double getTemperature() {
 		return temperature;
