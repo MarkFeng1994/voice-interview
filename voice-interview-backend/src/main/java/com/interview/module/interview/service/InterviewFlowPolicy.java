@@ -1,11 +1,18 @@
 package com.interview.module.interview.service;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+@Service
 public class InterviewFlowPolicy {
 
 	private final int defaultDurationMinutes;
 	private final int maxDurationMinutes;
 
-	public InterviewFlowPolicy(int defaultDurationMinutes, int maxDurationMinutes) {
+	public InterviewFlowPolicy(
+			@Value("${app.interview.default-duration-minutes:60}") int defaultDurationMinutes,
+			@Value("${app.interview.max-duration-minutes:120}") int maxDurationMinutes
+	) {
 		this.defaultDurationMinutes = defaultDurationMinutes;
 		this.maxDurationMinutes = maxDurationMinutes;
 	}

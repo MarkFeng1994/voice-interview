@@ -12,11 +12,22 @@ public interface InterviewEngine {
 
 	InterviewSessionView startSession(
 			List<InterviewQuestionCard> questions,
+			int durationMinutes,
 			int maxFollowUpPerQuestion,
 			InterviewSessionOwner owner,
 			Integer interviewerSpeakerId,
 			Double interviewerSpeechSpeed
 	);
+
+	default InterviewSessionView startSession(
+			List<InterviewQuestionCard> questions,
+			int maxFollowUpPerQuestion,
+			InterviewSessionOwner owner,
+			Integer interviewerSpeakerId,
+			Double interviewerSpeechSpeed
+	) {
+		return startSession(questions, 60, maxFollowUpPerQuestion, owner, interviewerSpeakerId, interviewerSpeechSpeed);
+	}
 
 	InterviewSessionView getState(String sessionId, String requesterUserId);
 

@@ -92,6 +92,7 @@ export interface InterviewRoundRecord {
   userAnswerText: string | null
   userAudioUrl: string | null
   userAnswerMode: string | null
+  analysisReason?: string | null
   createdAt: string
   answeredAt: string | null
 }
@@ -99,6 +100,8 @@ export interface InterviewRoundRecord {
 export interface InterviewSessionState {
   sessionId: string
   status: string
+  stage: string
+  durationMinutes: number
   currentQuestionIndex: number
   totalQuestions: number
   followUpIndex: number
@@ -150,6 +153,7 @@ export interface StartInterviewRequest {
   presetKey?: string
   resumeFileId?: string
   questionCount?: number
+  durationMinutes?: number
   interviewerSpeakerId?: number
   interviewerSpeechSpeed?: number
 }

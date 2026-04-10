@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ public class ResumeProfileService {
 
 	private final Store store;
 
+	@Autowired
 	public ResumeProfileService(ResumeProfileRepository repository) {
 		this.store = new Store() {
 			@Override

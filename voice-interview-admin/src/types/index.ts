@@ -35,6 +35,7 @@ export interface QuestionItem {
   difficulty: number
   source: string | null
   sourceUrl: string | null
+  tags: string[]
 }
 
 export interface ImportTaskItem {
@@ -62,6 +63,8 @@ export interface InterviewSessionSummary {
   answeredRounds: number
   overallScore: number | null
   summary: string
+  stage?: string
+  durationMinutes?: number
 }
 
 export interface InterviewQuestionReport {

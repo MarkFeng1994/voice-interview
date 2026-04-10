@@ -1,5 +1,10 @@
 package com.interview.module.ai.service;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,11 +14,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.interview.common.config.OpenAiProperties;
+import com.interview.module.interview.service.InterviewAnswerAnalyzer;
 import com.interview.module.interview.resume.GeneratedResumeQuestion;
 import com.interview.module.interview.resume.ResumeKeywordExtractionResult;
 import com.interview.module.interview.resume.ResumeQuestionGenerationCommand;
@@ -35,6 +42,7 @@ public class OpenAiCompatibleAiService implements AiService {
 			""";
 
 	private final RestClient restClient;
+	private final HttpClient httpClient;
 	private final ObjectMapper objectMapper;
 	private final OpenAiProperties openAiProperties;
 	private final ProviderMetricsService providerMetricsService;
@@ -48,6 +56,7 @@ public class OpenAiCompatibleAiService implements AiService {
 		this.objectMapper = objectMapper;
 		this.openAiProperties = openAiProperties;
 		this.providerMetricsService = providerMetricsService;
+		this.httpClient = HttpClient.newHttpClient();
 		this.restClient = restClientBuilder
 				.baseUrl(trimTrailingSlash(openAiProperties.resolveAiBaseUrl()))
 				.defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + openAiProperties.resolveAiApiKey())
@@ -58,23 +67,7 @@ public class OpenAiCompatibleAiService implements AiService {
 	public AiReply generateInterviewReply(String inputText) {
 		return providerMetricsService.record("AI", "openai", () -> {
 			requireApiKey();
-
-			Map<String, Object> payload = new LinkedHashMap<>();
-			payload.put("model", openAiProperties.resolveAiModel());
-			payload.put("messages", List.of(
-					Map.of("role", "system", "content", SYSTEM_PROMPT),
-					Map.of("role", "user", "content", inputText == null ? "" : inputText)
-			));
-			payload.put("response_format", Map.of("type", "json_object"));
-
-			JsonNode root = restClient.post()
-					.uri("/chat/completions")
-					.contentType(MediaType.APPLICATION_JSON)
-					.body(payload)
-					.retrieve()
-					.body(JsonNode.class);
-
-			String content = root.path("choices").path(0).path("message").path("content").asText();
+			String content = invokeTextCompletion(SYSTEM_PROMPT, inputText, true);
 			try {
 				JsonNode contentJson = objectMapper.readTree(content);
 				String spokenText = contentJson.path("spokenText").asText(content);
@@ -160,14 +153,45 @@ public class OpenAiCompatibleAiService implements AiService {
 		});
 	}
 
+	@Override
+	public InterviewAnswerAnalyzer.Analysis analyzeInterviewAnswer(
+			String question,
+			String answer,
+			List<String> expectedPoints
+	) {
+		return InterviewAnswerAnalyzer.heuristic().analyze(question, answer, expectedPoints);
+	}
+
 	private JsonNode invokeJsonChat(String systemPrompt, String userContent) {
+		String content = invokeTextCompletion(systemPrompt, userContent, true);
+		try {
+			return objectMapper.readTree(content);
+		} catch (Exception ex) {
+			return objectMapper.createObjectNode();
+		}
+	}
+
+	private String invokeTextCompletion(String systemPrompt, String userContent, boolean jsonOnly) {
+		try {
+			return invokeChatCompletions(systemPrompt, userContent, jsonOnly);
+		} catch (HttpClientErrorException.BadRequest ex) {
+			if (shouldFallbackToResponses(ex)) {
+				return invokeStreamingResponses(systemPrompt, userContent);
+			}
+			throw ex;
+		}
+	}
+
+	private String invokeChatCompletions(String systemPrompt, String userContent, boolean jsonOnly) {
 		Map<String, Object> payload = new LinkedHashMap<>();
 		payload.put("model", openAiProperties.resolveAiModel());
 		payload.put("messages", List.of(
 				Map.of("role", "system", "content", systemPrompt),
 				Map.of("role", "user", "content", userContent == null ? "" : userContent)
 		));
-		payload.put("response_format", Map.of("type", "json_object"));
+		if (jsonOnly) {
+			payload.put("response_format", Map.of("type", "json_object"));
+		}
 
 		JsonNode root = restClient.post()
 				.uri("/chat/completions")
@@ -176,12 +200,92 @@ public class OpenAiCompatibleAiService implements AiService {
 				.retrieve()
 				.body(JsonNode.class);
 
-		String content = root.path("choices").path(0).path("message").path("content").asText();
+		return root.path("choices").path(0).path("message").path("content").asText();
+	}
+
+	private boolean shouldFallbackToResponses(HttpClientErrorException.BadRequest ex) {
+		String body = ex.getResponseBodyAsString();
+		return body != null && body.contains("system_prompt");
+	}
+
+	private String invokeStreamingResponses(String systemPrompt, String userContent) {
+		Map<String, Object> payload = new LinkedHashMap<>();
+		payload.put("model", openAiProperties.resolveAiModel());
+		payload.put("instructions", systemPrompt);
+		payload.put("input", userContent == null ? "" : userContent);
+		payload.put("stream", true);
+
 		try {
-			return objectMapper.readTree(content);
+			HttpRequest request = HttpRequest.newBuilder()
+					.uri(URI.create(trimTrailingSlash(openAiProperties.resolveAiBaseUrl()) + "/responses"))
+					.header(HttpHeaders.AUTHORIZATION, "Bearer " + openAiProperties.resolveAiApiKey())
+					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+					.header(HttpHeaders.ACCEPT, MediaType.TEXT_EVENT_STREAM_VALUE)
+					.POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(payload), StandardCharsets.UTF_8))
+					.build();
+			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+			if (response.statusCode() >= 400) {
+				throw new IllegalStateException("Responses API request failed: " + response.body());
+			}
+			return extractStreamingResponseText(response.body());
+		} catch (RuntimeException ex) {
+			throw ex;
 		} catch (Exception ex) {
-			return objectMapper.createObjectNode();
+			throw new IllegalStateException("Failed to invoke responses API", ex);
 		}
+	}
+
+	private String extractStreamingResponseText(String responseBody) {
+		StringBuilder text = new StringBuilder();
+		for (String line : responseBody.split("\\R")) {
+			if (line == null || !line.startsWith("data:")) {
+				continue;
+			}
+			String json = line.substring(5).trim();
+			if (json.isBlank()) {
+				continue;
+			}
+			try {
+				JsonNode event = objectMapper.readTree(json);
+				String type = event.path("type").asText();
+				if ("response.output_text.done".equals(type)) {
+					String doneText = event.path("text").asText("");
+					if (!doneText.isBlank()) {
+						return doneText;
+					}
+				}
+				if ("response.output_text.delta".equals(type)) {
+					text.append(event.path("delta").asText(""));
+					continue;
+				}
+				if ("response.output_item.done".equals(type)) {
+					String itemText = extractTextFromOutputItem(event.path("item"));
+					if (!itemText.isBlank()) {
+						return itemText;
+					}
+				}
+			} catch (Exception ignored) {
+				// Ignore malformed SSE events and keep parsing the stream body.
+			}
+		}
+		if (!text.isEmpty()) {
+			return text.toString();
+		}
+		throw new IllegalStateException("Responses API stream did not contain output text");
+	}
+
+	private String extractTextFromOutputItem(JsonNode item) {
+		JsonNode content = item.path("content");
+		if (!content.isArray()) {
+			return "";
+		}
+		StringBuilder text = new StringBuilder();
+		for (JsonNode part : content) {
+			if ("output_text".equals(part.path("type").asText())) {
+				text.append(part.path("text").asText(""));
+			}
+		}
+		return text.toString();
 	}
 
 	private List<String> jsonArrayToList(JsonNode arrayNode) {

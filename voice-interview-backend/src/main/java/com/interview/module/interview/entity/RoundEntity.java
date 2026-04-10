@@ -22,6 +22,7 @@ public class RoundEntity {
 	private String finalUserAnswerText;
 	private String userAudioUrl;
 	private String aiMessageText;
+	private String aiAnalysis;
 	private String ttsAudioUrl;
 	private Integer score;
 	private Long durationMs;

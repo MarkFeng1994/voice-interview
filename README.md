@@ -198,10 +198,12 @@ $env:APP_INTERVIEW_SESSION_STORE='memory'
 - `voice-interview-backend`: `dev + jdbc + jwt` 实测可跑登录、资料、会话、媒体、报告链路
 - `voice-interview-backend`: JDBC 模式下最终报告会落到 `t_interview_report`
 - `voice-interview-backend`: `GET /api/system/providers` 可查看 AI / ASR / TTS 当前 provider 运行态
+- `voice-interview-backend`: `/api/resumes/upload` / `/{resumeId}` / `/{resumeId}/reparse` 已接入简历上传与解析状态闭环
 - `voice-interview-backend`: `POST /api/system/media/cleanup` 可手动清理已过期媒体
 - `voice-interview-backend`: `t_media_file` 已接入上传音频和生成音频元数据记录
 - `voice-interview-backend`: 分类 / 题目 CRUD 已在 MySQL 实测通过
 - `voice-interview-backend`: `wsTicket + /ws/interview` 已完成，移动端会话支持实时同步
+- `voice-interview-backend`: 面试会话已透出 `stage / durationMinutes / maxFollowUpPerQuestion`
 - `voice-interview-backend`: `X-Request-Id` 与请求开始/结束日志已接入
 - `voice-interview-admin`: 已具备最小可用的登录、分类管理、题目管理界面
 - `voice-interview-backend` / `voice-interview-admin`: 文本导入题目能力已实测通过

@@ -31,12 +31,20 @@
             <text class="telemetry-value">{{ selectedPresetTitle || '自由练习' }}</text>
           </view>
           <view class="telemetry-card">
+            <text class="telemetry-label">Stage</text>
+            <text class="telemetry-value">{{ stageLabel }}</text>
+          </view>
+          <view class="telemetry-card">
             <text class="telemetry-label">Mode</text>
             <text class="telemetry-value">{{ preferredAnswerModeLabel }}</text>
           </view>
           <view class="telemetry-card">
             <text class="telemetry-label">Follow-up</text>
             <text class="telemetry-value">{{ followUpIndex }} / {{ maxFollowUpPerQuestion }}</text>
+          </view>
+          <view class="telemetry-card">
+            <text class="telemetry-label">Duration</text>
+            <text class="telemetry-value">{{ durationLabel }}</text>
           </view>
           <view class="telemetry-card live">
             <view class="live-copy">
@@ -197,6 +205,8 @@ const previewMessages: InterviewMessage[] = [
 const {
   messages,
   sessionStatus,
+  currentStage,
+  durationMinutes,
   currentQuestionTitle,
   currentQuestionPrompt,
   followUpIndex,
@@ -216,6 +226,8 @@ const {
 } = useInterviewSession({
   apiBaseUrl: API_BASE_URL,
   initialPreviewMessages: previewMessages,
+  initialStage: 'OPENING',
+  initialDurationMinutes: 60,
   initialQuestionTitle: '开始一轮模拟面试',
   initialQuestionIndex: 0,
   initialTotalQuestions: 3,
@@ -233,6 +245,7 @@ const userStore = useUserStore()
 const voiceSettings = readInterviewVoiceSettings()
 const resumeFileId = ref('')
 const resumeQuestionCount = ref(0)
+const plannedDurationMinutes = ref(60)
 
 const voiceToneMap: Record<number, string> = {
   33: 'Cherry',
@@ -252,6 +265,18 @@ const preferredAnswerModeLabel = computed(() =>
 const voiceToneLabel = computed(() =>
   voiceToneMap[Number(voiceSettings.interviewerSpeakerId)] || `Voice ${voiceSettings.interviewerSpeakerId}`,
 )
+
+const stageLabel = computed(() => {
+  const map: Record<string, string> = {
+    OPENING: '开场',
+    JAVA_CORE: 'Java 基础',
+    PROJECT_DEEP_DIVE: '项目深挖',
+    WRAP_UP: '总结',
+  }
+  return map[currentStage.value] || '面试中'
+})
+
+const durationLabel = computed(() => `${durationMinutes.value || plannedDurationMinutes.value} 分钟`)
 
 const socketStatusLabel = computed(() => {
   switch (socketStatus.value) {
@@ -308,6 +333,19 @@ const setUiStatus = (status: string, hint: string) => {
   hintText.value = hint
 }
 
+const handleVoiceFailure = () => {
+  preferredAnswerMode.value = 'TEXT'
+  setUiStatus('语音失败', '已自动切换为文本作答')
+}
+
+const handleMediaStatusChange = (status: string, hint: string) => {
+  if (['录音失败', '无法开始录音', '上传失败', '识别失败'].includes(status)) {
+    handleVoiceFailure()
+    return
+  }
+  setUiStatus(status, hint)
+}
+
 const { playAudio, stopAudio } = useAudioPlayback({
   onPlay: () => {
     setUiStatus('播放中', lastAiAudioUrl.value ? '正在播放当前题目的音频。' : latestAudioLabel.value)
@@ -350,7 +388,7 @@ const {
 } = useMediaUpload({
   apiBaseUrl: API_BASE_URL,
   toAbsoluteUrl,
-  onStatusChange: setUiStatus,
+  onStatusChange: handleMediaStatusChange,
   appendMessage: () => {
     // Upload now behaves as a draft step; messages are appended after real submit.
   },
@@ -408,6 +446,7 @@ onLoad(async (query) => {
   preferredAnswerMode.value = query?.answerMode === 'TEXT' ? 'TEXT' : 'VOICE'
   resumeFileId.value = typeof query?.resumeFileId === 'string' ? query.resumeFileId : ''
   resumeQuestionCount.value = typeof query?.questionCount === 'string' ? parseInt(query.questionCount, 10) || 0 : 0
+  plannedDurationMinutes.value = typeof query?.durationMinutes === 'string' ? parseInt(query.durationMinutes, 10) || 60 : 60
   if (selectedPresetTitle.value) {
     currentQuestionTitle.value = `${selectedPresetTitle.value} · 准备开始`
   }
@@ -425,6 +464,7 @@ const startInterviewSession = async () => {
       presetKey: selectedPresetKey.value || undefined,
       resumeFileId: resumeFileId.value || undefined,
       questionCount: resumeQuestionCount.value || undefined,
+      durationMinutes: plannedDurationMinutes.value,
       interviewerSpeakerId: voiceSettings.interviewerSpeakerId,
       interviewerSpeechSpeed: voiceSettings.interviewerSpeechSpeed,
     })

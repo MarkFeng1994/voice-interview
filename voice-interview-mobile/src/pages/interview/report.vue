@@ -14,7 +14,7 @@
     <view class="score-card">
       <text class="score-label">总体评分</text>
       <text class="score-value">{{ report?.overallScore ?? '--' }}</text>
-      <text class="score-copy">状态：{{ report?.status || '暂无' }}</text>
+      <text class="score-copy">状态：{{ report?.status || '暂无' }} · {{ report?.questionReports.length || 0 }} 题回顾</text>
     </view>
 
     <view v-if="missingSession" class="section-card">

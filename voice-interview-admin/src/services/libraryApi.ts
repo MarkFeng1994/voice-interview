@@ -14,6 +14,10 @@ export const deleteCategory = (id: string) => del<void>(`/api/library/categories
 
 // --- Questions ---
 export const getQuestions = () => request<QuestionItem[]>('/api/library/questions')
+  .then((items) => items.map((item) => ({
+    ...item,
+    tags: item.tags ?? [],
+  })))
 
 export const createQuestion = (body: Partial<QuestionItem>) =>
   jsonPost<QuestionItem>('/api/library/questions', body)

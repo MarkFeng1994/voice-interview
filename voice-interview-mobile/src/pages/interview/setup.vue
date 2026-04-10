@@ -142,6 +142,24 @@
       </view>
     </template>
 
+    <view class="section-card">
+      <text class="section-title">面试时长</text>
+      <text class="section-desc">默认 60 分钟，支持延长到 90 或 120 分钟，时长越长可追问次数越多。</text>
+      <view class="question-count-row">
+        <view class="count-pills">
+          <view
+            v-for="minutes in durationOptions"
+            :key="minutes"
+            class="count-pill"
+            :class="{ active: durationMinutes === minutes }"
+            @click="durationMinutes = minutes"
+          >
+            <text class="pill-text">{{ minutes }} 分钟</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
     <!-- Answer Mode (shared) -->
     <view class="section-card">
       <text class="section-title">回答模式偏好</text>
@@ -195,6 +213,8 @@ const resumeQuestionCount = ref(5)
 const resumePresetKey = ref('')
 const resumePlan = ref<ResumeInterviewPlan | null>(null)
 const previewLoading = ref(false)
+const durationMinutes = ref(60)
+const durationOptions = [60, 90, 120]
 
 const canStart = computed(() => {
   if (activeTab.value === 'preset') return true
@@ -352,6 +372,7 @@ const goToSession = () => {
     const params = new URLSearchParams()
     params.set('resumeFileId', resumeProfile.value.mediaFileId)
     params.set('questionCount', String(resumeQuestionCount.value))
+    params.set('durationMinutes', String(durationMinutes.value))
     params.set('answerMode', answerModePreference.value)
     params.set('presetTitle', '简历面试')
     if (resumePresetKey.value) params.set('presetKey', resumePresetKey.value)
@@ -362,7 +383,7 @@ const goToSession = () => {
     const preset = presets.value.find((item) => item.key === selectedPresetKey.value)
     const title = preset?.title || '模拟面试'
     uni.navigateTo({
-      url: `/pages/interview/session?presetKey=${encodeURIComponent(selectedPresetKey.value)}&presetTitle=${encodeURIComponent(title)}&answerMode=${answerModePreference.value}`,
+      url: `/pages/interview/session?presetKey=${encodeURIComponent(selectedPresetKey.value)}&presetTitle=${encodeURIComponent(title)}&answerMode=${answerModePreference.value}&durationMinutes=${durationMinutes.value}`,
     })
   }
 }

@@ -19,6 +19,8 @@ import { formatDurationMs } from '@/utils/time'
 interface UseInterviewSessionOptions {
   apiBaseUrl: string
   initialPreviewMessages: InterviewMessage[]
+  initialStage: string
+  initialDurationMinutes: number
   initialQuestionTitle: string
   initialQuestionIndex: number
   initialTotalQuestions: number
@@ -42,6 +44,8 @@ const mapSessionMessage = (
 export const useInterviewSession = (options: UseInterviewSessionOptions) => {
   const messages = ref<InterviewMessage[]>([...options.initialPreviewMessages])
   const sessionStatus = ref('PREVIEW')
+  const currentStage = ref(options.initialStage)
+  const durationMinutes = ref(options.initialDurationMinutes)
   const currentQuestionTitle = ref(options.initialQuestionTitle)
   const currentQuestionPrompt = ref('')
   const currentQuestionIndex = ref(options.initialQuestionIndex)
@@ -74,6 +78,8 @@ export const useInterviewSession = (options: UseInterviewSessionOptions) => {
   const applySessionState = (session: InterviewSessionState) => {
     lastSessionId.value = session.sessionId
     sessionStatus.value = session.status
+    currentStage.value = session.stage
+    durationMinutes.value = session.durationMinutes
     currentQuestionIndex.value = session.currentQuestionIndex
     totalQuestions.value = session.totalQuestions
     followUpIndex.value = session.followUpIndex
@@ -92,6 +98,8 @@ export const useInterviewSession = (options: UseInterviewSessionOptions) => {
 
   const resetPreviewState = () => {
     sessionStatus.value = 'PREVIEW'
+    currentStage.value = options.initialStage
+    durationMinutes.value = options.initialDurationMinutes
     currentQuestionTitle.value = options.initialQuestionTitle
     currentQuestionPrompt.value = ''
     currentQuestionIndex.value = options.initialQuestionIndex
@@ -215,6 +223,8 @@ export const useInterviewSession = (options: UseInterviewSessionOptions) => {
   return {
     messages,
     sessionStatus,
+    currentStage,
+    durationMinutes,
     currentQuestionTitle,
     currentQuestionPrompt,
     currentQuestionIndex,

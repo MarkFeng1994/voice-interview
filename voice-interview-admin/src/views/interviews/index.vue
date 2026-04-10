@@ -22,6 +22,8 @@
                 <div class="session-meta">
                   <a-tag :color="statusColor(s.status)" size="small">{{ s.status }}</a-tag>
                   {{ s.answeredRounds }}/{{ s.totalQuestions }} 题
+                  <template v-if="s.stage"> · {{ s.stage }}</template>
+                  <template v-if="s.durationMinutes"> · {{ s.durationMinutes }} 分钟</template>
                 </div>
                 <div v-if="s.overallScore != null" class="session-score" :style="{ color: scoreColor(s.overallScore) }">
                   {{ s.overallScore }}分

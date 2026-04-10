@@ -1,6 +1,8 @@
 package com.interview.module.interview.engine.store;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -179,6 +181,7 @@ public class JdbcInterviewSessionStore implements InterviewSessionStore {
 			entity.setFinalUserAnswerText(round.userAnswerText());
 			entity.setUserAudioUrl(round.userAudioUrl());
 			entity.setAiMessageText(round.aiMessageText());
+			entity.setAiAnalysis(round.analysisReason());
 			entity.setTtsAudioUrl(round.aiAudioUrl());
 			entity.setScore(round.scoreSuggestion());
 			entity.setDurationMs(round.aiAudioDurationMs());
@@ -202,7 +205,8 @@ public class JdbcInterviewSessionStore implements InterviewSessionStore {
 				e.getUserAudioUrl(),
 				e.getUserAnswerMode(),
 				e.getCreatedAt() == null ? null : e.getCreatedAt().toString(),
-				e.getAnsweredAt() == null ? null : e.getAnsweredAt().toString()
+				e.getAnsweredAt() == null ? null : e.getAnsweredAt().toString(),
+				e.getAiAnalysis()
 		);
 	}
 
@@ -266,7 +270,11 @@ public class JdbcInterviewSessionStore implements InterviewSessionStore {
 		try {
 			return LocalDateTime.parse(value);
 		} catch (Exception ex) {
-			return null;
+			try {
+				return LocalDateTime.ofInstant(Instant.parse(value), ZoneOffset.UTC);
+			} catch (Exception ignored) {
+				return null;
+			}
 		}
 	}
 

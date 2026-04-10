@@ -46,6 +46,12 @@
             {{ difficultyLabel(record.difficulty) }}
           </span>
         </template>
+        <template v-if="column.key === 'tags'">
+          <a-space wrap>
+            <a-tag v-for="tag in record.tags" :key="tag">{{ tag }}</a-tag>
+            <span v-if="!record.tags.length" style="color: var(--text-muted)">-</span>
+          </a-space>
+        </template>
         <template v-if="column.key === 'action'">
           <a-space>
             <a-button size="small" @click="editQuestion(record)">编辑</a-button>
@@ -127,6 +133,7 @@ const columns = [
   { title: '标题', dataIndex: 'title', key: 'title', ellipsis: true },
   { title: '分类', key: 'category', width: 120 },
   { title: '难度', key: 'difficulty', width: 90, align: 'center' as const },
+  { title: '标签', key: 'tags', width: 180 },
   { title: '操作', key: 'action', width: 150, align: 'center' as const },
 ]
 
@@ -194,6 +201,7 @@ async function saveQuestion() {
       difficulty: form.difficulty,
       source: 'MANUAL',
       sourceUrl: null,
+      tags: [],
     }
     if (editingId.value) {
       await api.updateQuestion(editingId.value, body)
