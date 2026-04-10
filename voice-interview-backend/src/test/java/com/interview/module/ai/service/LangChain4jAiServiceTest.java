@@ -9,15 +9,12 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.interview.module.ai.service.langchain4j.InterviewReplyAssistant;
-import com.interview.module.ai.service.langchain4j.InterviewReplyOutput;
 import com.interview.module.ai.service.langchain4j.LangChain4jAiService;
 import com.interview.module.ai.service.langchain4j.LangChain4jAssistantFactory;
 import com.interview.module.ai.service.langchain4j.ResumeKeywordAssistant;
-import com.interview.module.ai.service.langchain4j.ResumeKeywordOutput;
 import com.interview.module.ai.service.langchain4j.ResumeQuestionAssistant;
-import com.interview.module.ai.service.langchain4j.ResumeQuestionListOutput;
-import com.interview.module.ai.service.langchain4j.ResumeQuestionOutput;
 import com.interview.module.interview.resume.GeneratedResumeQuestion;
 import com.interview.module.interview.resume.ResumeKeywordExtractionResult;
 import com.interview.module.interview.resume.ResumeQuestionGenerationCommand;
@@ -27,7 +24,7 @@ import com.interview.module.system.service.ProviderMetricsService.ProviderMetric
 class LangChain4jAiServiceTest {
 
 	@Test
-	void should_map_interview_reply_output_and_record_metrics() {
+	void should_map_interview_reply_json_and_record_metrics() {
 		InterviewReplyAssistant assistant = mock(InterviewReplyAssistant.class);
 		when(assistant.generate(
 				"请介绍你在上一家公司最有挑战的一次故障排查。",
@@ -36,7 +33,14 @@ class LangChain4jAiServiceTest {
 				1,
 				2,
 				List.of("排查思路", "根因定位")
-		)).thenReturn(new InterviewReplyOutput("可以，继续展开说根因。", "FOLLOW_UP", 86));
+		)).thenReturn("""
+				```json
+				{
+				  "spokenText": "可以，继续展开说根因。",
+				  "decisionSuggestion": "FOLLOW_UP",
+				  "scoreSuggestion": 86
+				}
+				```""");
 
 		ProviderMetricsService metricsService = new ProviderMetricsService();
 		LangChain4jAiService service = createService(metricsService, assistant, mock(ResumeKeywordAssistant.class), mock(ResumeQuestionAssistant.class));
@@ -69,9 +73,44 @@ class LangChain4jAiServiceTest {
 	}
 
 	@Test
-	void should_map_resume_keyword_output_with_defaults_and_record_metrics() {
+	void should_fallback_when_interview_reply_json_is_invalid() {
+		InterviewReplyAssistant assistant = mock(InterviewReplyAssistant.class);
+		when(assistant.generate(
+				"请介绍一次线上问题复盘。",
+				"我排查了日志。",
+				"FOLLOW_UP",
+				0,
+				2,
+				List.of("定位过程")
+		)).thenReturn("这不是 JSON");
+
+		ProviderMetricsService metricsService = new ProviderMetricsService();
+		LangChain4jAiService service = createService(metricsService, assistant, mock(ResumeKeywordAssistant.class), mock(ResumeQuestionAssistant.class));
+
+		AiReply reply = service.generateInterviewReply(new InterviewReplyCommand(
+				"请介绍一次线上问题复盘。",
+				"我排查了日志。",
+				"FOLLOW_UP",
+				0,
+				2,
+				List.of("定位过程")
+		));
+
+		assertThat(reply.spokenText()).isEqualTo("好的，我们继续。");
+		assertThat(reply.decisionSuggestion()).isEqualTo("FOLLOW_UP");
+		assertThat(reply.scoreSuggestion()).isNull();
+	}
+
+	@Test
+	void should_map_resume_keyword_json_with_defaults_and_record_metrics() {
 		ResumeKeywordAssistant assistant = mock(ResumeKeywordAssistant.class);
-		when(assistant.extract("简历正文")).thenReturn(new ResumeKeywordOutput(null, null, null));
+		when(assistant.extract("简历正文")).thenReturn("""
+				{
+				  "summary": null,
+				  "keywords": null,
+				  "experienceHighlights": null
+				}
+				""");
 
 		ProviderMetricsService metricsService = new ProviderMetricsService();
 		LangChain4jAiService service = createService(metricsService, mock(InterviewReplyAssistant.class), assistant, mock(ResumeQuestionAssistant.class));
@@ -90,7 +129,7 @@ class LangChain4jAiServiceTest {
 	}
 
 	@Test
-	void should_map_resume_questions_output_with_defaults_and_limit() {
+	void should_map_resume_questions_json_with_defaults_and_limit() {
 		ResumeQuestionAssistant assistant = mock(ResumeQuestionAssistant.class);
 		when(assistant.generate(
 				"5 年 Java 后端",
@@ -98,11 +137,30 @@ class LangChain4jAiServiceTest {
 				List.of("项目经验"),
 				List.of("Redis", "Kafka"),
 				2
-		)).thenReturn(new ResumeQuestionListOutput(List.of(
-				new ResumeQuestionOutput("缓存设计", "你如何设计热点缓存失效策略？", "Redis", 3),
-				new ResumeQuestionOutput(null, null, null, null),
-				new ResumeQuestionOutput("消息可靠性", "如何保证消息最终一致？", "Kafka", 2)
-		)));
+		)).thenReturn("""
+				{
+				  "questions": [
+				    {
+				      "title": "缓存设计",
+				      "prompt": "你如何设计热点缓存失效策略？",
+				      "targetKeyword": "Redis",
+				      "difficulty": 3
+				    },
+				    {
+				      "title": null,
+				      "prompt": null,
+				      "targetKeyword": null,
+				      "difficulty": null
+				    },
+				    {
+				      "title": "消息可靠性",
+				      "prompt": "如何保证消息最终一致？",
+				      "targetKeyword": "Kafka",
+				      "difficulty": 2
+				    }
+				  ]
+				}
+				""");
 
 		ProviderMetricsService metricsService = new ProviderMetricsService();
 		LangChain4jAiService service = createService(metricsService, mock(InterviewReplyAssistant.class), mock(ResumeKeywordAssistant.class), assistant);
@@ -148,7 +206,7 @@ class LangChain4jAiServiceTest {
 		when(factory.interviewReplyAssistant()).thenReturn(interviewReplyAssistant);
 		when(factory.resumeKeywordAssistant()).thenReturn(resumeKeywordAssistant);
 		when(factory.resumeQuestionAssistant()).thenReturn(resumeQuestionAssistant);
-		return new LangChain4jAiService(factory, metricsService);
+		return new LangChain4jAiService(factory, metricsService, new ObjectMapper());
 	}
 
 	private ProviderMetricView findMetric(ProviderMetricsService metricsService, String capability) {

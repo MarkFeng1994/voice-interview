@@ -2,10 +2,13 @@ package com.interview.module.ai.service.langchain4j;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.interview.module.ai.service.AiReply;
 import com.interview.module.ai.service.AiService;
 import com.interview.module.ai.service.InterviewReplyCommand;
@@ -30,21 +33,24 @@ public class LangChain4jAiService implements AiService {
 	private final ResumeKeywordAssistant resumeKeywordAssistant;
 	private final ResumeQuestionAssistant resumeQuestionAssistant;
 	private final ProviderMetricsService providerMetricsService;
+	private final ObjectMapper objectMapper;
 
 	public LangChain4jAiService(
 			LangChain4jAssistantFactory assistantFactory,
-			ProviderMetricsService providerMetricsService
+			ProviderMetricsService providerMetricsService,
+			ObjectMapper objectMapper
 	) {
 		this.interviewReplyAssistant = assistantFactory.interviewReplyAssistant();
 		this.resumeKeywordAssistant = assistantFactory.resumeKeywordAssistant();
 		this.resumeQuestionAssistant = assistantFactory.resumeQuestionAssistant();
 		this.providerMetricsService = providerMetricsService;
+		this.objectMapper = objectMapper;
 	}
 
 	@Override
 	public AiReply generateInterviewReply(InterviewReplyCommand command) {
 		return providerMetricsService.record("AI", PROVIDER, () -> {
-			InterviewReplyOutput output = interviewReplyAssistant.generate(
+			String content = interviewReplyAssistant.generate(
 					command == null ? "" : command.question(),
 					command == null ? "" : command.answer(),
 					command == null ? "" : command.stage(),
@@ -52,6 +58,7 @@ public class LangChain4jAiService implements AiService {
 					command == null ? 0 : command.maxFollowUpPerQuestion(),
 					command == null ? List.of() : command.expectedPoints()
 			);
+			InterviewReplyOutput output = parseJsonObject(content, InterviewReplyOutput.class);
 			return new AiReply(
 					firstNonBlank(output == null ? null : output.spokenText(), DEFAULT_REPLY_TEXT),
 					firstNonBlank(output == null ? null : output.decisionSuggestion(), DEFAULT_DECISION),
@@ -63,7 +70,8 @@ public class LangChain4jAiService implements AiService {
 	@Override
 	public ResumeKeywordExtractionResult extractResumeKeywords(String resumeText) {
 		return providerMetricsService.record("AI_RESUME_KEYWORDS", PROVIDER, () -> {
-			ResumeKeywordOutput output = resumeKeywordAssistant.extract(resumeText == null ? "" : resumeText);
+			String content = resumeKeywordAssistant.extract(resumeText == null ? "" : resumeText);
+			ResumeKeywordOutput output = parseJsonObject(content, ResumeKeywordOutput.class);
 			return new ResumeKeywordExtractionResult(
 					firstNonBlank(output == null ? null : output.summary(), DEFAULT_RESUME_SUMMARY),
 					normalizeList(output == null ? null : output.keywords()),
@@ -78,16 +86,14 @@ public class LangChain4jAiService implements AiService {
 			if (command == null || command.questionCount() <= 0) {
 				return List.of();
 			}
-			ResumeQuestionListOutput output = resumeQuestionAssistant.generate(
+			String content = resumeQuestionAssistant.generate(
 					command.resumeSummary(),
 					command.keywords(),
 					command.existingQuestionTitles(),
 					command.missingKeywords(),
 					command.questionCount()
 			);
-			List<ResumeQuestionOutput> rawQuestions = output == null || output.questions() == null
-					? List.of()
-					: output.questions();
+			List<ResumeQuestionOutput> rawQuestions = parseResumeQuestionOutputs(content);
 			return rawQuestions.stream()
 					.limit(command.questionCount())
 					.map(this::toGeneratedQuestion)
@@ -130,5 +136,80 @@ public class LangChain4jAiService implements AiService {
 			return value.trim();
 		}
 		return fallback;
+	}
+
+	private <T> T parseJsonObject(String content, Class<T> type) {
+		JsonNode node = parseJsonNode(content);
+		if (node == null || !node.isObject()) {
+			return null;
+		}
+		try {
+			return objectMapper.treeToValue(node, type);
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+
+	private List<ResumeQuestionOutput> parseResumeQuestionOutputs(String content) {
+		JsonNode node = parseJsonNode(content);
+		if (node == null) {
+			return List.of();
+		}
+		JsonNode questionsNode = node;
+		if (node.isObject()) {
+			questionsNode = node.path("questions");
+		}
+		if (!questionsNode.isArray()) {
+			return List.of();
+		}
+		return StreamSupport.stream(questionsNode.spliterator(), false)
+				.map(item -> {
+					try {
+						return objectMapper.treeToValue(item, ResumeQuestionOutput.class);
+					} catch (Exception ex) {
+						return null;
+					}
+				})
+				.filter(Objects::nonNull)
+				.toList();
+	}
+
+	private JsonNode parseJsonNode(String content) {
+		if (content == null || content.isBlank()) {
+			return null;
+		}
+		String normalized = stripCodeFence(content.trim());
+		JsonNode directNode = readJsonNode(normalized);
+		if (directNode != null) {
+			return directNode;
+		}
+		int start = normalized.indexOf('{');
+		int end = normalized.lastIndexOf('}');
+		if (start >= 0 && end > start) {
+			return readJsonNode(normalized.substring(start, end + 1));
+		}
+		return null;
+	}
+
+	private JsonNode readJsonNode(String value) {
+		try {
+			return objectMapper.readTree(value);
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+
+	private String stripCodeFence(String value) {
+		String normalized = value;
+		if (normalized.startsWith("```")) {
+			int firstNewLine = normalized.indexOf('\n');
+			if (firstNewLine >= 0) {
+				normalized = normalized.substring(firstNewLine + 1);
+			}
+		}
+		if (normalized.endsWith("```")) {
+			normalized = normalized.substring(0, normalized.length() - 3);
+		}
+		return normalized.trim();
 	}
 }

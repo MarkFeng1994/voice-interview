@@ -1,9 +1,6 @@
 package com.interview.module.ai.service.langchain4j;
 
-import static dev.langchain4j.model.chat.Capability.RESPONSE_FORMAT_JSON_SCHEMA;
-
 import java.time.Duration;
-import java.util.Set;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -56,8 +53,6 @@ public class LangChain4jAssistantFactory {
 				.temperature(langChain4jAiProperties.getTemperature())
 				.timeout(Duration.ofSeconds(Math.max(1, langChain4jAiProperties.getTimeoutSeconds())))
 				.maxRetries(Math.max(0, langChain4jAiProperties.getMaxRetries()))
-				.supportedCapabilities(Set.of(RESPONSE_FORMAT_JSON_SCHEMA))
-				.strictJsonSchema(langChain4jAiProperties.isStrictJsonSchema())
 				.build();
 	}
 }

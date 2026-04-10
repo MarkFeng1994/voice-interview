@@ -11,6 +11,7 @@ unpackage/
 target/
 *.class
 *.log
+ops/runtime.local.ps1
 
 # IDE
 .idea/

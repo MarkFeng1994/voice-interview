@@ -14,5 +14,5 @@ public interface ResumeKeywordAssistant {
 			resumeText:
 			{{resumeText}}
 			""")
-	ResumeKeywordOutput extract(@V("resumeText") String resumeText);
+	String extract(@V("resumeText") String resumeText);
 }

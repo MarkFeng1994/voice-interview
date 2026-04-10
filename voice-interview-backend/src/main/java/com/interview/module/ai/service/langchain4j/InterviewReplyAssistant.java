@@ -20,7 +20,7 @@ public interface InterviewReplyAssistant {
 			maxFollowUpPerQuestion: {{maxFollowUpPerQuestion}}
 			expectedPoints: {{expectedPoints}}
 			""")
-	InterviewReplyOutput generate(
+	String generate(
 			@V("question") String question,
 			@V("answer") String answer,
 			@V("stage") String stage,

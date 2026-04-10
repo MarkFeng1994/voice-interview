@@ -8,7 +8,7 @@ $env:SPRING_DATASOURCE_USERNAME = 'root'
 $env:SPRING_DATASOURCE_PASSWORD = 'change-me'
 
 # Providers
-$env:APP_AI_PROVIDER = 'openai'
+$env:APP_AI_PROVIDER = 'langchain4j'
 $env:APP_ASR_PROVIDER = 'dashscope'
 $env:APP_TTS_PROVIDER = 'dashscope'
 

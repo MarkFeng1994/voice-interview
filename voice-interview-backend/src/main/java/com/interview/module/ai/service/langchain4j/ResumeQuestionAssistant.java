@@ -19,7 +19,7 @@ public interface ResumeQuestionAssistant {
 			missingKeywords: {{missingKeywords}}
 			questionCount: {{questionCount}}
 			""")
-	ResumeQuestionListOutput generate(
+	String generate(
 			@V("resumeSummary") String resumeSummary,
 			@V("keywords") List<String> keywords,
 			@V("existingQuestionTitles") List<String> existingQuestionTitles,
