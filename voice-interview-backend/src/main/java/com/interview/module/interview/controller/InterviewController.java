@@ -74,6 +74,7 @@ public class InterviewController {
 					startInterviewRequest.resumeFileId(),
 					startInterviewRequest.presetKey(),
 					startInterviewRequest.questionCount(),
+					startInterviewRequest.durationMinutes(),
 					startInterviewRequest.interviewerSpeakerId(),
 					startInterviewRequest.interviewerSpeechSpeed()
 			));
@@ -81,6 +82,7 @@ public class InterviewController {
 		return ApiResponse.success(interviewPracticeService.startSession(
 				owner,
 				startInterviewRequest == null ? null : startInterviewRequest.presetKey(),
+				startInterviewRequest == null ? null : startInterviewRequest.durationMinutes(),
 				startInterviewRequest == null ? null : startInterviewRequest.interviewerSpeakerId(),
 				startInterviewRequest == null ? null : startInterviewRequest.interviewerSpeechSpeed()
 		));
@@ -224,6 +226,7 @@ public class InterviewController {
 			String presetKey,
 			String resumeFileId,
 			Integer questionCount,
+			Integer durationMinutes,
 			Integer interviewerSpeakerId,
 			Double interviewerSpeechSpeed
 	) {

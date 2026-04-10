@@ -13,7 +13,8 @@ public record InterviewRoundRecord(
 		String userAudioUrl,
 		String userAnswerMode,
 		String createdAt,
-		String answeredAt
+		String answeredAt,
+		String analysisReason
 ) {
 
 	public InterviewRoundRecord withUserAnswer(
@@ -21,6 +22,16 @@ public record InterviewRoundRecord(
 			String userAudioUrl,
 			String userAnswerMode,
 			String answeredAt
+	) {
+		return withUserAnswer(userAnswerText, userAudioUrl, userAnswerMode, answeredAt, analysisReason);
+	}
+
+	public InterviewRoundRecord withUserAnswer(
+			String userAnswerText,
+			String userAudioUrl,
+			String userAnswerMode,
+			String answeredAt,
+			String analysisReason
 	) {
 		return new InterviewRoundRecord(
 				roundId,
@@ -35,7 +46,8 @@ public record InterviewRoundRecord(
 				userAudioUrl,
 				userAnswerMode,
 				createdAt,
-				answeredAt
+				answeredAt,
+				analysisReason
 		);
 	}
 }

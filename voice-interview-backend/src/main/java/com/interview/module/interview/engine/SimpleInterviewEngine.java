@@ -19,6 +19,7 @@ import com.interview.module.interview.engine.model.InterviewQuestionReportView;
 import com.interview.module.interview.engine.model.InterviewQuestionSnapshot;
 import com.interview.module.interview.engine.model.InterviewReportView;
 import com.interview.module.interview.engine.model.InterviewRoundRecord;
+import com.interview.module.interview.engine.model.InterviewStage;
 import com.interview.module.interview.engine.model.InterviewSessionOwner;
 import com.interview.module.interview.engine.model.InterviewSessionSummaryView;
 import com.interview.module.interview.engine.model.InterviewSessionView;
@@ -26,6 +27,7 @@ import com.interview.module.interview.engine.store.InterviewReportStore;
 import com.interview.module.interview.engine.store.InterviewSessionState;
 import com.interview.module.interview.engine.store.InterviewSessionStore;
 import com.interview.module.interview.engine.store.NoopInterviewReportStore;
+import com.interview.module.interview.service.InterviewAnswerAnalyzer;
 import com.interview.module.tts.service.TtsAudioResult;
 import com.interview.module.tts.service.TtsRenderOptions;
 import com.interview.module.tts.service.TtsService;
@@ -53,14 +55,18 @@ public class SimpleInterviewEngine implements InterviewEngine {
 	@Override
 	public InterviewSessionView startSession(
 			List<InterviewQuestionCard> questions,
+			int durationMinutes,
 			int maxFollowUpPerQuestion,
 			InterviewSessionOwner owner,
 			Integer interviewerSpeakerId,
 			Double interviewerSpeechSpeed
 	) {
+		List<InterviewQuestionCard> effectiveQuestions = questions == null || questions.isEmpty()
+				? List.of(new InterviewQuestionCard("自我介绍", "请先做一个简短的自我介绍。"))
+				: questions;
 		List<InterviewQuestionSnapshot> questionSnapshots = new ArrayList<>();
-		for (int index = 0; index < questions.size(); index++) {
-			InterviewQuestionCard question = questions.get(index);
+		for (int index = 0; index < effectiveQuestions.size(); index++) {
+			InterviewQuestionCard question = effectiveQuestions.get(index);
 			questionSnapshots.add(new InterviewQuestionSnapshot(index + 1, question.title(), question.prompt()));
 		}
 		InterviewSessionState sessionState = new InterviewSessionState(
@@ -68,6 +74,8 @@ public class SimpleInterviewEngine implements InterviewEngine {
 				owner.userId(),
 				owner.nickname(),
 				questionSnapshots,
+				InterviewStage.OPENING.name(),
+				durationMinutes,
 				maxFollowUpPerQuestion,
 				interviewerSpeakerId,
 				interviewerSpeechSpeed
@@ -94,12 +102,23 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		synchronized (sessionState) {
 			requireActive(sessionState);
 			String normalizedText = normalize(userText);
-			appendUserAnswer(sessionState, normalizedText, userAudioUrl, answerMode);
+			InterviewQuestionSnapshot currentQuestion = currentQuestion(sessionState);
+			InterviewAnswerAnalyzer.Analysis analysis = aiService.analyzeInterviewAnswer(
+					currentQuestion.promptSnapshot(),
+					normalizedText,
+					expectedPoints(currentQuestion)
+			);
+			appendUserAnswer(sessionState, normalizedText, userAudioUrl, answerMode, analysis.reason());
 
 			AiReply aiReply = aiService.generateInterviewReply(normalizedText);
-			if (shouldFollowUp(sessionState, aiReply)) {
+			if (shouldFollowUp(sessionState, aiReply, analysis)) {
 				sessionState.setFollowUpIndex(sessionState.getFollowUpIndex() + 1);
-				appendAssistantRound(sessionState, aiReply.spokenText(), "FOLLOW_UP", aiReply.scoreSuggestion());
+				appendAssistantRound(
+						sessionState,
+						buildFollowUpPrompt(aiReply, analysis),
+						"FOLLOW_UP",
+						aiReply.scoreSuggestion()
+				);
 				sessionStore.save(sessionState);
 				return toView(sessionState);
 			}
@@ -107,6 +126,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 			if (hasNextQuestion(sessionState)) {
 				sessionState.setCurrentQuestionIndex(sessionState.getCurrentQuestionIndex() + 1);
 				sessionState.setFollowUpIndex(0);
+				sessionState.setStage(resolveStage(sessionState));
 				InterviewQuestionSnapshot nextQuestion = currentQuestion(sessionState);
 				appendAssistantRound(sessionState, nextQuestion.promptSnapshot(), "QUESTION", aiReply.scoreSuggestion());
 				sessionStore.save(sessionState);
@@ -114,6 +134,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 			}
 
 			sessionState.setStatus("COMPLETED");
+			sessionState.setStage(InterviewStage.WRAP_UP.name());
 			appendAssistantRound(
 					sessionState,
 					buildClosingText(aiReply.scoreSuggestion()),
@@ -131,11 +152,12 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		InterviewSessionState sessionState = requireSession(sessionId, requesterUserId);
 		synchronized (sessionState) {
 			requireActive(sessionState);
-			appendUserAnswer(sessionState, "本题已跳过。", null, "SKIP");
+			appendUserAnswer(sessionState, "本题已跳过。", null, "SKIP", "候选人主动跳过当前问题");
 
 			if (hasNextQuestion(sessionState)) {
 				sessionState.setCurrentQuestionIndex(sessionState.getCurrentQuestionIndex() + 1);
 				sessionState.setFollowUpIndex(0);
+				sessionState.setStage(resolveStage(sessionState));
 				InterviewQuestionSnapshot nextQuestion = currentQuestion(sessionState);
 				appendAssistantRound(sessionState, "收到，我们跳过这一题。下一题：" + nextQuestion.promptSnapshot(), "QUESTION", null);
 				sessionStore.save(sessionState);
@@ -143,6 +165,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 			}
 
 			sessionState.setStatus("COMPLETED");
+			sessionState.setStage(InterviewStage.WRAP_UP.name());
 			appendAssistantRound(sessionState, "最后一题已跳过。本轮 demo 面试结束。", "END_INTERVIEW", null);
 			sessionStore.save(sessionState);
 			persistReport(sessionState);
@@ -158,6 +181,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 				return toView(sessionState);
 			}
 			sessionState.setStatus("CANCELLED");
+			sessionState.setStage(InterviewStage.WRAP_UP.name());
 			appendAssistantRound(sessionState, "收到，本轮 demo 面试到此结束。你可以稍后查看历史和报告。", "END_INTERVIEW", null);
 			sessionStore.save(sessionState);
 			persistReport(sessionState);
@@ -213,12 +237,22 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		return sessionState.getQuestions().get(sessionState.getCurrentQuestionIndex());
 	}
 
-	private boolean shouldFollowUp(InterviewSessionState sessionState, AiReply aiReply) {
-		return "FOLLOW_UP".equalsIgnoreCase(aiReply.decisionSuggestion())
+	private boolean shouldFollowUp(
+			InterviewSessionState sessionState,
+			AiReply aiReply,
+			InterviewAnswerAnalyzer.Analysis analysis
+	) {
+		return (analysis.followUpNeeded() || "FOLLOW_UP".equalsIgnoreCase(aiReply.decisionSuggestion()))
 				&& sessionState.getFollowUpIndex() < sessionState.getMaxFollowUpPerQuestion();
 	}
 
-	private void appendUserAnswer(InterviewSessionState sessionState, String text, String userAudioUrl, String answerMode) {
+	private void appendUserAnswer(
+			InterviewSessionState sessionState,
+			String text,
+			String userAudioUrl,
+			String answerMode,
+			String analysisReason
+	) {
 		int latestRoundIndex = sessionState.getRounds().size() - 1;
 		if (latestRoundIndex < 0) {
 			throw new IllegalStateException("No round exists to attach the user answer");
@@ -226,7 +260,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		InterviewRoundRecord latestRound = sessionState.getRounds().get(latestRoundIndex);
 		sessionState.getRounds().set(
 				latestRoundIndex,
-				latestRound.withUserAnswer(text, userAudioUrl, answerMode, Instant.now().toString())
+				latestRound.withUserAnswer(text, userAudioUrl, answerMode, Instant.now().toString(), analysisReason)
 		);
 	}
 
@@ -248,6 +282,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 				null,
 				null,
 				Instant.now().toString(),
+				null,
 				null
 		));
 	}
@@ -293,6 +328,8 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		return new InterviewSessionView(
 				sessionState.getSessionId(),
 				sessionState.getStatus(),
+				sessionState.getStage(),
+				sessionState.getDurationMinutes(),
 				sessionState.getCurrentQuestionIndex() + 1,
 				sessionState.getQuestions().size(),
 				sessionState.getFollowUpIndex(),
@@ -332,7 +369,9 @@ public class SimpleInterviewEngine implements InterviewEngine {
 				sessionState.getQuestions().size(),
 				answeredRounds,
 				overallScore,
-				summary
+				summary,
+				sessionState.getStage(),
+				sessionState.getDurationMinutes()
 		);
 	}
 
@@ -444,5 +483,49 @@ public class SimpleInterviewEngine implements InterviewEngine {
 			return "本轮 demo 面试结束。基础还可以，建议重点补齐关键场景的原理和取舍。";
 		}
 		return "本轮 demo 面试结束。建议从核心概念、常见场景和追问深度三方面继续补强。";
+	}
+
+	private List<String> expectedPoints(InterviewQuestionSnapshot question) {
+		if (question == null) {
+			return List.of();
+		}
+		List<String> points = new ArrayList<>();
+		if (question.titleSnapshot() != null
+				&& !question.titleSnapshot().isBlank()
+				&& !"自我介绍".equals(question.titleSnapshot().trim())) {
+			points.add(question.titleSnapshot());
+		}
+		if (question.promptSnapshot() != null && (question.promptSnapshot().contains("和") || question.promptSnapshot().contains("、"))) {
+			String normalizedPrompt = question.promptSnapshot().replace("、", "和");
+			for (String segment : normalizedPrompt.split("和")) {
+				String normalized = segment.replace("请说明", "").replace("请介绍", "").trim();
+				if (!normalized.isBlank() && normalized.length() <= 12) {
+					points.add(normalized);
+				}
+			}
+		}
+		return points.stream().distinct().toList();
+	}
+
+	private String buildFollowUpPrompt(AiReply aiReply, InterviewAnswerAnalyzer.Analysis analysis) {
+		if (analysis.followUpNeeded() && !analysis.missingPoints().isEmpty()) {
+			return "你刚才的回答还缺少这些点：" + String.join("、", analysis.missingPoints()) + "。请补充说明。";
+		}
+		return aiReply.spokenText();
+	}
+
+	private String resolveStage(InterviewSessionState sessionState) {
+		int totalQuestions = sessionState.getQuestions().size();
+		int currentIndex = sessionState.getCurrentQuestionIndex();
+		if (currentIndex <= 0) {
+			return InterviewStage.OPENING.name();
+		}
+		if (currentIndex >= Math.max(1, totalQuestions - 1)) {
+			return InterviewStage.WRAP_UP.name();
+		}
+		if (currentIndex <= Math.max(1, totalQuestions / 2)) {
+			return InterviewStage.JAVA_CORE.name();
+		}
+		return InterviewStage.PROJECT_DEEP_DIVE.name();
 	}
 }
