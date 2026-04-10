@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.interview.module.ai.service.AiReply;
 import com.interview.module.ai.service.AiService;
+import com.interview.module.ai.service.InterviewReplyCommand;
 import com.interview.module.interview.engine.model.InterviewMessageView;
 import com.interview.module.interview.engine.model.InterviewQuestionCard;
 import com.interview.module.interview.engine.model.InterviewQuestionReportView;
@@ -103,14 +104,22 @@ public class SimpleInterviewEngine implements InterviewEngine {
 			requireActive(sessionState);
 			String normalizedText = normalize(userText);
 			InterviewQuestionSnapshot currentQuestion = currentQuestion(sessionState);
+			List<String> expectedPoints = expectedPoints(currentQuestion);
 			InterviewAnswerAnalyzer.Analysis analysis = aiService.analyzeInterviewAnswer(
 					currentQuestion.promptSnapshot(),
 					normalizedText,
-					expectedPoints(currentQuestion)
+					expectedPoints
 			);
 			appendUserAnswer(sessionState, normalizedText, userAudioUrl, answerMode, analysis.reason());
 
-			AiReply aiReply = aiService.generateInterviewReply(normalizedText);
+			AiReply aiReply = aiService.generateInterviewReply(new InterviewReplyCommand(
+					currentQuestion.promptSnapshot(),
+					normalizedText,
+					sessionState.getStage(),
+					sessionState.getFollowUpIndex(),
+					sessionState.getMaxFollowUpPerQuestion(),
+					expectedPoints
+			));
 			if (shouldFollowUp(sessionState, aiReply, analysis)) {
 				sessionState.setFollowUpIndex(sessionState.getFollowUpIndex() + 1);
 				appendAssistantRound(

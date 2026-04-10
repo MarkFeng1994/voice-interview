@@ -64,9 +64,10 @@ public class OpenAiCompatibleAiService implements AiService {
 	}
 
 	@Override
-	public AiReply generateInterviewReply(String inputText) {
+	public AiReply generateInterviewReply(InterviewReplyCommand command) {
 		return providerMetricsService.record("AI", "openai", () -> {
 			requireApiKey();
+			String inputText = command == null ? "" : command.answer();
 			String content = invokeTextCompletion(SYSTEM_PROMPT, inputText, true);
 			try {
 				JsonNode contentJson = objectMapper.readTree(content);

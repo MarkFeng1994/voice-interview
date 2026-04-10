@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +28,14 @@ class OpenAiCompatibleAiServiceTest {
 		try (StubAiGateway gateway = new StubAiGateway(responseJson)) {
 			OpenAiCompatibleAiService service = createService(gateway.baseUrl());
 
-			AiReply reply = service.generateInterviewReply("候选人的回答");
+			AiReply reply = service.generateInterviewReply(new InterviewReplyCommand(
+					"问题",
+					"候选人的回答",
+					"OPENING",
+					0,
+					2,
+					List.of()
+			));
 
 			assertThat(reply.spokenText()).isEqualTo("好的，我们继续。");
 			assertThat(reply.decisionSuggestion()).isEqualTo("NEXT_QUESTION");

@@ -9,7 +9,7 @@ import com.interview.module.interview.resume.ResumeQuestionGenerationCommand;
 
 public interface AiService {
 
-	AiReply generateInterviewReply(String inputText);
+	AiReply generateInterviewReply(InterviewReplyCommand command);
 
 	ResumeKeywordExtractionResult extractResumeKeywords(String resumeText);
 
