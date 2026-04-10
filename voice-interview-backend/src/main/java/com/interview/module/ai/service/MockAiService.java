@@ -14,7 +14,7 @@ import com.interview.module.interview.resume.ResumeQuestionGenerationCommand;
 public class MockAiService implements AiService {
 
 	@Override
-	public AiReply generateInterviewReply(String inputText) {
+	public AiReply generateInterviewReply(InterviewReplyCommand command) {
 		return new AiReply("好的，我们继续下一题。", "NEXT_QUESTION", 80);
 	}
 

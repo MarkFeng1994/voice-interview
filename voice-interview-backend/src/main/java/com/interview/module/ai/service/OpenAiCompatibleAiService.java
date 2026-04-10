@@ -30,8 +30,11 @@ import com.interview.module.system.service.ProviderMetricsService;
 @ConditionalOnProperty(prefix = "app.ai", name = "provider", havingValue = "openai")
 public class OpenAiCompatibleAiService implements AiService {
 
-	private static final String SYSTEM_PROMPT = """
+	private static final String INTERVIEW_REPLY_SYSTEM_PROMPT = """
 			You are a professional technical interviewer.
+			You will receive structured interview context fields:
+			question, answer, stage, followUpIndex, maxFollowUpPerQuestion, expectedPoints.
+			Use all fields to decide whether to continue follow-up, switch question, or end interview.
 			Return JSON only with these fields:
 			{
 			  "spokenText": "string",
@@ -64,10 +67,14 @@ public class OpenAiCompatibleAiService implements AiService {
 	}
 
 	@Override
-	public AiReply generateInterviewReply(String inputText) {
+	public AiReply generateInterviewReply(InterviewReplyCommand command) {
 		return providerMetricsService.record("AI", "openai", () -> {
 			requireApiKey();
-			String content = invokeTextCompletion(SYSTEM_PROMPT, inputText, true);
+			String content = invokeTextCompletion(
+					INTERVIEW_REPLY_SYSTEM_PROMPT,
+					buildInterviewUserContent(command),
+					true
+			);
 			try {
 				JsonNode contentJson = objectMapper.readTree(content);
 				String spokenText = contentJson.path("spokenText").asText(content);
@@ -80,6 +87,30 @@ public class OpenAiCompatibleAiService implements AiService {
 				return new AiReply(content, "FOLLOW_UP", null);
 			}
 		});
+	}
+
+	private String buildInterviewUserContent(InterviewReplyCommand command) {
+		if (command == null) {
+			return "";
+		}
+		String expectedPoints = command.expectedPoints() == null || command.expectedPoints().isEmpty()
+				? "(none)"
+				: String.join("；", command.expectedPoints());
+		return """
+				question: %s
+				answer: %s
+				stage: %s
+				followUpIndex: %d
+				maxFollowUpPerQuestion: %d
+				expectedPoints: %s
+				""".formatted(
+				valueOrEmpty(command.question()),
+				valueOrEmpty(command.answer()),
+				valueOrEmpty(command.stage()),
+				command.followUpIndex(),
+				command.maxFollowUpPerQuestion(),
+				expectedPoints
+		);
 	}
 
 	private void requireApiKey() {
@@ -303,5 +334,9 @@ public class OpenAiCompatibleAiService implements AiService {
 
 	private String trimTrailingSlash(String value) {
 		return value == null ? "" : value.replaceAll("/+$", "");
+	}
+
+	private String valueOrEmpty(String value) {
+		return value == null ? "" : value;
 	}
 }

@@ -1,5 +1,7 @@
 package com.interview.module.interview.controller;
 
+import java.util.List;
+
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.interview.common.result.ApiResponse;
 import com.interview.module.ai.service.AiReply;
 import com.interview.module.ai.service.AiService;
+import com.interview.module.ai.service.InterviewReplyCommand;
 import com.interview.module.asr.service.AsrService;
 import com.interview.module.asr.service.AsrTranscription;
 import com.interview.module.interview.engine.model.InterviewReportView;
@@ -177,7 +180,14 @@ public class InterviewController {
 
 	@PostMapping("/reply-preview")
 	public ApiResponse<InterviewReplyPreviewPayload> replyPreview(@RequestBody InterviewReplyPreviewRequest request) {
-		AiReply aiReply = aiService.generateInterviewReply(request.inputText());
+		AiReply aiReply = aiService.generateInterviewReply(new InterviewReplyCommand(
+				null,
+				request.inputText(),
+				"PREVIEW",
+				0,
+				0,
+				List.of()
+		));
 		TtsAudioResult ttsAudio = ttsService.synthesize(aiReply.spokenText());
 		return ApiResponse.success(new InterviewReplyPreviewPayload(
 				request.inputText(),
