@@ -16,8 +16,8 @@ target/
 .idea/
 .vscode/
 *.iml
+.worktrees/
 
 # OS
 Thumbs.db
 .DS_Store
-
