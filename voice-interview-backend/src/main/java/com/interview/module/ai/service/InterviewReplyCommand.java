@@ -10,4 +10,7 @@ public record InterviewReplyCommand(
 		int maxFollowUpPerQuestion,
 		List<String> expectedPoints
 ) {
+	public InterviewReplyCommand {
+		expectedPoints = expectedPoints == null ? List.of() : List.copyOf(expectedPoints);
+	}
 }

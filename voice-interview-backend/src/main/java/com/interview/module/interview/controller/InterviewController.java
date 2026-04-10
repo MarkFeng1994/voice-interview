@@ -181,7 +181,7 @@ public class InterviewController {
 	@PostMapping("/reply-preview")
 	public ApiResponse<InterviewReplyPreviewPayload> replyPreview(@RequestBody InterviewReplyPreviewRequest request) {
 		AiReply aiReply = aiService.generateInterviewReply(new InterviewReplyCommand(
-				"PREVIEW",
+				null,
 				request.inputText(),
 				"PREVIEW",
 				0,
