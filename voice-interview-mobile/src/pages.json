@@ -1,0 +1,52 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/login/index",
+			"style": {
+				"navigationBarTitleText": "登录"
+			}
+		},
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "Voice Interview"
+			}
+		},
+		{
+			"path": "pages/interview/setup",
+			"style": {
+				"navigationBarTitleText": "面试配置"
+			}
+		},
+		{
+			"path": "pages/interview/session",
+			"style": {
+				"navigationBarTitleText": "面试会话"
+			}
+		},
+		{
+			"path": "pages/interview/report",
+			"style": {
+				"navigationBarTitleText": "面试报告"
+			}
+		},
+		{
+			"path": "pages/history/list",
+			"style": {
+				"navigationBarTitleText": "历史记录"
+			}
+		},
+		{
+			"path": "pages/profile/index",
+			"style": {
+				"navigationBarTitleText": "我的"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "Voice Interview",
+		"navigationBarBackgroundColor": "#09090b",
+		"backgroundColor": "#09090b"
+	}
+}

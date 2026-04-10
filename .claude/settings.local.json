@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__firecrawl-mcp__firecrawl_search",
+      "mcp__firecrawl-mcp__firecrawl_scrape",
+      "Bash(java -version)",
+      "Bash(npm install:*)",
+      "Bash(cd:*)",
+      "Bash(npx vue-tsc:*)",
+      "Bash(npx vite:*)",
+      "mcp__mcpServers__new_page",
+      "Bash(./mvnw compile:*)",
+      "Bash(npm run:*)",
+      "Bash(curl:*)",
+      "Bash(find E:developSoftideaworkspacevoice-interview -type f -name *session* -o -name *interview*)",
+      "Bash(grep -E \"\\\\.\\(vue|ts|tsx\\)$\")",
+      "Bash(./mvnw.cmd compile:*)",
+      "Bash(npm list:*)",
+      "Bash(pandoc --version)",
+      "Bash(npx md-to-pdf:*)",
+      "Bash(md-to-pdf 项目架构技术明细.md)",
+      "Bash(npx puppeteer:*)",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Read(//c/Program Files \\(x86\\)/Google/Chrome/Application/**)",
+      "Bash(where chrome:*)",
+      "Bash(md-to-pdf 项目架构技术明细.md --launch-options '{\"\"\"\"executablePath\"\"\"\":\"\"\"\"C:\\\\\\\\Program Files\\\\\\\\Google\\\\\\\\Chrome\\\\\\\\Application\\\\\\\\chrome.exe\"\"\"\"}')",
+      "Bash(node:*)",
+      "Bash(ssh:*)"
+    ]
+  }
+}

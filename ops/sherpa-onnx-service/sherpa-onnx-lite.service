@@ -1,0 +1,17 @@
+[Unit]
+Description=Sherpa ONNX lightweight ASR API
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/sherpa-onnx-service/app
+Environment=SERVICE_PYTHON=/opt/sherpa-onnx-service/.venv/bin/python
+Environment=MODELS_DIR=/opt/sherpa-onnx-service/models
+Environment=TMP_DIR=/opt/sherpa-onnx-service/tmp
+ExecStart=/opt/sherpa-onnx-service/.venv/bin/python -m uvicorn app:app --host 0.0.0.0 --port 18100 --workers 1
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

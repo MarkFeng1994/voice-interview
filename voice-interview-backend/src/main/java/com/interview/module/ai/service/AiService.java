@@ -1,0 +1,16 @@
+package com.interview.module.ai.service;
+
+import java.util.List;
+
+import com.interview.module.interview.resume.GeneratedResumeQuestion;
+import com.interview.module.interview.resume.ResumeKeywordExtractionResult;
+import com.interview.module.interview.resume.ResumeQuestionGenerationCommand;
+
+public interface AiService {
+
+	AiReply generateInterviewReply(String inputText);
+
+	ResumeKeywordExtractionResult extractResumeKeywords(String resumeText);
+
+	List<GeneratedResumeQuestion> generateResumeQuestions(ResumeQuestionGenerationCommand command);
+}

@@ -1,0 +1,600 @@
+
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="nav-disable" content="flex" />
+ <link
+rel="icon"
+href="https://img.alicdn.com/imgextra/i2/O1CN01TFs5Qw27uYvfA6gib_!!6000000007857-55-tps-32-32.svg"
+type="image/x-icon"
+/>
+ <!-- 搜索引擎icon -->
+<link
+rel="apple-touch-icon"
+href="https://img.alicdn.com/imgextra/i1/O1CN01BEqugB1KebzCRyIJl_!!6000000001189-55-tps-48-48.svg"
+/>
+ <script type="application/ld+json">
+{
+"@context": "https://schema.org",
+"@type": "Organization",
+"name": "阿里云计算",
+"url": "https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events",
+"logo": "https://img.alicdn.com/imgextra/i1/O1CN01BEqugB1KebzCRyIJl_!!6000000001189-55-tps-48-48.svg"
+}
+</script>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="renderer" content="webkit" />
+<meta http-equiv="x-ua-compatible" content="ie=edge,chrome=1" />
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"
+/>
+<meta name="applicable-device" content="pc,mobile" />
+<meta name="data-spm" content="a2c4g" />
+<meta name="aplus-core" content="aplus.js" />
+<meta name="aplus-ajax" content="chksum" />
+<meta name="aplus-waiting" content="MAN" />
+<meta name="aplus-pvhash" content="1" />
+<!-- 基础资源 -->
+ <title>实时语音合成服务端事件参考-大模型服务平台百炼-阿里云-大模型服务平台百炼(Model Studio)-阿里云帮助中心</title>
+ <link rel="canonical" href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events" />
+ <meta name="keywords" content="了解Qwen-TTS事件,查询Qwen-TTS事件参数,参考Qwen-TTS事件示例,Qwen-TTS事件参考,Qwen-TTS事件参数" />
+ <meta name="description" content="本文介绍 Qwen-TTS-Realtime API 的服务端事件。" />
+ <meta name="last-modified" content="2026-02-11T15:27:12+08:00" />
+ <meta name="date" content="2025-07-16T10:57:52+08:00" />
+ <meta property="og:title" content="服务端事件" />
+ <meta property="og:type" content="website" />
+ <meta property="og:url" content="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events" />
+ <meta property="og:image" content="https://img.alicdn.com/imgextra/i1/O1CN012QgtoH1c1Mu70xD3w_!!6000000003540-2-tps-640-640.png" />
+ <meta property="og:description" content="本文介绍 Qwen-TTS-Realtime API 的服务端事件。" />
+
+<link
+href="https://g.alicdn.com/aliyun-help/help-portal-fe/0.12.38/css/index.css"
+rel="stylesheet"
+/>
+<script>
+window.globalData = {
+website: "cn",
+language: "zh",
+nodeId: "2938851",
+};
+window.resourceBaseUrl =
+"https://g.alicdn.com/aliyun-help/help-portal-fe/0.12.38/";
+// UT的全局配置变量，在CDN加载前配置
+window.$ACE_TRACKER_CONFIG = {
+enableHistory: true,
+enableHash: false,
+};
+</script>
+<link href="https://g.alicdn.com/code/npm/@ali??hmod-ace-2023-box/0.1.0/index.css,hmod-aliyun-com-global-nav-search/0.7.15/index.css,hmod-aliyun-com-global-nav/0.3.3/index.css" rel="stylesheet"/>
+<link href="https://g.alicdn.com/code/npm/@ali??hmod-ace-2023-box/0.1.0/index.css,hmod-ace-2024-global-footer/0.1.2/index.css" rel="stylesheet"/>
+</head>
+<body><script>
+with(document)with(body)with(insertBefore(createElement("script"),firstChild))setAttribute("exparams","category=&userid=&aplus&yunid=&&trid=213e018117740914797298357ed08e&asid=AQAAAADXfL5pObnzZQAAAAB3OWAIWwUqwg==",id="tb-beacon-aplus",src=(location>"https"?"//g":"//g")+".alicdn.com/alilog/mlog/aplus_v2.js")
+</script>
+
+<script>
+var _performance_domStart =
+window.performance && window.performance.now();
+</script>
+<header><div id="770f73a3c0ad6ce7da74e547d5948415"><div class="_18a32969382a277c44015217fbc5cb5a_box"><div class="c97dc5fe8c8f69b0e60edf6a1f709489_pc de5ef2fee09ebcb2b1dcaf0c982523bc_theme bdac01e7d42089a1161e0315c2a68512_reset" data-ai-assistant-text-selection-tooltip="disabled"><header class="b62a767265ae40ce4e5e07aa2336b1be_container   "><button class="_17fcaf1a4ee37405e5ad5fbad24204b4_container _17fcaf1a4ee37405e5ad5fbad24204b4_loading" aria-label="打开菜单" data-spm="d_dashboard_trigger" data-tracker-exp="true"><span class="_17fcaf1a4ee37405e5ad5fbad24204b4_burger "><span class="_17fcaf1a4ee37405e5ad5fbad24204b4_middle"></span></span></button><a href="https://www.aliyun.com/" class="_3f46140aade30bc61f3012933357c477_logo b62a767265ae40ce4e5e07aa2336b1be_logo" data-tracker-content="LOGO" data-spm="d_logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4608 1024" fill="#ff6a00" width="80"><path d="M3266.56 773.12h327.68v-102.4h-327.68v-102.4H3584V35.84H2846.72v532.48h317.44v102.4h-327.68v102.4h327.68v112.64h-353.28v102.4h814.08v-102.4h-353.28v-112.64zM3276.8 138.24h215.04v112.64H3276.8V138.24z m0 215.04h215.04V460.8H3276.8V353.28zM3174.4 460.8h-215.04V353.28H3174.4V460.8z m0-209.92h-215.04V138.24H3174.4v112.64zM537.6 445.44H1075.2v122.88H537.6z"></path><path d="M1341.44 5.12h-353.28L1075.2 128l256 81.92c46.08 15.36 76.8 61.44 76.8 107.52v389.12c0 46.08-30.72 92.16-76.8 107.52l-256 81.92-87.04 122.88h353.28c148.48 0 266.24-117.76 266.24-266.24V276.48c0-148.48-117.76-271.36-266.24-271.36zM276.48 814.08c-46.08-15.36-76.8-61.44-76.8-107.52V317.44c0-46.08 30.72-92.16 76.8-107.52l256-81.92L619.52 5.12H266.24C117.76 5.12 0 128 0 276.48v471.04c0 148.48 117.76 266.24 266.24 266.24h353.28l-87.04-122.88-256-76.8zM2493.44 250.88h-261.12v537.6h261.12V250.88z m-107.52 430.08h-56.32V353.28h56.32v327.68zM1848.32 988.16h102.4V138.24h107.52L1996.8 419.84v102.4h61.44v225.28c0 15.36-10.24 25.6-25.6 25.6h-25.6v102.4h51.2c56.32 0 102.4-46.08 102.4-102.4v-358.4H2099.2l61.44-281.6v-102.4h-312.32v957.44z"></path><path d="M2206.72 138.24H2560v660.48c0 46.08-35.84 87.04-87.04 87.04h-76.8v102.4h107.52c87.04 0 163.84-71.68 163.84-163.84V138.24h35.84v-102.4h-496.64v102.4zM3763.2 40.96h737.28v102.4H3763.2zM4541.44 527.36v-102.4H3727.36v102.4h204.8l-163.84 358.4v102.4h691.2c30.72 0 51.2-25.6 51.2-51.2 0-10.24 0-15.36-5.12-20.48l-87.04-194.56h-112.64l76.8 163.84h-496.64l163.84-358.4h491.52z"></path></svg></a><div class="e76910c82efe8556eb8a6ce6019c5d00_container"><button class="e76910c82efe8556eb8a6ce6019c5d00_controller" data-spm="dscroll-left"><i class="ee52067fb65534cb06d3b35f654f5441_icon ddd10ed9ffa4788f54781e516c4c6560-button_left"></i></button><div class="e76910c82efe8556eb8a6ce6019c5d00_menu-warp"><nav class="_0b0e00051b37611378e027e6ac3a695a_menus"><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/product/tongyi" data-spm="d_menu_0">大模型</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/product/list" data-spm="d_menu_1">产品</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/solution/tech-solution/" data-spm="d_menu_2">解决方案</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/benefit" data-spm="d_menu_3">权益</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/price" data-spm="d_menu_4">定价</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://market.aliyun.com/" data-spm="d_menu_5">云市场</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://partner.aliyun.com/management/v2" data-spm="d_menu_6">伙伴</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/service" data-spm="d_menu_7">服务</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/about" data-spm="d_menu_8">了解阿里云</a></nav></div><button class="e76910c82efe8556eb8a6ce6019c5d00_controller" data-spm="dscroll-right"><i class="ee52067fb65534cb06d3b35f654f5441_icon ddd10ed9ffa4788f54781e516c4c6560-button_right"></i></button></div><div class="b62a767265ae40ce4e5e07aa2336b1be_search-wrap "><div class="global-nav-search _626567c051250ffe2f303af907d3fc83_global-nav-search"><div class="global-search-container _626567c051250ffe2f303af907d3fc83_global-nav-search-desktop-container"><div class="ff4f4a96a12f52ffbdd0d6adbdb6a2b0_position-desktop-search-container"><div><div class="f6fd7e4d3293f0634b9ac54848c275b7_default-search-panel  f6fd7e4d3293f0634b9ac54848c275b7_hidden-default-search-panel"></div><div class="_3b4f5487091623b0b6852e2b46d2729e_search-recommend-panel  _3b4f5487091623b0b6852e2b46d2729e_hidden-search-recommend-panel"><button class="_4b65cdd64479a2fabe582b8c0789821e_search-no-content " type="button"><div>查看 “</div><div class="_4b65cdd64479a2fabe582b8c0789821e_search-word"></div><div>” 全部搜索结果</div></button></div></div></div></div><div class="_626567c051250ffe2f303af907d3fc83_global-nav-search-mobile-container"><a class="_626567c051250ffe2f303af907d3fc83_search-button" href="https://www.aliyun.com/search?from=h5-global-nav-search"><span role="img" class="_9a1d73bbcd1a80626a31035a12410804_icon _626567c051250ffe2f303af907d3fc83_search-button-icon"><svg width="1em" height="1em" viewBox="0 0 32 32" focusable="false" color="currentColor" fill="currentColor" class="" data-icon="search"><g fill-rule="evenodd" stroke-width="1"><path d="M14,4 C15.3558127,4 16.653362,4.26210485 17.8926477,4.78631455 C19.0891275,5.29241739 20.1485621,6.00666269 21.0709515,6.92905045 C21.9933389,7.8514363 22.7075837,8.91087023 23.213686,10.1073523 C23.7378953,11.3466396 24,12.6441889 24,14 C24,15.3558159 23.737896,16.6533658 23.2136879,17.8926497 C22.838225,18.7802852 22.3482024,19.5924969 21.7436199,20.3292847 L27.7071819,26.2928467 L26.2929688,27.7070599 L20.3294201,21.7435112 C19.592603,22.3481382 18.7803456,22.8381971 17.8926477,23.2136879 C16.6533607,23.737896 15.3558114,24 14,24 C12.6441879,24 11.3466384,23.737896 10.1073513,23.2136879 C8.91087246,22.7075844 7.85143844,21.9933383 6.92904925,21.0709496 C6.00666173,20.1485621 5.29241653,19.0891282 4.78631365,17.8926477 C4.26210455,16.6533613 4,15.3558121 4,14 C4,12.6441879 4.26210451,11.3466388 4.78631353,10.1073527 C5.29241594,8.91087262 6.00666118,7.85143844 6.92904925,6.92905021 C7.85143812,6.00666118 8.91087198,5.2924157 10.1073508,4.78631377 C11.3466366,4.26210459 12.6441863,4 14,4 Z M14,6 C11.7910172,6 9.90543811,6.78108788 8.34326267,8.34326363 C6.78108756,9.90543874 6,11.7910175 6,14 C6,16.2089825 6.78108756,18.0945616 8.34326267,19.6567373 C9.90543779,21.2189124 11.7910169,22 14,22 C16.2089844,22 18.0945635,21.2189128 19.6567373,19.6567383 C21.2189124,18.0945644 22,16.208985 22,14 C22,11.7910175 21.2189124,9.9054389 19.6567373,8.3432641 C18.0945622,6.78108803 16.2089831,6 14,6 Z"></path></g></svg></span></a></div></div></div><div class="_4af07273271b80d6f43a7fc0a40e8124_container"><a class="_4af07273271b80d6f43a7fc0a40e8124_item _2d3ef330b3f8055912d355b9a255bfcf_btn global-nav-ai-assistant" href="https://www.aliyun.com/ai-assistant?displayMode=side" data-spm="dai_assistant" target="_blank"><div class="LogoStyled-aliyun-ai-assistant-rc-8096__sc-1qusfpt-0 cpJKij"><div class="ai-assistant-brand-logo-icon" style="background:no-repeat center/100%  url(https://img.alicdn.com/imgextra/i4/O1CN012X1Rxl1clAgB5waMK_!!6000000003640-2-tps-52-52.png)"><img src="https://img.alicdn.com/imgextra/i2/O1CN01bYc1m81RrcSAyOjMu_!!6000000002165-54-tps-60-60.apng" loading="lazy"/></div><div class="ai-assistant-brand-logo-tooltip "><div class="ai-assistant-logo-tooltip-content">AI 助理</div></div></div></a><button class="_4af07273271b80d6f43a7fc0a40e8124_item bb3dbc2de557f9f2029f50770c77fab9_button"><i class="ee52067fb65534cb06d3b35f654f5441_icon ddd10ed9ffa4788f54781e516c4c6560-intl"></i></button><button class="_4af07273271b80d6f43a7fc0a40e8124_item"><i class="ee52067fb65534cb06d3b35f654f5441_icon ddd10ed9ffa4788f54781e516c4c6560-contact d42d5e3a0d0e018547c66700af2a2030_icon"></i></button><a class="_4af07273271b80d6f43a7fc0a40e8124_item" href="https://help.aliyun.com/" target="_blank" data-spm="d_quick_access_3">文档</a><a class="_4af07273271b80d6f43a7fc0a40e8124_item" href="https://beian.aliyun.com/" target="_blank" data-spm="d_quick_access_4">备案</a><a class="_4af07273271b80d6f43a7fc0a40e8124_item" href="https://home.console.aliyun.com/home/dashboard/ProductAndService" target="_blank" data-spm="d_quick_access_5" rel="nofollow">控制台</a><span class="_05da28cf18b2b6ee04dbfd3ceb5ad3c9_loading _4af07273271b80d6f43a7fc0a40e8124_item"></span></div></header></div><div class="c97dc5fe8c8f69b0e60edf6a1f709489_mobile de5ef2fee09ebcb2b1dcaf0c982523bc_theme bdac01e7d42089a1161e0315c2a68512_reset"></div><div class="_18a32969382a277c44015217fbc5cb5a_box"></div></div></div></header>
+
+ <div id="app">
+<div class="main-layout" id="docs-container" style="opacity:0;">
+<div class="help-body-head"></div>
+<div class="stick-top-layout">
+<div class="help-layout">
+<nav class="aliyun-docs-toc" id="aliyun-docs-toc"></nav>
+<section class="aliyun-docs-view" id="aliyun-docs-view">
+<div class="product-detail">
+<section class="aliyun-docs-content">
+<header class="aliyun-docs-view-header">
+<div class="header-topbar">
+ <div class="header-topbar-breadcrumb">
+ <span><a href="https://help.aliyun.com/">首页</a></span>
+ <span><a href="/zh/model-studio/">大模型服务平台百炼</a></span>
+ <span><a href="/zh/model-studio/model-api-reference/">API参考（模型）</a></span>
+ <span><a href="/zh/model-studio/speech-synthesis-api-reference/">语音合成</a></span>
+ <span><a href="/zh/model-studio/qwen-tts-realtime-api-reference/">实时语音合成（Qwen-TTS-Realtime）</a></span>
+ <span>服务端事件</span>
+ </div>
+ </div>
+<div class="header-title">
+ <h1>服务端事件</h1>
+ <div class="header-actionbar">
+<span class="update-time">更新时间: 2026-02-11 15:27:12</span>
+</div>
+ </div>
+</header>
+<div
+class="pc-markdown-container unionContainer"
+id="pc-markdown-container"
+>
+<!-- 内容 -->
+<div class="markdown-body">
+ <div><div lang="zh" class="icms-help-docs-content">
+<main id="main-2996392"><p id="6c907c5eb27wb" data-tag="shortdesc" class="shortdesc">本文介绍 Qwen-TTS-Realtime API 的服务端事件。</p><div data-tag="body" class="body"><blockquote id="acafb3ceebaoa">相关文档：<a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime" id="3d8cf46ec1agl" title="" class="xref">实时语音合成-千问</a>。</blockquote><section id="04b7856f50yuw" class="section"><h2 id="a5065ac8c1psu"><b>error</b></h2><p id="8af7cfbf9eg8d">不论是遇到客户端错误还是服务端错误，服务端都会响应该事件。</p><table bordertype="no-border" id="e83b5df4d1cfo" outputclass="api-reference column-layout" tablewidth="100" tablecolswidth="57.55 42.45" autofit="true" class="api-reference column-layout table"><colgroup colwidth="1.15*" style="width:57.55%"></colgroup><colgroup colwidth="0.85*" style="width:42.45%"></colgroup><tbody class="tbody"><tr id="86f1a28371ag8" outputclass="test" class="test"><td id="5ad625f77ekil" rowspan="1" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><p id="a1c24e2d60l54"><b>event_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="2f7d2d8a6bo7j">服务端事件ID。</p></td><td id="8120c6cbb82zo" rowspan="3" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><section id="4e4c0efb80zo0" outputclass="stick-top" class="stick-top section"><pre code-type="xCode" id="cf11e6574afiv" index="0" data-tag="codeblock" outputclass="language-json" class="pre codeblock language-json"><code>{
+  "event_id": "event_QzAVZRVa9hKqM5VOaHunh",
+  "type": "error",
+  "error": {
+    "code": "invalid_value",
+    "message": "Session update error: session already started or finished or failed."
+  }
+}</code></pre></section><p id="b00d848811ada"></p></td></tr><tr id="c018efc4635h0"><td id="a2357863622uj" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="99cdb8c2c2lis"><b>type </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="966b052ff0vyi">事件类型，固定为<code data-tag="code" id="a1511ea965oi7" class="code">error</code>。</p></td></tr><tr id="3cf1796ce5trt"><td id="bcbf36a58ci8o" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="7282027d62wss"><b>error </b><code data-tag="code" code-type="xCode" id="77fe9787eb6tm" data-init-id="cbc03347aakj0" class="code"><i>object</i></code></p><p id="2e254fa41d5kl">错误详情。</p><div id="bb983674bc0y9" outputclass="collapse expanded" class="collapse expanded"><p id="cefeed8e26nht" data-tag="expandable-title" class="expandable-title"><b>属性</b></p><div id="044b193eb66wg" data-tag="expandable-content" class="expandable-content"><section id="13a1394681xgl" class="section"><p id="de1843083cal8"><b>code </b><i>string</i></p><p id="25dae9be5dfpp">错误码。</p></section><section id="e99a9a34ba0mn" class="section"><p id="c5a04c78822wv"><b>message </b><i>string</i></p><p jc="left" uuid="m95147brql0uecf9l49" id="a0df0be21811m" style="text-align:left">错误信息。</p></section></div></div></td></tr></tbody></table></section><section id="781d225bcdmuy" class="section"><h2 id="05bb97c283l2n"><b>session.created</b></h2><p id="3a24a14056fw1">客户端连接到服务端后，响应的第一个事件，该事件返回时会携带服务端对此次连接的默认配置信息。</p><table bordertype="no-border" id="2957735477v6w" outputclass="api-reference column-layout" tablewidth="100" tablecolswidth="57.55 42.45" autofit="true" class="api-reference column-layout table"><colgroup colwidth="1.15*" style="width:57.55%"></colgroup><colgroup colwidth="0.85*" style="width:42.45%"></colgroup><tbody class="tbody"><tr id="adc46884f4hxe" outputclass="test" class="test"><td id="f8ac7a24de3iq" rowspan="1" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><p id="1e14920762yv3"><b>event_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="3006cd2c7d8h5">服务端事件ID。</p></td><td id="fecc4daa17mvl" rowspan="3" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><section id="8b307f8236uxc" outputclass="stick-top" class="stick-top section"><pre code-type="xCode" id="f5ad4f7c26fty" index="0" data-tag="codeblock" outputclass="language-json" class="pre codeblock language-json"><code>{
+  "event_id": "event_xxx",
+  "type": "session.created",
+  "session": {
+    "object": "realtime.session",
+    "mode": "server_commit",
+    "model": "qwen-tts-realtime",
+    "voice": "Cherry",
+    "response_format": "pcm",
+    "sample_rate": 24000,
+    "id": "sess_xxx"
+  }
+}</code></pre></section><p id="4d9374908a06x"></p></td></tr><tr id="21eafe3ba63r9"><td id="53e00e2074o4e" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="a87ad4fd6cjkn"><b>type </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="1ebb38ef7bvg5">事件类型，固定为<code data-tag="code" id="a1511ea965oi7" class="code">session.created</code>。</p></td></tr><tr id="ab37daa61faf2"><td id="5e428046bdp3e" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="6f799d7f2dhtt"><b>session </b><code data-tag="code" code-type="xCode" id="77fe9787eb6tm" data-init-id="cbc03347aakj0" class="code"><i>object</i></code></p><p id="3d7e8d5643xdi">会话配置。</p><div id="e398df23e0qas" outputclass="collapse expanded" class="collapse expanded"><p id="8d7e3337840bf" data-tag="expandable-title" class="expandable-title"><b>属性</b></p><div id="c6d74bb4644lo" data-tag="expandable-content" class="expandable-content"><section id="a0eff97cf2te2" class="section"><p id="ab73e726c85s3"><b>id </b><code data-tag="code" code-type="xCode" id="a7fff0a5b86yd" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="5b711c7087i9j">会话ID。</p></section><section id="478d02f650dxv" class="section"><p id="7eee73bb6eypu"><b>object </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="8eef3d93edg75" style="text-align:left">会话服务名。</p></section><section id="40aa539913bxq" class="section"><p id="f666ec4f3234h"><b>mode </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="66b4230bcc3dx" style="text-align:left">交互模式，<code data-tag="code" id="ecc116e15b4f2" class="code">server_commit</code>或<code data-tag="code" id="e6af13f10amo4" class="code">commit</code>。</p></section><section id="72ee79f4efogb" class="section"><p id="ee54542a44grw"><b>model </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="42fe055bfb5t8" style="text-align:left">使用的模型。</p></section><section id="a16775532cs5k" class="section"><p id="478316ae186hy"><b>voice </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="a7b72bb218w4g" style="text-align:left">使用的音色。</p></section><section id="8192969c0aubo" class="section"><p id="e7a32342ae3se"><b>response_format </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="03786c244043g" style="text-align:left">音频格式。</p></section><section id="6b2a7910e9qiw" class="section"><p id="fcdfcbac94jki"><b>sample_rate </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>integer</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="fe62af915f6pl" style="text-align:left">音频采样率。</p></section></div></div></td></tr></tbody></table></section><section id="b122b3098arno" class="section"><h2 id="58f078ab61di5"><b>session.updated</b></h2><p id="fa9ec6307745r">接收到客户端的<code data-tag="code" id="729f5ed36b3ef" class="code">session.update</code>请求并正确处理后返回。如果出现错误，则直接返回error事件。</p><table bordertype="no-border" id="43dcdcff7ahc3" outputclass="api-reference column-layout" tablewidth="100" tablecolswidth="57.55 42.45" autofit="true" class="api-reference column-layout table"><colgroup colwidth="1.15*" style="width:57.55%"></colgroup><colgroup colwidth="0.85*" style="width:42.45%"></colgroup><tbody class="tbody"><tr id="46af5d5da2lqv" outputclass="test" class="test"><td id="dbeea89e94mde" rowspan="1" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><p id="85f2f47ab91lx"><b>event_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="b45d8c215dx3t">服务端事件ID。</p></td><td id="99910b539dfzz" rowspan="3" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><section id="ac2885c652mm9" outputclass="stick-top" class="stick-top section"><pre code-type="xCode" id="119f37eb3coxl" index="0" data-tag="codeblock" outputclass="language-json" class="pre codeblock language-json"><code>{
+  "event_id": "event_xxx",
+  "type": "session.updated",
+  "session": {
+    "id": "sess_xxx",
+    "object": "realtime.session",
+    "model": "qwen-tts-realtime",
+    "voice": "Cherry",
+    "language_type": "Chinese",
+    "mode": "commit",
+    "response_format": "pcm",
+    "sample_rate": 24000
+  }
+}</code></pre></section><p id="76459745b0qou"></p></td></tr><tr id="be75f15c9ai7b"><td id="b42736ca113dr" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="8c2c349a28nfz"><b>type </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="ff0a7c9af3tvg">事件类型，固定为<code data-tag="code" id="a1511ea965oi7" class="code">session.updated</code>。</p></td></tr><tr id="8903dc632e8t6"><td id="a487e880e9i7s" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="7844c44a463bi"><b>session </b><code data-tag="code" code-type="xCode" id="77fe9787eb6tm" data-init-id="cbc03347aakj0" class="code"><i>object</i></code></p><p id="956d260424l5t">会话配置。</p><div id="079842bbfcxzq" outputclass="collapse expanded" class="collapse expanded"><p id="f87a2bbaf5boj" data-tag="expandable-title" class="expandable-title"><b>属性</b></p><div id="fdf9f3e56cut6" data-tag="expandable-content" class="expandable-content"><section id="f35d42962ceo3" class="section"><p id="185eaee0d5c4r"><b>id </b><code data-tag="code" code-type="xCode" id="a7fff0a5b86yd" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="c24d9b37fabl2">会话ID。</p></section><section id="3c3147f60bzhl" class="section"><p id="57f83026eepc7"><b>object </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="f541dad22c9da" style="text-align:left">会话服务名。</p></section><section id="6ac1bc8e00exx" class="section"><p id="5fcf44f15ckr3"><b>mode </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="7a21c1a9bcyh5" style="text-align:left">交互模式，<code data-tag="code" id="ecc116e15b4f2" class="code">server_commit</code>或<code data-tag="code" id="e6af13f10amo4" class="code">commit</code>。</p></section><section id="6c932a2df5ev8" class="section"><p id="505b97db7anph"><b>model </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="56adee068036l" style="text-align:left">使用的模型。</p></section><section id="e455c53445vdc" class="section"><p id="13bfd4dfb82ch"><b>voice </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="a7e23596eccoq" style="text-align:left">使用的音色。</p></section><section id="c876401adcvhy" class="section"><p id="1b80140663mtr"><b>response_format </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="cbe7cf8f68o65" style="text-align:left">音频格式。</p></section><section id="f6d991525a1l3" class="section"><p id="e83706a5b9rg5"><b>sample_rate </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>integer</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="16ccadfc20fww" style="text-align:left">音频采样率。</p></section><section id="4404212f5ftp7" class="section"><p id="1f0df1ea492ng"><b>language_type </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="e6e7bf29ecv0p" style="text-align:left">音频语种。</p></section></div></div></td></tr></tbody></table></section><section id="c7c41a46db39k" class="section"><h2 id="76abc25665qt8"><b>input_text_buffer.committed</b></h2><p id="8516f8c215l5o">客户端发送<code data-tag="code" id="483e18faa8f3i" class="code" data-spm-anchor-id="a2c4g.11186623.0.i10.3c5b489dUmdZVT">input_text_buffer.commit</code>事件后，服务端的响应事件。</p><table bordertype="no-border" id="139305dca30az" outputclass="api-reference column-layout" tablewidth="100" tablecolswidth="57.55 42.45" autofit="true" class="api-reference column-layout table"><colgroup colwidth="1.15*" style="width:57.55%"></colgroup><colgroup colwidth="0.85*" style="width:42.45%"></colgroup><tbody class="tbody"><tr id="4940476540dxm" outputclass="test" class="test"><td id="e34f67ad8dwan" rowspan="1" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><p id="9a079ce4c28dj"><b>event_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="587048d8c2tfg">服务端事件ID。</p></td><td id="f4f10aa1f803p" rowspan="3" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><section id="c2120e465aojs" outputclass="stick-top" class="stick-top section"><pre code-type="xCode" id="67c56f46f7m8g" index="0" data-tag="codeblock" outputclass="language-json" class="pre codeblock language-json"><code>{
+  "event_id": "event_FC6MA88wS2oEeXkPvWsxX",
+  "type": "input_text_buffer.committed",
+  "item_id": ""
+}</code></pre></section><p id="daf7a26c389nj"></p></td></tr><tr id="d1a293ef56z02"><td id="da9f5231e9fsi" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="51cbd0abf86mo"><b>type </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="32221425e33mz">事件类型，固定为<code data-tag="code" id="a1511ea965oi7" class="code">input_text_buffer.committed</code>。</p></td></tr><tr id="7e25a0342360g"><td id="871e33958ejsn" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="a6edd973c695h"><b>item_id </b><code data-tag="code" code-type="xCode" id="77fe9787eb6tm" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="75712bbe75uk6">将创建的用户消息项的 ID。</p></td></tr></tbody></table></section><section id="479388c8533g0" class="section"><h2 id="7a04edb8840o7"><b>input_text_buffer.</b><b>cleared</b></h2><p id="83bda9a60c0f4">客户端发送<code data-tag="code" id="b7ea4b4937vl8" class="code" data-spm-anchor-id="a2c4g.11186623.0.i16.3c5b489dUmdZVT">input_audio_buffer.clear</code>事件后，服务端的响应事件。</p><table bordertype="no-border" id="be6e96b9ad4d1" outputclass="api-reference column-layout" tablewidth="100" tablecolswidth="57.55 42.45" autofit="true" class="api-reference column-layout table"><colgroup colwidth="1.15*" style="width:57.55%"></colgroup><colgroup colwidth="0.85*" style="width:42.45%"></colgroup><tbody class="tbody"><tr id="1d21354dd5ijh" outputclass="test" class="test"><td id="efe0ffe173i9w" rowspan="1" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><p id="477e49d4625gr"><b>event_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="50ceff5cf8wi2">服务端事件ID。</p></td><td id="5c0fa093b21kg" rowspan="2" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><section id="18f3d0b761ipv" outputclass="stick-top" class="stick-top section"><pre code-type="xCode" id="4c4c3e7388u71" index="0" data-tag="codeblock" outputclass="language-json" class="pre codeblock language-json"><code>{
+    "event_id": "event_1122",
+    "type": "input_text_buffer.cleared"
+}</code></pre></section><p id="eb5f8831933jx"></p></td></tr><tr id="a4a08db01999k"><td id="28d92b5602myc" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="c53b0fb62cdxo"><b>type </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="1b2eaa32eblxb">事件类型，固定为<code data-tag="code" id="a1511ea965oi7" class="code">input_text_buffer.cleared</code>。</p></td></tr></tbody></table></section><section id="95141179a8kaj" class="section"><h2 id="4e06909a7es5k"><b>response.created</b></h2><p id="7931ef426d77p">客户端发送<code data-tag="code" id="483e18faa8f3i" class="code" data-spm-anchor-id="a2c4g.11186623.0.i10.3c5b489dUmdZVT">input_text_buffer.commit</code>事件后，服务端的响应事件。</p><table bordertype="no-border" id="a26ec995abl9m" outputclass="api-reference column-layout" tablewidth="100" tablecolswidth="57.55 42.45" autofit="true" class="api-reference column-layout table"><colgroup colwidth="1.15*" style="width:57.55%"></colgroup><colgroup colwidth="0.85*" style="width:42.45%"></colgroup><tbody class="tbody"><tr id="2a03f1e2bbm78" outputclass="test" class="test"><td id="12c814a8935nc" rowspan="1" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><p id="6392f0dfbbzg9"><b>event_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="21f5cd2720bt6">服务端事件ID。</p></td><td id="a2867ac10dhx0" rowspan="3" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><section id="e858e0f327do9" outputclass="stick-top" class="stick-top section"><pre code-type="xCode" id="ba5b372ef5ugu" index="0" data-tag="codeblock" outputclass="language-json" class="pre codeblock language-json"><code>{
+  "event_id": "event_IMnLqDvG6Ahhk7sWV2uOs",
+  "type": "response.created",
+  "response": {
+    "id": "resp_USvBwHktHcz76r6GaIJUV",
+    "object": "realtime.response",
+    "conversation_id": "",
+    "status": "in_progress",
+    "voice": "Cherry",
+    "output": []
+  }
+}</code></pre></section><p id="233d5cdb9159t"></p></td></tr><tr id="c67c06fc113yw"><td id="973c99bfe7dl5" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="9f234f0256u5k"><b>type </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="7b28e5a9f3n2d">事件类型，固定为<code data-tag="code" id="a1511ea965oi7" class="code">response.created</code>。</p></td></tr><tr id="f5585717581u3"><td id="be65f8c1a9ui4" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="0add19838dx7v"><b>response </b><code data-tag="code" code-type="xCode" id="77fe9787eb6tm" data-init-id="cbc03347aakj0" class="code"><i>object</i></code></p><p id="e8b49f87e3fry">响应详情。</p><div id="0b9edda923enm" outputclass="collapse expanded" class="collapse expanded"><p id="5570494dfafg4" data-tag="expandable-title" class="expandable-title"><b>属性</b></p><div id="fea13c2819ysa" data-tag="expandable-content" class="expandable-content"><section id="3648112b2ck6v" class="section"><p id="0adb325885vau"><b>id </b><code data-tag="code" code-type="xCode" id="a7fff0a5b86yd" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="6053347efacc7">响应ID。</p></section><section id="89a75fe3247n2" class="section"><p id="715c56a553pfx"><b>object </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="14eb2ef683pmb" style="text-align:left">对象类型，在此事件下固定为<code data-tag="code" uuid="mcbv316p8otvytis0ns" id="41bea3fa44gfw" class="code">realtime.response</code>。</p></section><section id="02cd1a87fa9rz" class="section"><p id="30106e3ecex2a"><b>status </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="76512634d7zhk" style="text-align:left">响应的最终状态，取值范围：</p><ul id="b3bf31848dnk9"><li id="9dac7b1b7exp0"><p jc="left" uuid="mkqqwofz0z5hqk7jpsr" id="e9cdabf1494xs" style="text-align:left">completed</p></li><li id="da268683c7ifb"><p id="618565ff93mer">failed</p></li><li id="56aa757d55ift"><p id="242675042b2rl">in_progress</p></li><li id="76e71ea142e6d"><p id="d50820bf63hpm">incomplete</p></li></ul></section><section id="052495ab812qr" class="section"><p id="a9036e090clp0"><b>voice </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="d7cb43f15dbzc" style="text-align:left">使用的音色。</p></section><section id="1d888b993bhwf" class="section"><p id="59f3a05dd9dje"><b>output </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>array</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="10e2835cf0arm" style="text-align:left">在此事件下为空。</p></section></div></div></td></tr></tbody></table></section><section id="d5d620047bmat" class="section"><h2 id="efd58c096b3bv"><b>response.output_item.added</b></h2><p id="4767d3f629d3a">当新的item项需要输出时，服务端返回此事件。</p><table bordertype="no-border" id="0696c748ae2ii" outputclass="api-reference column-layout" tablewidth="100" tablecolswidth="57.55 42.45" autofit="true" class="api-reference column-layout table"><colgroup colwidth="1.15*" style="width:57.55%"></colgroup><colgroup colwidth="0.85*" style="width:42.45%"></colgroup><tbody class="tbody"><tr id="7cc09cf31a11r" outputclass="test" class="test"><td id="8769616344jp8" rowspan="1" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><p id="786c8894a7phk"><b>event_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="fdbda33024jfv">服务端事件ID。</p></td><td id="e80f4203aevto" rowspan="5" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><section id="c0e6687ea67ul" outputclass="stick-top" class="stick-top section"><pre code-type="xCode" id="57f42aae4235k" index="0" data-tag="codeblock" outputclass="language-json" class="pre codeblock language-json"><code>{
+  "event_id": "event_INDGnGNulaXCrStd9ZM5X",
+  "type": "response.output_item.added",
+  "response_id": "resp_USvBwHktHcz76r6GaIJUV",
+  "output_index": 0,
+  "item": {
+    "id": "item_FIrYGaNVK3rbIZqeY4QjM",
+    "object": "realtime.item",
+    "type": "message",
+    "status": "in_progress",
+    "role": "assistant",
+    "content": []
+  }
+}</code></pre></section><p id="4c1908c0ab1n8"></p></td></tr><tr id="11be9ccd4c4rt"><td id="c612c6dcb5ndr" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="079ed306107oq"><b>type </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="d81b3aaebfcha">事件类型，固定为<code data-tag="code" id="a1511ea965oi7" class="code">response.output_item.added</code>。</p></td></tr><tr id="b4dfe440717ub"><td id="2392bf58c6dz2" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="811b2e06ban7m"><b>response_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="eee2fb80e6j7e">响应的ID。</p></td></tr><tr id="2ffb32f112upj"><td id="dacecd9c7a3iu" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="5204b9b71bzd9"><b>output_index </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>integer</i></code></p><p id="32c40f9b9edn9">响应输出项的索引，目前固定为0。</p></td></tr><tr id="008fa8d9d7ltb"><td id="8925156326k59" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="ee41d3dbc8v85"><b>item </b><code data-tag="code" code-type="xCode" id="77fe9787eb6tm" data-init-id="cbc03347aakj0" class="code"><i>object</i></code></p><p id="7b7844b65084l">输出项信息。</p><div id="f8ab83c359w7k" outputclass="collapse expanded" class="collapse expanded"><p id="b814146805z9t" data-tag="expandable-title" class="expandable-title"><b>属性</b></p><div id="d95357603bt5t" data-tag="expandable-content" class="expandable-content"><section id="e510b84bcf4fh" class="section"><p id="c4fad614a4k1g"><b>id </b><code data-tag="code" code-type="xCode" id="a7fff0a5b86yd" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="efb1f7f7aey6m">输出项ID。</p></section><section id="15f700d19a8z6" class="section"><p id="9491308aa92s1"><b>object </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="9787c444d6i1x" style="text-align:left">始终为&nbsp;<code data-tag="code" uuid="mcbv4jr7kl93h6g14s" id="1eef00dadexu5" class="code">realtime.item</code>。</p></section><section id="de3c1f8d3670q" class="section"><p id="7c18a24baboxp"><b>status </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="b929c14b250ju" style="text-align:left">输出项的状态。</p></section><section id="47cc25d2fc2fo" class="section"><p id="b5f78e4e24o7j"><b>content </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>array</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="ae66586e4dd3w" style="text-align:left">消息的内容。</p></section></div></div></td></tr></tbody></table></section><section id="c41f69e765yxk" class="section"><h2 id="141bec9bb11yi"><b>response.content_part.added</b></h2><p id="40e361d296hnv">当新的内容项需要输出时，服务端返回此事件。</p><table bordertype="no-border" id="15a667193eai2" outputclass="api-reference column-layout" tablewidth="100" tablecolswidth="57.55 42.45" autofit="true" class="api-reference column-layout table"><colgroup colwidth="1.15*" style="width:57.55%"></colgroup><colgroup colwidth="0.85*" style="width:42.45%"></colgroup><tbody class="tbody"><tr id="5263b6512fhm9" outputclass="test" class="test"><td id="d73b463418ajs" rowspan="1" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><p id="4a89259ec34r0"><b>event_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="84d96d1bfcc05">服务端事件ID。</p></td><td id="6f862814e02sv" rowspan="7" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><section id="a3c27e78b6xys" outputclass="stick-top" class="stick-top section"><pre code-type="xCode" id="6386f8bce7zm6" index="0" data-tag="codeblock" outputclass="language-json" class="pre codeblock language-json"><code>{
+  "event_id": "event_DigZ95MWN36YYyyjcENoq",
+  "type": "response.content_part.added",
+  "response_id": "resp_USvBwHktHcz76r6GaIJUV",
+  "item_id": "item_FIrYGaNVK3rbIZqeY4QjM",
+  "output_index": 0,
+  "content_index": 0,
+  "part": {
+    "type": "audio",
+    "text": ""
+  }
+}</code></pre></section><p id="1831233d9a116"></p></td></tr><tr id="df45792fc1pau"><td id="f1618b2fe8rva" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="79a06b53050me"><b>type </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="a1f8aa0a6b4xk">事件类型，固定为<code data-tag="code" id="a1511ea965oi7" class="code">response.content_part.added</code>。</p></td></tr><tr id="923770781fw1p"><td id="0d9f08f951m4u" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="8923ab5135x07"><b>response_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="6d2f470a07c85">响应的ID。</p></td></tr><tr id="4196f357418vd"><td id="49a06e111aun6" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="d5bf4ba6f9efu"><b>item_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="05988430efrk2">消息项ID。</p></td></tr><tr id="02cf26f791ugt"><td id="31cc3f13f75bp" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="3ec6f18a82vlh"><b>output_index </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>integer</i></code></p><p id="8a568ea0b6xoh">响应输出项的索引，目前固定为0。</p></td></tr><tr id="9501698152r1f"><td id="cef89eacc2gxg" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="2bd59742e9gjc"><b>content_index </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>integer</i></code></p><p id="3cd66812c2yoh">响应输出项中内部部分的索引，目前固定为0。</p></td></tr><tr id="f4407dc586g46"><td id="66c80dff76l8w" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="4c88f45cda8vq"><b>part </b><code data-tag="code" code-type="xCode" id="77fe9787eb6tm" data-init-id="cbc03347aakj0" class="code"><i>object</i></code></p><p id="e475754b08eh8">已完成的内容部分。</p><div id="522d1f493aqrd" outputclass="collapse expanded" class="collapse expanded"><p id="69a8090df95nc" data-tag="expandable-title" class="expandable-title"><b>属性</b></p><div id="a43b06121d0kw" data-tag="expandable-content" class="expandable-content"><section id="b958395fc4ejg" class="section"><p id="873540caf4a7q"><b>type </b><code data-tag="code" code-type="xCode" id="a7fff0a5b86yd" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="d81758b58c6qx">内容部分的类型。</p></section><section id="6b73fddb8eliy" class="section"><p id="f441c88bb04lv"><b>text </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="f9eea4c19bw44" style="text-align:left">内容部分的文本。</p></section></div></div></td></tr></tbody></table></section><section id="3752be529dmfi" class="section"><h2 id="a2b95643bdvnl"><b>response.audio.delta</b></h2><p id="a3ea53d73f1on">当模型增量生成新的audio数据时，系统会返回服务器 response.audio.delta 事件。</p><table bordertype="no-border" id="2c659bc91a941" outputclass="api-reference column-layout" tablewidth="100" tablecolswidth="57.55 42.45" autofit="true" class="api-reference column-layout table"><colgroup colwidth="1.15*" style="width:57.55%"></colgroup><colgroup colwidth="0.85*" style="width:42.45%"></colgroup><tbody class="tbody"><tr id="669f4bb74bweh" outputclass="test" class="test"><td id="1147c4a06bk3m" rowspan="1" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><p id="d30f320cd78ks"><b>event_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="d0e15ab1a2siw">服务端事件ID。</p></td><td id="62c3973115a1a" rowspan="7" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><section id="f01055e9b520f" outputclass="stick-top" class="stick-top section"><pre code-type="xCode" id="f9a05b8f180ms" index="0" data-tag="codeblock" outputclass="language-json" class="pre codeblock language-json"><code>{
+  "event_id": "event_B1osWMZBtrEQbiIwW0qHQ",
+  "type": "response.audio.delta",
+  "response_id": "resp_B1osWTzBb8hO0WsELHgVP",
+  "item_id": "item_B1osWH81fXDoyim1T5fsF",
+  "output_index": 0,
+  "content_index": 0,
+  "delta": "base64 audio"
+}</code></pre></section><p id="bccbad1dc2gs2"></p></td></tr><tr id="5376006edd264"><td id="76f328fe1e226" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="9a9136c8f1uha"><b>type </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="f79f43beb3dqo">事件类型，固定为<code data-tag="code" id="a1511ea965oi7" class="code">response.audio.delta</code>。</p></td></tr><tr id="26a5bfa424hpu"><td id="e66a3571ffs06" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="5b6c81df813rd"><b>response_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="dfbb3cd5eeko9">响应的ID。</p></td></tr><tr id="8cd19576c18rg"><td id="505255f699116" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="55e1b5173cbnt"><b>item_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="0de044882apob">消息项ID。</p></td></tr><tr id="39d6be2d7fx9q"><td id="c96e8f708797o" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="6c68b3d3c2imd"><b>output_index </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>integer</i></code></p><p id="ce9712f8eftln">响应输出项的索引，目前固定为0。</p></td></tr><tr id="5ce1da392f6pk"><td id="ae884dc65cj5e" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="cb0f11383as0e"><b>content_index </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>integer</i></code></p><p id="c7923601b0r32">响应输出项中内部部分的索引，目前固定为0。</p></td></tr><tr id="b949f462c0660"><td id="6938457040zgs" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="e8dcf482a7zwy"><b>delta </b><code data-tag="code" code-type="xCode" id="77fe9787eb6tm" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="789d52c84fpuq">模型增量输出的audio数据，使用Base64编码。</p></td></tr></tbody></table></section><section id="466bb9b860bya" class="section"><h2 id="5244e1dbc9vw6"><b>response.content_part.done</b></h2><p id="e0abe94745f9b">当新的内容项输出完成时，服务端返回此事件。</p><table bordertype="no-border" id="1cb0f94a64j7u" outputclass="api-reference column-layout" tablewidth="100" tablecolswidth="57.55 42.45" autofit="true" class="api-reference column-layout table"><colgroup colwidth="1.15*" style="width:57.55%"></colgroup><colgroup colwidth="0.85*" style="width:42.45%"></colgroup><tbody class="tbody"><tr id="b5278a82f3jv9" outputclass="test" class="test"><td id="1aa5c1a86cp66" rowspan="1" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><p id="efda246acekhg"><b>event_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="359562e501uqs">服务端事件ID。</p></td><td id="4a351bf883no6" rowspan="7" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><section id="ae3ffb99cegcx" outputclass="stick-top" class="stick-top section"><pre code-type="xCode" id="2db1aed056mbc" index="0" data-tag="codeblock" outputclass="language-json" class="pre codeblock language-json"><code>{
+  "event_id": "event_Vo2YUjlYQJ4colH8nVzkU",
+  "type": "response.content_part.done",
+  "response_id": "resp_USvBwHktHcz76r6GaIJUV",
+  "item_id": "item_FIrYGaNVK3rbIZqeY4QjM",
+  "output_index": 0,
+  "content_index": 0,
+  "part": {
+    "type": "audio",
+    "text": ""
+  }
+}</code></pre></section><p id="08ebadb4292hx"></p></td></tr><tr id="9cf2c4cfe17hf"><td id="8db3a6ccebwy0" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="b972b72cc9ccr"><b>type </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="b34d39944dwpo">事件类型，固定为<code data-tag="code" id="a1511ea965oi7" class="code">response.content_part.done</code>。</p></td></tr><tr id="234bc0bd485bp"><td id="405540b642rp5" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="6560547e36tq7"><b>response_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="a567e93cb8toy">响应的ID。</p></td></tr><tr id="5b912fb57bm8f"><td id="b6f5e037cdxaw" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="f589b1f81dl1c"><b>item_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="08715997736hg">消息项ID。</p></td></tr><tr id="a42ba77ea8vag"><td id="ad41f7c706173" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="62f981df5790x"><b>output_index </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>integer</i></code></p><p id="2dce1642cc8mx">响应输出项的索引，目前固定为0。</p></td></tr><tr id="623ad7b017u9f"><td id="817b5a299fvy4" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="5878c47a94oiq"><b>content_index </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>integer</i></code></p><p id="dd1586f2ed2lq">响应输出项中内部部分的索引，目前固定为0。</p></td></tr><tr id="61abfa8619yeu"><td id="14b20618a32er" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="40f12066362g7"><b>part </b><code data-tag="code" code-type="xCode" id="77fe9787eb6tm" data-init-id="cbc03347aakj0" class="code"><i>object</i></code></p><p id="e70b62609efdz">已完成的内容部分。</p><div id="af0ac32fd5hf8" outputclass="collapse expanded" class="collapse expanded"><p id="f93fb3f950szk" data-tag="expandable-title" class="expandable-title"><b>属性</b></p><div id="4ac3cb30537a0" data-tag="expandable-content" class="expandable-content"><section id="b41eb76807fgh" class="section"><p id="a0020eca2dlgx"><b>type </b><code data-tag="code" code-type="xCode" id="a7fff0a5b86yd" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="e69ace8b09iv5">内容部分的类型。</p></section><section id="76cdb3c2d849c" class="section"><p id="dd7367de87k6u"><b>text </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="56b636bece7zm" style="text-align:left">内容部分的文本。</p></section></div></div></td></tr></tbody></table></section><section id="69735f570dw05" class="section"><h2 id="a922404106vzd"><b>response.output_item.done</b></h2><p id="8f5562f1ccbp3">当新的item输出完成时，服务端返回此事件。</p><table bordertype="no-border" id="d06729df43mx4" outputclass="api-reference column-layout" tablewidth="100" tablecolswidth="57.55 42.45" autofit="true" class="api-reference column-layout table"><colgroup colwidth="1.15*" style="width:57.55%"></colgroup><colgroup colwidth="0.85*" style="width:42.45%"></colgroup><tbody class="tbody"><tr id="5b5967bfe9tce" outputclass="test" class="test"><td id="20e8e6b4f5ix7" rowspan="1" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><p id="2325943b5f5ou"><b>event_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="e41af5ac1aolx">服务端事件ID。</p></td><td id="4a5dc1f6c4iq5" rowspan="5" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><section id="10db04806du3c" outputclass="stick-top" class="stick-top section"><pre code-type="xCode" id="720b2710ffajs" index="0" data-tag="codeblock" outputclass="language-json" class="pre codeblock language-json"><code>{
+  "event_id": "event_LO6SJRKIQ9NBayyYB8a1A",
+  "type": "response.output_item.done",
+  "response_id": "resp_USvBwHktHcz76r6GaIJUV",
+  "output_index": 0,
+  "item": {
+    "id": "item_FIrYGaNVK3rbIZqeY4QjM",
+    "object": "realtime.item",
+    "type": "message",
+    "status": "completed",
+    "role": "assistant",
+    "content": [
+      {
+        "type": "audio",
+        "text": ""
+      }
+    ]
+  }
+}</code></pre></section><p id="6e0685e8c6kqb"></p></td></tr><tr id="7b73b42eecdov"><td id="9ff29ef723f4y" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="ab0c355b5cior"><b>type </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="9b9c6b8a2bz1e">事件类型，固定为<code data-tag="code" id="a1511ea965oi7" class="code">response.output_item.done</code>。</p></td></tr><tr id="a1082012ab3jw"><td id="8659d216b57tg" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="f24fe74809bso"><b>response_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="6ccece8584a1c">响应的ID。</p></td></tr><tr id="91fe81b75cbpd"><td id="858b938db9fe5" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="be21fc99cd71y"><b>output_index </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>integer</i></code></p><p id="d9853cdf27437">响应输出项的索引，目前固定为0。</p></td></tr><tr id="6aede9f753ubd"><td id="e2cde94c85cu4" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="7bcf4b05315z2"><b>item </b><code data-tag="code" code-type="xCode" id="77fe9787eb6tm" data-init-id="cbc03347aakj0" class="code"><i>object</i></code></p><p id="57c9803340e6t">输出项信息。</p><div id="a4719e30a3ifb" outputclass="collapse expanded" class="collapse expanded"><p id="8035b8bb35gwf" data-tag="expandable-title" class="expandable-title"><b>属性</b></p><div id="c0f0e6515020z" data-tag="expandable-content" class="expandable-content"><section id="24aba68ad8lg3" class="section"><p id="3b4cb95ed488c"><b>id </b><code data-tag="code" code-type="xCode" id="a7fff0a5b86yd" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="2222bc62adkox">输出项ID。</p></section><section id="b373d7805cbav" class="section"><p id="12b973ef9f1ji"><b>object </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="d28ee25468xt3" style="text-align:left">始终为&nbsp;<code data-tag="code" uuid="mcbv4jr7kl93h6g14s" id="1eef00dadexu5" class="code">realtime.item</code>。</p></section><section id="414fa704856xq" class="section"><p id="2383c8284dbq0"><b>status </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="66af99a02bp6r" style="text-align:left">输出项的状态。</p></section><section id="dfb1c62f38l7z" class="section"><p id="7a9695db3f4oc"><b>content </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>array</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="aa88cce3706jw" style="text-align:left">消息的内容。</p></section></div></div></td></tr></tbody></table></section><section id="d8c7a9ebbax23" class="section"><h2 id="faa3f9bc106tj"><b>response.audio.done</b></h2><p id="bef74a8160kna">当模型生成audio数据完成时，系统会返回服务器 response.audio.done 事件。</p><table bordertype="no-border" id="48c3a556eax1q" outputclass="api-reference column-layout" tablewidth="100" tablecolswidth="57.55 42.45" autofit="true" class="api-reference column-layout table"><colgroup colwidth="1.15*" style="width:57.55%"></colgroup><colgroup colwidth="0.85*" style="width:42.45%"></colgroup><tbody class="tbody"><tr id="70152cdf55qw8" outputclass="test" class="test"><td id="7c716d531f5vo" rowspan="1" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><p id="d707db48d9fg3"><b>event_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="7e2dfa6658cge">服务端事件ID。</p></td><td id="c41b1ac9c3cfj" rowspan="6" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><section id="45bc73e6988bi" outputclass="stick-top" class="stick-top section"><pre code-type="xCode" id="db37132a62kmm" index="0" data-tag="codeblock" outputclass="language-json" class="pre codeblock language-json"><code>{
+  "event_id": "event_LZaOHPzXYMUXGBcVkBmKX",
+  "type": "response.audio.done",
+  "response_id": "resp_USvBwHktHcz76r6GaIJUV",
+  "item_id": "item_FIrYGaNVK3rbIZqeY4QjM",
+  "output_index": 0,
+  "content_index": 0
+}</code></pre></section><p id="b048e6b454xxf"></p></td></tr><tr id="911be9f503ki0"><td id="e1878ccde37l0" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="268ca33b925cw"><b>type </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="0de6e3eb71tz6">事件类型，固定为<code data-tag="code" id="a1511ea965oi7" class="code">response.audio.done</code>。</p></td></tr><tr id="bd8419c399x74"><td id="843108868b1zl" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="5b215cc7bb7c3"><b>response_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="de6c85f23ftlj">响应的ID。</p></td></tr><tr id="65d6be702eo6j"><td id="a9c1dae537r4e" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="cfc553cde97wm"><b>item_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="40485574daiwt">消息项ID。</p></td></tr><tr id="273563019ajf3"><td id="4b3107511bp4e" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="41871d30b1o9s"><b>output_index </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>integer</i></code></p><p id="85f3b437c252j">响应输出项的索引，目前固定为0。</p></td></tr><tr id="a8fa5c4093vfw"><td id="09b11f24d8i7a" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="910ec64a4byd2"><b>content_index </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>integer</i></code></p><p id="7bc8b7515bhtv">响应输出项中内部部分的索引，目前固定为0。</p></td></tr></tbody></table></section><section id="a7ef502fa8lz9" class="section"><h2 id="91f767e7440pc"><b>response.done</b></h2><p id="a84b9530b8xo7">当响应生成完成时，服务端会返回此事件。该事件中包含的 Response 对象将包含 Response 中的所有输出项，但不包括已返回的原始音频数据。</p><table bordertype="no-border" id="2d6092b053bin" outputclass="api-reference column-layout" tablewidth="100" tablecolswidth="57.55 42.45" autofit="true" class="api-reference column-layout table"><colgroup colwidth="1.15*" style="width:57.55%"></colgroup><colgroup colwidth="0.85*" style="width:42.45%"></colgroup><tbody class="tbody"><tr id="a9e73d1cdbno8" outputclass="test" class="test"><td id="1fdb69d8b70qi" rowspan="1" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><p id="0d86ad9852ybu"><b>event_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="4c01a99fb0vwi">服务端事件ID。</p></td><td id="e6a2e45c03ryp" rowspan="4" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><section id="ec28f2fffdb5q" outputclass="stick-top" class="stick-top section"><section id="88208e7e1e9us" data-tag="tabbed-content-box" outputclass="tabbed-content-box" class="tabbed-content-box section"><section id="6cb0117440st0" class="section"><h2 id="7d409e241dmoj">Qwen3-TTS Realtime</h2><pre code-type="xCode" id="923f5b3c47efx" index="0" data-tag="codeblock" outputclass="language-json" class="pre codeblock language-json"><code>{
+    "event_id": "event_Aemy83XqHFFDDSeJIDn6N",
+    "type": "response.done",
+    "response": {
+        "id": "resp_LFeR42yXZ9SxUAeXjmyTz",
+        "object": "realtime.response",
+        "conversation_id": "",
+        "status": "completed",
+        "modalities": [
+            "text",
+            "audio"
+        ],
+        "voice": "Cherry",
+        "output": [
+            {
+                "id": "item_Ae1lv2XmRljRSG96L8Zm1",
+                "object": "realtime.item",
+                "type": "message",
+                "status": "completed",
+                "role": "assistant",
+                "content": [
+                    {
+                        "type": "audio",
+                        "transcript": ""
+                    }
+                ]
+            }
+        ],
+        "usage": {
+            "characters": 25
+        }
+    }
+}</code></pre></section><section id="b94ef9868cisj" class="section"><h2 id="1f44fff115qb4">Qwen-TTS Realtime</h2><pre code-type="xCode" id="a2c99b38c98ym" index="0" data-tag="codeblock" outputclass="language-json" class="pre codeblock language-json"><code>{
+  "event_id": "event_xxx",
+  "type": "response.done",
+  "response": {
+    "id": "resp_xxx",
+    "object": "realtime.response",
+    "conversation_id": "",
+    "status": "completed",
+    "modalities": [
+      "text",
+      "audio"
+    ],
+    "voice": "Cherry",
+    "output": [
+      {
+        "id": "item_FIrYGaNVK3rbIZqeY4QjM",
+        "object": "realtime.item",
+        "type": "message",
+        "status": "completed",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "audio",
+            "transcript": ""
+          }
+        ]
+      }
+    ],
+    "usage": {
+      "total_tokens": 67,
+      "input_tokens": 3,
+      "output_tokens": 64,
+      "input_tokens_details": {
+        "text_tokens": 3
+      },
+      "output_tokens_details": {
+        "text_tokens": 0,
+        "audio_tokens": 64
+      }
+    }
+  }
+}</code></pre></section></section></section><p id="b83f44ac04yu1"></p></td></tr><tr id="55e3d4880d2m0"><td id="20c96444763zx" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="56664814c5myq"><b>type </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="a98c4aa7a6ybg">事件类型，固定为<code data-tag="code" id="a1511ea965oi7" class="code">response.done</code>。</p></td></tr><tr id="463f6ed033yq6"><td id="98258dd075w0m" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="52f1962e16odi"><b>response_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="c745dc28e3rux">响应的ID。</p></td></tr><tr id="e4f0374ba6kni"><td id="e6e881f811k65" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="92bf728881zil"><b>response </b><code data-tag="code" code-type="xCode" id="77fe9787eb6tm" data-init-id="cbc03347aakj0" class="code"><i>object</i></code></p><p id="f2bc232eabdcc">响应详情。</p><div id="c09d60d96ar7p" outputclass="collapse expanded" class="collapse expanded"><p id="87159d23b00o9" data-tag="expandable-title" class="expandable-title"><b>属性</b></p><div id="5d1aeb33046ak" data-tag="expandable-content" class="expandable-content"><section id="00446289b32nm" class="section"><p id="5bb9081e09cqs"><b>id </b><code data-tag="code" code-type="xCode" id="a7fff0a5b86yd" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="190d83fe582m2">响应ID。</p></section><section id="072a572e78rmv" class="section"><p id="6ce5c15d8cj6l"><b>object </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>string</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="6dda518b96siu" style="text-align:left">对象类型，在此事件下固定为<code data-tag="code" uuid="mcbv316p8otvytis0ns" id="41bea3fa44gfw" class="code">realtime.response</code>。</p></section><section id="3174b470bdn54" class="section"><p id="41f834b5depy0"><b>output </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>array</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="5164754700imz" style="text-align:left">响应的输出。</p></section><section id="448153d0ce80m" class="section"><p id="156262ba10m9c"><b>usage </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>object</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="5357c59a85l6p" style="text-align:left">本次语音合成计费信息。</p><div id="537a53ecc45on" outputclass="collapse expanded" class="collapse expanded"><p id="1c8c65931apf4" data-tag="expandable-title" class="expandable-title"><b>属性</b></p><div id="932322d441s8y" data-tag="expandable-content" class="expandable-content"><section id="2970f804d5h2k" class="section"><p id="363d162737xso"><b>characters </b><code data-tag="code" code-type="xCode" id="a7fff0a5b86yd" data-init-id="cbc03347aakj0" class="code"><i>integer</i></code></p><p id="9d1c935b0bz8f">Qwen3-TTS Realtime计费字符数。</p></section><section id="fe757101e08n9" class="section"><p id="dcdcb628ffqdu"><b>total_tokens</b><b> </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>integer</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="f340b020d8o01" style="text-align:left">Qwen-TTS Realtime输入和输出（合成的音频）内容总长度（Token）。</p></section><section id="3e4e27ac56b2t" class="section"><p id="8edd8a10b6kt3"><b>input_tokens</b><b> </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>integer</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="77bef21fef2ps" style="text-align:left">Qwen-TTS Realtime输入内容总长度（Token）。</p></section><section id="825032d5fd92z" class="section"><p id="a2e60b4acbjbw"><b>output_tokens</b><b> </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>integer</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="08c96d6eb7zxw" style="text-align:left">Qwen-TTS Realtime输出内容总长度（Token）。</p></section><section id="e9b9ca4f7bxxn" class="section"><p id="632d655041l8m"><b>input_tokens_details</b><b> </b><code data-tag="code" code-type="xCode" id="a7fff0a5b86yd" data-init-id="cbc03347aakj0" class="code"><i>integer</i></code></p><p id="63837fb3f7nyg">Qwen-TTS Realtime输入内容长度（Token）详情。</p></section><section id="551f5f844a1rs" class="section"><p id="8ebf5a00e3y77"><b>input_tokens_details.text_tokens</b><b> </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>integer</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="1381a65f81dxc" style="text-align:left">Qwen-TTS Realtime输入文本内容总长度（Token）。</p></section><section id="154b31467bbvn" class="section"><p id="e8344a11c2okg"><b>output_tokens_details</b><b> </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>integer</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="63713bb55bsil" style="text-align:left">Qwen-TTS Realtime输出内容长度（Token）详情。</p></section><section id="a22a495abc0w6" class="section"><p id="6ad18f74b8xm7"><b>output_tokens_details.text_tokens</b><b> </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>integer</i></code></p><p jc="left" uuid="m95147brql0uecf9l49" id="d4f3ccfa3cbdc" style="text-align:left">Qwen-TTS Realtime输出文本内容总长度（Token）。</p></section><section id="a15103a173njg" class="section"><p id="ff8d7eaeaeo8j"><b>output_tokens_details.audio_tokens</b><b> </b><code data-tag="code" code-type="xCode" id="1d8377cb0cdlw" data-init-id="cbc03347aakj0" class="code"><i>integer</i></code></p><p jc="left" id="12cf8b64a73no" style="text-align:left">Qwen-TTS Realtime输出音频内容总长度（Token）。</p><p jc="left" id="e90ead73c6azd" style="text-align:left">音频转换为 Token 的规则：每1秒的音频对应 50个 Token 。若音频时长不足1秒，则按 50个 Token 计算。</p></section></div></div></section></div></div></td></tr></tbody></table></section><section id="898ac0348fxvc" class="section"><h2 id="ac332f7d78oxg"><b>session.finished</b></h2><p id="ebea228aba0wr">当所有响应生成完成时，服务端会返回此事件。</p><table bordertype="no-border" id="2feebaa8444zd" outputclass="api-reference column-layout" tablewidth="100" tablecolswidth="57.55 42.45" autofit="true" class="api-reference column-layout table"><colgroup colwidth="1.15*" style="width:57.55%"></colgroup><colgroup colwidth="0.85*" style="width:42.45%"></colgroup><tbody class="tbody"><tr id="3a12b6c301sdr" outputclass="test" class="test"><td id="63a43b422bu8y" rowspan="1" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><p id="a5c6f67e797fv"><b>event_id </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="5c83f0254cd0v">服务端事件ID。</p></td><td id="4d7033693bmpe" rowspan="2" style="background-color:rgba(0, 0, 0, 0);vertical-align:top" colspan="1"><section id="66aabca0a7i0x" outputclass="stick-top" class="stick-top section"><pre code-type="xCode" id="f4b6c26101yxz" index="0" data-tag="codeblock" outputclass="language-json" class="pre codeblock language-json"><code>{
+  "event_id": "event_2239",
+  "type": "session.finished"
+}</code></pre></section><p id="0b3cc3f794okg"></p></td></tr><tr id="da8253423eovz"><td id="2925733140tlc" rowspan="1" style="background-color:rgba(0, 0, 0, 0)" colspan="1"><p id="1c5a7f01631af"><b>type </b><code data-tag="code" code-type="xCode" id="cbc03347aakj0" class="code"><i>string</i></code></p><p id="0a6f894d7abxc">事件类型，固定为<code data-tag="code" id="a1511ea965oi7" class="code">session.finished</code>。</p></td></tr></tbody></table></section><p id="910bf636ccxqh"></p><p id="304b2fe8aej3d"></p>
+  <style>
+/* 支持吸顶 */
+div:has(.aliyun-docs-content),
+.aliyun-docs-content .markdown-body {
+  overflow: visible;
+}
+.stick-top {
+  position: sticky;
+  top: 46px;
+}
+</style>
+ <style>
+.aliyun-docs-content .one-codeblocks pre {
+  max-height: calc(80vh - 136px) !important;
+  height: auto;
+}
+</style><style>
+.tab-item {
+  font-size: 12px !important; /* 你可以根据需要调整字体大小 */
+  padding: 0px 5px !important;
+}
+</style><style>
+.expandable-content {
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+}
+</style><section id="e4559a1f58er5" data-ref-searchable="yes" data-source="reuse_library" is-conref="true" class="section">
+  <style>
+/* 调整 table 宽度 */
+.aliyun-docs-content table.medium-width {
+  max-width: 1018px;
+  width: 100%;
+}
+
+.aliyun-docs-content table.table-no-border tr td:first-child {
+  padding-left: 0;
+}
+
+.aliyun-docs-content table.table-no-border tr td:last-child {
+  padding-right: 0;
+}
+</style>
+ 
+  <style>
+/* 支持吸顶 */
+div:has(.aliyun-docs-content),
+.aliyun-docs-content .markdown-body {
+  overflow: visible;
+}
+.stick-top {
+  position: sticky;
+  top: 46px;
+}
+</style>
+ 
+  <style>
+/**代码块字体**/
+
+/* 减少表格中的代码块 margin，让表格信息显示更紧凑 */
+.unionContainer .markdown-body table .help-code-block  {
+  margin: 0 !important;
+}
+/* 减少表格中的代码块字号，让表格信息显示更紧凑 */
+.unionContainer .markdown-body .help-code-block pre {
+  font-size: 12px !important;
+}
+/* 减少表格中的代码块字号，让表格信息显示更紧凑 */
+.unionContainer .markdown-body .help-code-block pre code {
+  font-size: 12px !important;
+}
+</style>
+ 
+  <style>
+
+/** API Reference 表格 **/
+
+.aliyun-docs-content table.api-reference tr td:first-child {
+  margin: 0px;
+  border-bottom: 1px solid #d8d8d8;
+}
+
+.aliyun-docs-content table.api-reference tr:last-child td:first-child {  
+  border-bottom: none;
+}
+
+.aliyun-docs-content table.api-reference p {
+  color: #6e6e80;
+}
+
+.aliyun-docs-content table.api-reference b, i {
+  color: #181818;
+}
+
+.aliyun-docs-content table.api-reference .collapse {
+  border: none;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.aliyun-docs-content table.api-reference .collapse .expandable-title-bold {
+  padding: 0;
+}
+
+.aliyun-docs-content table.api-reference .collapse .expandable-title {
+  padding: 0;
+}
+
+.aliyun-docs-content table.api-reference .collapse .expandable-title-bold .title {
+  margin-left: 16px;
+}
+
+.aliyun-docs-content table.api-reference .collapse .expandable-title .title {
+  margin-left: 16px;
+}
+
+.aliyun-docs-content table.api-reference .collapse .expandable-title-bold i.icon {
+  position: absolute;
+  color: #777;
+  font-weight: 100;
+}
+
+.aliyun-docs-content table.api-reference .collapse .expandable-title i.icon {
+  position: absolute;
+  color: #777;
+  font-weight: 100;
+}
+
+.aliyun-docs-content table.api-reference .collapse.expanded .expandable-content {
+  padding: 10px 14px 10px 14px !important;
+  margin: 0;
+  border: 1px solid #e9e9e9;
+}
+
+.aliyun-docs-content table.api-reference .collapse .expandable-title-bold b {
+  font-size: 13px;
+  font-weight: normal;
+  color: #6e6e80;
+}
+
+.aliyun-docs-content table.api-reference .collapse .expandable-title b {
+  font-size: 13px;
+  font-weight: normal;
+  color: #6e6e80;
+}
+
+.aliyun-docs-content table.api-reference .tabbed-content-box {
+  border: none;
+}
+
+.aliyun-docs-content table.api-reference .tabbed-content-box section {
+  padding: 8px 0 !important;
+}
+
+.aliyun-docs-content table.api-reference .tabbed-content-box.mini .tab-box {
+  /*
+  position: absolute;
+  left: 40px;
+  right: 0;
+  */
+}
+
+.aliyun-docs-content .margin-top-33 {
+  margin-top: 33px !important;
+}
+
+.aliyun-docs-content .two-codeblocks pre {
+  max-height: calc(50vh - 136px) !important;
+  height: auto;
+}
+
+.expandable-content section {
+    border-bottom: 1px solid #e9e9e9;
+    padding-top: 6px;
+    padding-bottom: 4px;
+}
+
+.expandable-content section:last-child {
+    border-bottom: none;
+}
+
+.expandable-content section:first-child {
+    padding-top: 0;
+}
+
+</style>
+ </section></div></main>
+
+</div></div>
+ <a href="/zh/model-studio/qwen-tts-realtime-client-events" title="客户端事件"
+>上一篇: 客户端事件</a
+>
+ <a href="/zh/model-studio/qwen-tts-realtime-python-sdk" title="Python SDK"
+>下一篇: Python SDK</a
+>
+ </div>
+</div>
+<div class="help-footer-recommend"></div>
+</section>
+<div
+class="aliyun-docs-synopsis"
+id="aliyun-docs-synopsis"
+></div>
+</div>
+</section>
+</div>
+</div>
+</div>
+ <div class="aliyun-app-layout">
+<!-- seo -->
+<a href="https://www.aliyun.com/">阿里云首页</a>
+<a href="https://www.aliyun.com/product/bailian" title="大模型服务平台百炼">大模型服务平台百炼</a>
+<a href="https://developer.aliyun.com/modelstudio/" title="相关技术圈">相关技术圈</a>
+</div>
+ </div>
+ <script>
+var _performance_domEnd = window.performance && window.performance.now();
+</script>
+<footer><div id="c128e122f505853933ddf03e4f5a1b67"><div class="_18a32969382a277c44015217fbc5cb5a_box"><footer class="_49ada0cd752f65901c49f2eed0d6c3d5_container" aria-label="PC 端页尾"><div class="_49ada0cd752f65901c49f2eed0d6c3d5_inner"><div class="b34f022d45e42bd104ce1362bc0808b1_services"><nav class="b34f022d45e42bd104ce1362bc0808b1_homepage-footer-main-services" aria-label="页脚导航"><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">为什么选择阿里云</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/about/what-is-cloud-computing" target="_blank">什么是云计算</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://infrastructure.aliyun.com/" target="_blank">全球基础设施</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/why-us/leading-technology" target="_blank">技术领先</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/why-us/reliability" target="_blank">稳定可靠</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/why-us/security-compliance" target="_blank">安全合规</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/analyst-reports" target="_blank">分析师报告</a></section><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">大模型</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/product/tongyi" target="_blank">通义大模型</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://bailian.console.aliyun.com/?tab=model#/model-market" target="_blank" rel="nofollow">大模型服务</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://bailian.console.aliyun.com/app-center?tab=app#/app-center" target="_blank" rel="nofollow">AI应用构建</a></section><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">产品和定价</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/product/list" target="_blank">全部产品</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://free.aliyun.com/" target="_blank">免费试用</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/product/news/" target="_blank">产品动态</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/price/detail" target="_blank">产品定价</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/price/cpq/list" target="_blank">配置报价器</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/price/cost-management" target="_blank">云上成本管理</a></section><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">技术内容</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/solution/tech-solution" target="_blank">技术解决方案</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://help.aliyun.com/" target="_blank">帮助文档</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://developer.aliyun.com/" target="_blank">开发者社区</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://tianchi.aliyun.com/" target="_blank">天池大赛</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://edu.aliyun.com/" target="_blank">阿里云认证</a></section><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">权益</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://free.aliyun.com/" target="_blank">免费试用</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/solution/free" target="_blank">解决方案免费试用</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://university.aliyun.com/" target="_blank">高校计划</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/benefit/form/index" target="_blank">5亿算力补贴</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://dashi.aliyun.com/?ambRef=shouYeDaoHang2&amp;pageCode=yunparterIndex" target="_blank">推荐返现计划</a></section><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">服务</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/service" target="_blank">基础服务</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/service/supportplans" target="_blank">企业增值服务</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/service/devopsimpl/devopsimpl_cloudmigration_public_cn" target="_blank">迁云服务</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/notice/" target="_blank">官网公告</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://status.aliyun.com/" target="_blank">健康看板</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://security.aliyun.com/trust-center" target="_blank">信任中心</a></section></nav><article class="_7b44142961778903dda8af3f769cd06c_focus"><h3 class="_7b44142961778903dda8af3f769cd06c_ali-main-services-title">关注阿里云</h3><p class="_7b44142961778903dda8af3f769cd06c_ali-main-services-desc">关注阿里云公众号或下载阿里云APP，关注云资讯，随时随地运维管控云服务</p><img alt="阿里云APP" src="https://img.alicdn.com/imgextra/i4/O1CN01XLesV31fkf7pYNATb_!!6000000004045-2-tps-400-400.png" class="_7b44142961778903dda8af3f769cd06c_ali-official-code" loading="lazy"/><img alt="阿里云微信" src="https://img.alicdn.com/tfs/TB1AOdINW6qK1RjSZFmXXX0PFXa-258-258.jpg" class="_7b44142961778903dda8af3f769cd06c_ali-official-code" loading="lazy"/><p class="_7b44142961778903dda8af3f769cd06c_consult-text">联系我们：4008013260</p></article></div><div class="_4598709a854bea355ceb6ef9f23f10d4_about-link-wrap"><a href="https://help.aliyun.com/product/67275.html" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">法律声明</a><a href="https://terms.alicdn.com/legal-agreement/terms/platform_service/20220906101446934/20220906101446934.html" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">Cookies政策</a><a href="https://aliyun.jubao.alibaba.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">廉正举报</a><a href="https://report.aliyun.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">安全举报</a><a href="https://www.aliyun.com/contact" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">联系我们</a><a href="https://careers.aliyun.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">加入我们</a></div><section class="_4598709a854bea355ceb6ef9f23f10d4_friend-link-wrap"><h3 hidden="">友情链接</h3><a href="https://www.alibabagroup.com/cn/global/home" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">阿里巴巴集团</a><a href="https://www.taobao.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">淘宝网</a><a href="https://www.tmall.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">天猫</a><a href="https://www.aliexpress.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">全球速卖通</a><a href="https://www.alibaba.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">阿里巴巴国际交易市场</a><a href="https://www.1688.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">1688</a><a href="https://www.alimama.com/index.htm" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">阿里妈妈</a><a href="https://www.fliggy.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">飞猪</a><a href="https://www.aliyun.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">阿里云计算</a><a href="https://wanwang.aliyun.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">万网</a><a href="https://mobile.amap.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">高德</a><a href="https://www.uc.cn/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">UC</a><a href="https://www.umeng.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">友盟</a><a href="https://www.youku.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">优酷</a><a href="https://www.dingtalk.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">钉钉</a><a href="https://www.alipay.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">支付宝</a><a href="https://damo.alibaba.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">达摩院</a><a href="https://world.taobao.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">淘宝海外</a><a href="https://www.aliyundrive.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">阿里云盘</a><a href="https://www.ele.me/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">淘宝闪购</a></section><p class="_4598709a854bea355ceb6ef9f23f10d4_ali-copyright-text">© 2009-现在 Aliyun.com 版权所有 增值电信业务经营许可证： <a href="http://beian.miit.gov.cn/" target="_blank">浙B2-20080101</a> 域名注册服务机构许可： <a href="https://domain.miit.gov.cn/域名注册服务机构/互联网域名/阿里云计算有限公司 " target="_blank">浙D3-20210002</a></p><p class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-wrap"><a href="https://zzlz.gsxt.gov.cn/businessCheck/verifKey.do?showType=p&amp;serial=91330106673959654P-SAIC_SHOW_10000091330106673959654P1710919400712&amp;signData=MEUCIQDEkCd8cK7%2Fyqe6BNMWvoMPtAnsgKa7FZetfPkjZMsvhAIgOX1G9YC6FKyndE7o7hL0KaBVn4f%20V%2Fiof3iAgpsV09o%3D" target="_blank" class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-link"><img src="//gw.alicdn.com/tfs/TB1GxwdSXXXXXa.aXXXXXXXXXXX-65-70.gif" class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-img" alt="" loading="lazy"/></a><a href="http://www.beian.gov.cn/portal/registerSystemInfo" target="_blank" class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-link"><img src="//img.alicdn.com/tfs/TB1..50QpXXXXX7XpXXXXXXXXXX-40-40.png" class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-img" alt="浙公网安备 33010602009975号" loading="lazy"/><span class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-link-text">浙公网安备 33010602009975号</span></a><a href="https://beian.miit.gov.cn/" target="_blank" class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-link"><span class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-link-text _4598709a854bea355ceb6ef9f23f10d4_ali-report-link-text-unique">浙B2-20080101-4</span></a></p></div></footer><footer class="_4b41e3343c851a7a8833c9165b249eb2_container" aria-label="移动端页尾"></footer></div></div></footer>
+
+<script>
+if (_performance_domEnd <= 10000) {
+// pcp上报
+window.ALIYUN_PERF && window.ALIYUN_PERF.report();
+window.ALIYUN_PERF &&
+window.ALIYUN_PERF.getPCP().then((rst) => {
+// pcp埋点
+var data = {
+product: "help.aliyun.com", // 站点
+ua: navigator.userAgent, // ua
+device: "pc", // 设备
+page: "document", // 页面
+lang: window.globalData.language || "zh", //站点语言
+cna: "", // 用户标识
+url: window.location.href,
+action: "pcp",
+userParams1: rst || 0,
+};
+let queryStr = Object.keys(data)
+.map(
+(key) =>
+data[key] &&
+`${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`,
+)
+.join("&");
+fetch(
+"https://help-new.cn-wulanchabu.log.aliyuncs.com/logstores/web-tracking/track?APIVersion=0.6.0&" +
+queryStr,
+);
+});
+}
+// fastLogin标记
+window.FastLoginContext = {
+tenantName: "help-aliyun-com-portal",
+};
+</script>
+<script
+crossorigin
+src="https://g.alicdn.com/code/lib/??react/16.8.6/umd/react.production.min.js,react-dom/16.8.6/umd/react-dom.production.min.js"
+></script>
+<script
+src="https://g.alicdn.com/code/lib/lodash.js/4.17.21/lodash.min.js"
+crossorigin="anonymous"
+></script>
+<script
+async
+src="https://g.alicdn.com/aliyun-help/help-portal-fe/0.12.38/js/vendor.js"
+></script>
+<script
+async
+src="https://g.alicdn.com/aliyun-help/help-portal-fe/0.12.38/js/index.js"
+></script>
+<script
+async
+src="//g.alicdn.com/dawn/assets-loader/scripts/fast-login.js?tenantName=help-aliyun-com-portal"
+></script>
+<script defer src="https://cloud-assets.alicdn.com/website.js"></script>
+<script src="https://g.alicdn.com/code/npm/@ali/??biu-loader/0.1.2/index.js,hmod-preact/0.0.1/index.js,hmod-preact-hooks/0.0.1/index.js,hmod-preact-compat/0.0.1/index.js,hmod-preact-bridge/0.1.4/index.js,hmod-ace-service-loader/0.1.1/index.js"></script>
+<script src="https://g.alicdn.com/aliyun-com/lowcode-engine/0.1.73/renderer/build/js/index.js"></script>
+<script src="https://g.alicdn.com/code/npm/@ali??hmod-ace-2023-box/0.1.0/index.js,hmod-aliyun-com-floating-toolbar/0.2.4/index.js,hmod-aliyun-com-global-nav-search/0.7.15/index.js,hmod-aliyun-com-global-nav/0.3.3/index.js"></script>
+<script src="https://cloud-assets.alicdn.com/lowcode/entry/prod/770f73a3c0ad6ce7da74e547d5948415.js"></script>
+<script src="https://g.alicdn.com/code/npm/@ali??hmod-ace-2023-box/0.1.0/index.js,hmod-ace-2024-global-footer/0.1.2/index.js,hmod-lowcode-normal-page/0.1.0/index.js"></script>
+<script src="https://cloud-assets.alicdn.com/lowcode/entry/prod/c128e122f505853933ddf03e4f5a1b67.js"></script>
+<script src="https://cloud-assets.alicdn.com/website.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,260 @@
+
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="nav-disable" content="flex" />
+ <link
+rel="icon"
+href="https://img.alicdn.com/imgextra/i2/O1CN01TFs5Qw27uYvfA6gib_!!6000000007857-55-tps-32-32.svg"
+type="image/x-icon"
+/>
+ <!-- 搜索引擎icon -->
+<link
+rel="apple-touch-icon"
+href="https://img.alicdn.com/imgextra/i1/O1CN01BEqugB1KebzCRyIJl_!!6000000001189-55-tps-48-48.svg"
+/>
+ <script type="application/ld+json">
+{
+"@context": "https://schema.org",
+"@type": "Organization",
+"name": "阿里云计算",
+"url": "https://help.aliyun.com/zh/model-studio/install-sdk",
+"logo": "https://img.alicdn.com/imgextra/i1/O1CN01BEqugB1KebzCRyIJl_!!6000000001189-55-tps-48-48.svg"
+}
+</script>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="renderer" content="webkit" />
+<meta http-equiv="x-ua-compatible" content="ie=edge,chrome=1" />
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"
+/>
+<meta name="applicable-device" content="pc,mobile" />
+<meta name="data-spm" content="a2c4g" />
+<meta name="aplus-core" content="aplus.js" />
+<meta name="aplus-ajax" content="chksum" />
+<meta name="aplus-waiting" content="MAN" />
+<meta name="aplus-pvhash" content="1" />
+<!-- 基础资源 -->
+ <title>安装阿里云百炼SDK-大模型服务平台百炼(Model Studio)-阿里云帮助中心</title>
+ <link rel="canonical" href="https://help.aliyun.com/zh/model-studio/install-sdk" />
+ <meta name="keywords" content="阿里云百炼,安装SDK" />
+ <meta name="description" content="您可以使用阿里云百炼官方的 DashScope SDK（支持 Python 和 Java），也可以通过 OpenAI 官方提供的多语言 SDK（如 Python、Node.js、Java、Go）来调用阿里云百炼的 OpenAI 兼容接口。" />
+ <meta name="last-modified" content="2026-02-11T15:21:25+08:00" />
+ <meta name="date" content="2024-03-16T12:33:44+08:00" />
+ <meta property="og:title" content="安装SDK" />
+ <meta property="og:type" content="website" />
+ <meta property="og:url" content="https://help.aliyun.com/zh/model-studio/install-sdk" />
+ <meta property="og:image" content="https://img.alicdn.com/imgextra/i1/O1CN012QgtoH1c1Mu70xD3w_!!6000000003540-2-tps-640-640.png" />
+ <meta property="og:description" content="您可以使用阿里云百炼官方的 DashScope SDK（支持 Python 和 Java），也可以通过 OpenAI 官方提供的多语言 SDK（如 Python、Node.js、Java、Go）来调用阿里云百炼的 OpenAI 兼容接口。" />
+
+<link
+href="https://g.alicdn.com/aliyun-help/help-portal-fe/0.12.38/css/index.css"
+rel="stylesheet"
+/>
+<script>
+window.globalData = {
+website: "cn",
+language: "zh",
+nodeId: "2712193",
+};
+window.resourceBaseUrl =
+"https://g.alicdn.com/aliyun-help/help-portal-fe/0.12.38/";
+// UT的全局配置变量，在CDN加载前配置
+window.$ACE_TRACKER_CONFIG = {
+enableHistory: true,
+enableHash: false,
+};
+</script>
+<link href="https://g.alicdn.com/code/npm/@ali??hmod-ace-2023-box/0.1.0/index.css,hmod-aliyun-com-global-nav-search/0.7.15/index.css,hmod-aliyun-com-global-nav/0.3.3/index.css" rel="stylesheet"/>
+<link href="https://g.alicdn.com/code/npm/@ali??hmod-ace-2023-box/0.1.0/index.css,hmod-ace-2024-global-footer/0.1.2/index.css" rel="stylesheet"/>
+</head>
+<body><script>
+with(document)with(body)with(insertBefore(createElement("script"),firstChild))setAttribute("exparams","category=&userid=&aplus&yunid=&&trid=213e057117740914608526816e8e3a&asid=AQAAAADEfL5pv1RtMQAAAACegucvmGGjMA==",id="tb-beacon-aplus",src=(location>"https"?"//g":"//g")+".alicdn.com/alilog/mlog/aplus_v2.js")
+</script>
+
+<script>
+var _performance_domStart =
+window.performance && window.performance.now();
+</script>
+<header><div id="770f73a3c0ad6ce7da74e547d5948415"><div class="_18a32969382a277c44015217fbc5cb5a_box"><div class="c97dc5fe8c8f69b0e60edf6a1f709489_pc de5ef2fee09ebcb2b1dcaf0c982523bc_theme bdac01e7d42089a1161e0315c2a68512_reset" data-ai-assistant-text-selection-tooltip="disabled"><header class="b62a767265ae40ce4e5e07aa2336b1be_container   "><button class="_17fcaf1a4ee37405e5ad5fbad24204b4_container _17fcaf1a4ee37405e5ad5fbad24204b4_loading" aria-label="打开菜单" data-spm="d_dashboard_trigger" data-tracker-exp="true"><span class="_17fcaf1a4ee37405e5ad5fbad24204b4_burger "><span class="_17fcaf1a4ee37405e5ad5fbad24204b4_middle"></span></span></button><a href="https://www.aliyun.com/" class="_3f46140aade30bc61f3012933357c477_logo b62a767265ae40ce4e5e07aa2336b1be_logo" data-tracker-content="LOGO" data-spm="d_logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4608 1024" fill="#ff6a00" width="80"><path d="M3266.56 773.12h327.68v-102.4h-327.68v-102.4H3584V35.84H2846.72v532.48h317.44v102.4h-327.68v102.4h327.68v112.64h-353.28v102.4h814.08v-102.4h-353.28v-112.64zM3276.8 138.24h215.04v112.64H3276.8V138.24z m0 215.04h215.04V460.8H3276.8V353.28zM3174.4 460.8h-215.04V353.28H3174.4V460.8z m0-209.92h-215.04V138.24H3174.4v112.64zM537.6 445.44H1075.2v122.88H537.6z"></path><path d="M1341.44 5.12h-353.28L1075.2 128l256 81.92c46.08 15.36 76.8 61.44 76.8 107.52v389.12c0 46.08-30.72 92.16-76.8 107.52l-256 81.92-87.04 122.88h353.28c148.48 0 266.24-117.76 266.24-266.24V276.48c0-148.48-117.76-271.36-266.24-271.36zM276.48 814.08c-46.08-15.36-76.8-61.44-76.8-107.52V317.44c0-46.08 30.72-92.16 76.8-107.52l256-81.92L619.52 5.12H266.24C117.76 5.12 0 128 0 276.48v471.04c0 148.48 117.76 266.24 266.24 266.24h353.28l-87.04-122.88-256-76.8zM2493.44 250.88h-261.12v537.6h261.12V250.88z m-107.52 430.08h-56.32V353.28h56.32v327.68zM1848.32 988.16h102.4V138.24h107.52L1996.8 419.84v102.4h61.44v225.28c0 15.36-10.24 25.6-25.6 25.6h-25.6v102.4h51.2c56.32 0 102.4-46.08 102.4-102.4v-358.4H2099.2l61.44-281.6v-102.4h-312.32v957.44z"></path><path d="M2206.72 138.24H2560v660.48c0 46.08-35.84 87.04-87.04 87.04h-76.8v102.4h107.52c87.04 0 163.84-71.68 163.84-163.84V138.24h35.84v-102.4h-496.64v102.4zM3763.2 40.96h737.28v102.4H3763.2zM4541.44 527.36v-102.4H3727.36v102.4h204.8l-163.84 358.4v102.4h691.2c30.72 0 51.2-25.6 51.2-51.2 0-10.24 0-15.36-5.12-20.48l-87.04-194.56h-112.64l76.8 163.84h-496.64l163.84-358.4h491.52z"></path></svg></a><div class="e76910c82efe8556eb8a6ce6019c5d00_container"><button class="e76910c82efe8556eb8a6ce6019c5d00_controller" data-spm="dscroll-left"><i class="ee52067fb65534cb06d3b35f654f5441_icon ddd10ed9ffa4788f54781e516c4c6560-button_left"></i></button><div class="e76910c82efe8556eb8a6ce6019c5d00_menu-warp"><nav class="_0b0e00051b37611378e027e6ac3a695a_menus"><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/product/tongyi" data-spm="d_menu_0">大模型</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/product/list" data-spm="d_menu_1">产品</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/solution/tech-solution/" data-spm="d_menu_2">解决方案</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/benefit" data-spm="d_menu_3">权益</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/price" data-spm="d_menu_4">定价</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://market.aliyun.com/" data-spm="d_menu_5">云市场</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://partner.aliyun.com/management/v2" data-spm="d_menu_6">伙伴</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/service" data-spm="d_menu_7">服务</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/about" data-spm="d_menu_8">了解阿里云</a></nav></div><button class="e76910c82efe8556eb8a6ce6019c5d00_controller" data-spm="dscroll-right"><i class="ee52067fb65534cb06d3b35f654f5441_icon ddd10ed9ffa4788f54781e516c4c6560-button_right"></i></button></div><div class="b62a767265ae40ce4e5e07aa2336b1be_search-wrap "><div class="global-nav-search _626567c051250ffe2f303af907d3fc83_global-nav-search"><div class="global-search-container _626567c051250ffe2f303af907d3fc83_global-nav-search-desktop-container"><div class="ff4f4a96a12f52ffbdd0d6adbdb6a2b0_position-desktop-search-container"><div><div class="f6fd7e4d3293f0634b9ac54848c275b7_default-search-panel  f6fd7e4d3293f0634b9ac54848c275b7_hidden-default-search-panel"></div><div class="_3b4f5487091623b0b6852e2b46d2729e_search-recommend-panel  _3b4f5487091623b0b6852e2b46d2729e_hidden-search-recommend-panel"><button class="_4b65cdd64479a2fabe582b8c0789821e_search-no-content " type="button"><div>查看 “</div><div class="_4b65cdd64479a2fabe582b8c0789821e_search-word"></div><div>” 全部搜索结果</div></button></div></div></div></div><div class="_626567c051250ffe2f303af907d3fc83_global-nav-search-mobile-container"><a class="_626567c051250ffe2f303af907d3fc83_search-button" href="https://www.aliyun.com/search?from=h5-global-nav-search"><span role="img" class="_9a1d73bbcd1a80626a31035a12410804_icon _626567c051250ffe2f303af907d3fc83_search-button-icon"><svg width="1em" height="1em" viewBox="0 0 32 32" focusable="false" color="currentColor" fill="currentColor" class="" data-icon="search"><g fill-rule="evenodd" stroke-width="1"><path d="M14,4 C15.3558127,4 16.653362,4.26210485 17.8926477,4.78631455 C19.0891275,5.29241739 20.1485621,6.00666269 21.0709515,6.92905045 C21.9933389,7.8514363 22.7075837,8.91087023 23.213686,10.1073523 C23.7378953,11.3466396 24,12.6441889 24,14 C24,15.3558159 23.737896,16.6533658 23.2136879,17.8926497 C22.838225,18.7802852 22.3482024,19.5924969 21.7436199,20.3292847 L27.7071819,26.2928467 L26.2929688,27.7070599 L20.3294201,21.7435112 C19.592603,22.3481382 18.7803456,22.8381971 17.8926477,23.2136879 C16.6533607,23.737896 15.3558114,24 14,24 C12.6441879,24 11.3466384,23.737896 10.1073513,23.2136879 C8.91087246,22.7075844 7.85143844,21.9933383 6.92904925,21.0709496 C6.00666173,20.1485621 5.29241653,19.0891282 4.78631365,17.8926477 C4.26210455,16.6533613 4,15.3558121 4,14 C4,12.6441879 4.26210451,11.3466388 4.78631353,10.1073527 C5.29241594,8.91087262 6.00666118,7.85143844 6.92904925,6.92905021 C7.85143812,6.00666118 8.91087198,5.2924157 10.1073508,4.78631377 C11.3466366,4.26210459 12.6441863,4 14,4 Z M14,6 C11.7910172,6 9.90543811,6.78108788 8.34326267,8.34326363 C6.78108756,9.90543874 6,11.7910175 6,14 C6,16.2089825 6.78108756,18.0945616 8.34326267,19.6567373 C9.90543779,21.2189124 11.7910169,22 14,22 C16.2089844,22 18.0945635,21.2189128 19.6567373,19.6567383 C21.2189124,18.0945644 22,16.208985 22,14 C22,11.7910175 21.2189124,9.9054389 19.6567373,8.3432641 C18.0945622,6.78108803 16.2089831,6 14,6 Z"></path></g></svg></span></a></div></div></div><div class="_4af07273271b80d6f43a7fc0a40e8124_container"><a class="_4af07273271b80d6f43a7fc0a40e8124_item _2d3ef330b3f8055912d355b9a255bfcf_btn global-nav-ai-assistant" href="https://www.aliyun.com/ai-assistant?displayMode=side" data-spm="dai_assistant" target="_blank"><div class="LogoStyled-aliyun-ai-assistant-rc-8096__sc-1qusfpt-0 cpJKij"><div class="ai-assistant-brand-logo-icon" style="background:no-repeat center/100%  url(https://img.alicdn.com/imgextra/i4/O1CN012X1Rxl1clAgB5waMK_!!6000000003640-2-tps-52-52.png)"><img src="https://img.alicdn.com/imgextra/i2/O1CN01bYc1m81RrcSAyOjMu_!!6000000002165-54-tps-60-60.apng" loading="lazy"/></div><div class="ai-assistant-brand-logo-tooltip "><div class="ai-assistant-logo-tooltip-content">AI 助理</div></div></div></a><button class="_4af07273271b80d6f43a7fc0a40e8124_item bb3dbc2de557f9f2029f50770c77fab9_button"><i class="ee52067fb65534cb06d3b35f654f5441_icon ddd10ed9ffa4788f54781e516c4c6560-intl"></i></button><button class="_4af07273271b80d6f43a7fc0a40e8124_item"><i class="ee52067fb65534cb06d3b35f654f5441_icon ddd10ed9ffa4788f54781e516c4c6560-contact d42d5e3a0d0e018547c66700af2a2030_icon"></i></button><a class="_4af07273271b80d6f43a7fc0a40e8124_item" href="https://help.aliyun.com/" target="_blank" data-spm="d_quick_access_3">文档</a><a class="_4af07273271b80d6f43a7fc0a40e8124_item" href="https://beian.aliyun.com/" target="_blank" data-spm="d_quick_access_4">备案</a><a class="_4af07273271b80d6f43a7fc0a40e8124_item" href="https://home.console.aliyun.com/home/dashboard/ProductAndService" target="_blank" data-spm="d_quick_access_5" rel="nofollow">控制台</a><span class="_05da28cf18b2b6ee04dbfd3ceb5ad3c9_loading _4af07273271b80d6f43a7fc0a40e8124_item"></span></div></header></div><div class="c97dc5fe8c8f69b0e60edf6a1f709489_mobile de5ef2fee09ebcb2b1dcaf0c982523bc_theme bdac01e7d42089a1161e0315c2a68512_reset"></div><div class="_18a32969382a277c44015217fbc5cb5a_box"></div></div></div></header>
+
+ <div id="app">
+<div class="main-layout" id="docs-container" style="opacity:0;">
+<div class="help-body-head"></div>
+<div class="stick-top-layout">
+<div class="help-layout">
+<nav class="aliyun-docs-toc" id="aliyun-docs-toc"></nav>
+<section class="aliyun-docs-view" id="aliyun-docs-view">
+<div class="product-detail">
+<section class="aliyun-docs-content">
+<header class="aliyun-docs-view-header">
+<div class="header-topbar">
+ <div class="header-topbar-breadcrumb">
+ <span><a href="https://help.aliyun.com/">首页</a></span>
+ <span><a href="/zh/model-studio/">大模型服务平台百炼</a></span>
+ <span><a href="/zh/model-studio/model-api-reference/">API参考（模型）</a></span>
+ <span><a href="/zh/model-studio/preparations/">准备工作</a></span>
+ <span>安装SDK</span>
+ </div>
+ </div>
+<div class="header-title">
+ <h1>安装SDK</h1>
+ <div class="header-actionbar">
+<span class="update-time">更新时间: 2026-02-11 15:21:25</span>
+</div>
+ </div>
+</header>
+<div
+class="pc-markdown-container unionContainer"
+id="pc-markdown-container"
+>
+<!-- 内容 -->
+<div class="markdown-body">
+ <div><div lang="zh" class="icms-help-docs-content">
+<main id="main-2613997"><p id="75741d2f0078v" data-tag="shortdesc" class="shortdesc">您可以使用阿里云百炼官方的 DashScope SDK（支持 Python 和 Java），也可以通过 OpenAI 官方提供的多语言 SDK（如 Python、Node.js、Java、Go）来调用阿里云百炼的 OpenAI 兼容接口。</p><div data-tag="body" class="body"><section id="0c4d002e002d0" class="section"><h2 id="75aa2ffbb2afo"><b>安装SDK</b></h2><section id="d2793c81ebbzg" data-tag="tabbed-content-box" outputclass="tabbed-content-box" class="tabbed-content-box section"><section id="2717cbc957c5c" class="section"><h2 id="fc13cdc36d040">Python</h2><p id="471fd3460fpez">需要<code data-tag="code" id="c9e0ca27cfjla" class="code">python &gt;= 3.8</code>。</p><div id="eeca87ce52gka" data-tag="expandable-content" docid="4925941" is-conref="true" class="expandable-content">
+                  <p id="0d9662e032f4t">您可以通过OpenAI的Python SDK或DashScope的Python SDK来调用阿里云百炼平台上的模型。</p>
+                  <section id="e119241cc4apr" data-tag="tabbed-content-box" outputclass="tabbed-content-box" class="tabbed-content-box section">
+                    <section id="16d09af0c1e26" class="section">
+                      <h3 id="301a07a9159yy">安装 OpenAI Python SDK</h3>
+                      <p id="3c36500417656">通过运行以下命令安装或升级 OpenAI Python SDK：</p><pre code-type="xCode" id="1150c34df2z0d" data-tag="codeblock" outputclass="language-bash" class="pre codeblock language-bash"><code># 如果运行失败，您可以将pip替换成pip3再运行
+pip install -U openai</code></pre>
+                      <p id="f7d5ad72f6oow"><img id="0af401ffcfbxm" src="https://help-static-aliyun-doc.aliyuncs.com/assets/img/zh-CN/0405879371/p917092.png" alt="image" placement="break" class="image break"></p>
+                      <p id="6f2284a336vs7">当终端出现<code data-tag="code" id="d7189e6c7do0b" class="code">Successfully installed ... openai-x.x.x</code>的提示后，表示您已经成功安装OpenAI Python SDK。</p>
+                    </section>
+                    <section id="5a27e4b221zh2" class="section">
+                      <h3 id="f80a232bb24v7">安装 DashScope Python SDK</h3>
+                      <p id="3ec4d2df6b8fk">通过运行以下命令安装或升级 DashScope Python SDK：</p><pre code-type="xCode" id="95fb2b1b7a0i5" data-tag="codeblock" outputclass="language-bash" class="pre codeblock language-bash"><code># 如果运行失败，您可以将pip替换成pip3再运行
+pip install -U dashscope</code></pre>
+                      <p id="4f464f8a32ezy"><img id="3b988a7c7ctmb" src="https://help-static-aliyun-doc.aliyuncs.com/assets/img/zh-CN/0405879371/p917093.png" alt="image" placement="break" class="image break"></p>
+                      <p id="5f5baa4ecd9vs">当终端出现<code data-tag="code" id="79a954083c5ur" class="code">Successfully installed ... dashscope-x.x.x</code>的提示后，表示您已经成功安装DashScope Python SDK。</p>
+                    </section>
+                  </section>
+                </div></section><section id="a84f7fede2xj1" class="section"><h2 id="351a991edb6nm">Java</h2><section id="dd0808f54bsh9" data-tag="tabbed-content-box" outputclass="tabbed-content-box" class="tabbed-content-box section"><section id="bfc43db29cepa" class="section"><h2 id="3caa9875bfjxw">DashScope</h2><p id="124b95501fovt">在项目中添加 <a class="" href="https://mvnrepository.com/artifact/com.alibaba/dashscope-sdk-java" id="41ebe5555cwhr">DashScope Java SDK</a> 依赖，并将 <code data-tag="code" class="code blog-code" code-type="xCode" id="a495d3bfe8m3k">the-latest-version</code> 替换为最新的版本号。</p><h3 tabindex="-1" class="heading-element" dir="auto" id="2a4ae7065aqql"><b>Gradle</b></h3><pre code-type="xCode" id="3c2ef4d45beh7" index="0" data-tag="codeblock" outputclass="language-gradle" class="pre codeblock language-gradle"><code>dependencies {
+    implementation group: 'com.alibaba', name: 'dashscope-sdk-java', version: 'the-latest-version'
+}</code></pre><h3 tabindex="-1" class="heading-element" dir="auto" id="388a11b5c1ws1"><b>Maven</b></h3><pre code-type="xCode" id="682754c0e5u5v" index="0" data-tag="codeblock" outputclass="language-xml" class="pre codeblock language-xml"><code>&lt;dependency&gt;
+    &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+    &lt;artifactId&gt;dashscope-sdk-java&lt;/artifactId&gt;
+    &lt;version&gt;the-latest-version&lt;/version&gt;
+&lt;/dependency&gt;</code></pre></section><section id="8ab3ace2f6j70" class="section"><h2 id="be3b5a1dedmw2">OpenAI</h2><p id="f7a3c02f71dnq">在项目中添加 <a class="" href="https://github.com/openai/openai-java?tab=readme-ov-file#openai-java-api-library" id="be05a160a3xr7">OpenAI Java SDK</a> 依赖，并将 <code data-tag="code" class="code blog-code" code-type="xCode" id="da1d10a90868d" data-init-id="a495d3bfe8m3k">the-latest-version</code> 替换为最新的版本号。（推荐设置为<code data-tag="code" id="313471a5eekse" class="code">3.5.0</code>）</p><p id="10ae52a2edh81">需要<code data-tag="code" id="797fe63bbe9c5" data-init-id="c9e0ca27cfjla" class="code">Java8 或更高版本</code>。</p><h3 tabindex="-1" class="heading-element" dir="auto" id="aabcb504d1u08"><b>Gradle</b></h3><pre code-type="xCode" id="fab1d1ff35umf" index="0" data-tag="codeblock" outputclass="language-gradle" class="pre codeblock language-gradle"><code>dependencies {
+    implementation("com.openai:openai-java:the-latest-version")
+}</code></pre><h3 tabindex="-1" class="heading-element" dir="auto" id="2d04e8a81bsn1"><b>Maven</b></h3><pre code-type="xCode" id="e47a8ddb8buni" index="0" data-tag="codeblock" outputclass="language-xml" class="pre codeblock language-xml"><code>&lt;dependency&gt;
+  &lt;groupId&gt;com.openai&lt;/groupId&gt;
+  &lt;artifactId&gt;openai-java&lt;/artifactId&gt;
+  &lt;version&gt;the-latest-version&lt;/version&gt;
+&lt;/dependency&gt;</code></pre></section></section></section><section id="9d97997701rtq" class="section"><h2 id="77db53c233mol">Node.js</h2><section id="ec74e2f897afj" data-tag="tabbed-content-box" outputclass="tabbed-content-box" class="tabbed-content-box section"><section id="fc95f6aeb95ll" class="section"><h2 id="fdfa6e9ba201i">OpenAI</h2><div id="0f029c29e8c9s" data-tag="expandable-content" docid="4925941" is-conref="true" class="expandable-content">
+                  <p id="250539cae7ay0">您可以在终端运行以下命令：</p><pre id="0a54550eb7o4f" code-type="xCode" data-tag="codeblock" outputclass="language-shell" class="pre codeblock language-shell"><code>npm install --save openai
+# 或者
+yarn add openai</code></pre>
+                  <div id="7d26710d6eqbz" type="note" class="note note-note"><div class="note-icon-wrapper"><i class="icon-note note note"></i></div><div class="noteContentSpan"><strong>说明 </strong>
+                    <p id="3740e86653e7v">如果安装失败，您可以通过配置镜像源的方法来完成安装，如：</p><pre code-type="xCode" id="4d2fd228d995i" data-tag="codeblock" outputclass="language-shell" class="pre codeblock language-shell"><code>npm config set registry https://registry.npmmirror.com/</code></pre>
+                    <p id="d4d8d76643zow">配置镜像源后，您可以重新运行安装SDK的命令。</p>
+                  </div></div>
+                  <p id="dd33e61202l28"><img id="18d541b0e7zg2" src="https://help-static-aliyun-doc.aliyuncs.com/assets/img/zh-CN/0405879371/p917106.png" alt="image" placement="break" class="image break"></p>
+                  <p id="b23edc368dfib">当终端出现<code data-tag="code" id="ead80039e5kbw" class="code">added xx package in xxs</code>的提示后，表示您已经成功安装OpenAI SDK。您可以使用<code data-tag="code" id="bd1a199447ht0" class="code">npm list openai</code>查询具体版本信息。</p>
+                </div></section></section></section><section id="fe5ab4be4e5c6" class="section"><h2 id="7cb6e35fe435b">Go</h2><section id="8256e2d8bacm7" data-tag="tabbed-content-box" outputclass="tabbed-content-box" class="tabbed-content-box section"><section id="c1b0835eb4285" class="section"><h2 id="8af1c185c152g">OpenAI</h2><p id="f6c6ec0584zjh">OpenAI 提供了<a class="" href="https://github.com/openai/openai-go#openai-go-api-library" id="9f8e63fbc8xnj">Go 语言的 SDK</a>（需要 <code data-tag="code" id="bc449734149gk" class="code">Go 1.22+</code>），您可以在项目目录下通过以下命令来安装：</p><pre code-type="xCode" id="fa06d1dbe7865" index="0" data-tag="codeblock" outputclass="language-go" class="pre codeblock language-go"><code>go get 'github.com/openai/openai-go/v3'</code></pre><p id="3db57b0e15zle">或者设置固定的版本进行安装：</p><pre code-type="xCode" id="25a4d3cda2vdz" index="0" data-tag="codeblock" outputclass="language-go" class="pre codeblock language-go"><code>go get -u 'github.com/openai/openai-go/v3@v3.8.1'</code></pre><blockquote id="38f59114971ps">如访问服务器超时，可设置阿里云镜像代理：<code data-tag="code" id="0d68ecfb79zg1" class="code">go env -w GOPROXY=https://mirrors.aliyun.com/goproxy/,direct</code></blockquote><p id="0fdd4b26af5no">在代码中使用以下命令进行导入：</p><pre code-type="xCode" id="9bf7edad97m1o" data-tag="codeblock" outputclass="language-bash" index="0" class="pre codeblock language-bash"><code>import (
+	"github.com/openai/openai-go/v3" // imported as openai
+)</code></pre></section></section></section></section></section><section id="1d2281f6d0inh" class="section"><h2 jc="left" data-line="732" class="code-line" dir="auto" id="%E5%90%8E%E7%BB%AD%E6%AD%A5%E9%AA%A4" style="text-align:left"><b>后续步骤</b></h2><p jc="left" id="85830c48112lp" style="text-align:left">成功完成 SDK 的安装后，您可以：</p><ul data-line="735" class="code-line" dir="auto" id="dc5ddaa279qf0"><li data-line="735" class="code-line" dir="auto" id="1fbd2ca1f4g2a"><p id="2f28d77d97hk1">查阅&nbsp;<a href="https://help.aliyun.com/zh/model-studio/models" id="5498836504eoh" title="" class="xref">模型列表</a>选择适合您业务场景的模型。</p></li><li data-line="736" class="code-line" dir="auto" id="037ea9f8aajt6"><p id="462645739b1me">使用<a href="https://help.aliyun.com/zh/model-studio/qwen-api-reference/" id="ef64165f77mut" title="" class="xref">文本生成模型</a>、<a href="https://help.aliyun.com/zh/model-studio/text-to-image-v2-api-reference" id="798423cead3pm" title="" class="xref">图像生成模型</a>、<a href="https://help.aliyun.com/zh/model-studio/image-to-video-api-reference/" id="7c626d9e6ea8n" title="" class="xref">视频生成模型</a>、<a href="https://help.aliyun.com/zh/model-studio/cosyvoice-python-sdk" id="9162165a3bbat" title="" class="xref">语音合成模型</a>、<a href="https://help.aliyun.com/zh/model-studio/paraformer-real-time-speech-recognition-python-sdk" id="7ca302e5f7pdn" title="" class="xref">语音识别模型</a>、<a href="https://help.aliyun.com/zh/model-studio/text-embedding-synchronous-api" id="b512148b40eyk" title="" class="xref">向量模型</a>、<a href="https://help.aliyun.com/zh/model-studio/text-rerank-api" id="50138d3b86li2" title="" class="xref">排序模型</a>开始构建您的应用。</p></li><li data-line="737" class="code-line" dir="auto" id="f2937c3dadghj"><p id="68a7b3a7fdvxm">了解&nbsp;<a href="https://help.aliyun.com/zh/model-studio/compatibility-of-openai-with-dashscope" id="b5b0e4199e6k9" title="" class="xref">与 OpenAI API 的兼容性详情</a>。</p></li></ul></section><p id="a8780751e48oe"></p></div></main>
+
+</div></div>
+ <a href="/zh/model-studio/configure-api-key-through-environment-variables" title="配置API Key到环境变量"
+>上一篇: 配置API Key到环境变量</a
+>
+ <a href="/zh/model-studio/chat/" title="对话"
+>下一篇: 对话</a
+>
+ </div>
+</div>
+<div class="help-footer-recommend"></div>
+</section>
+<div
+class="aliyun-docs-synopsis"
+id="aliyun-docs-synopsis"
+></div>
+</div>
+</section>
+</div>
+</div>
+</div>
+ <div class="aliyun-app-layout">
+<!-- seo -->
+<a href="https://www.aliyun.com/">阿里云首页</a>
+<a href="https://www.aliyun.com/product/bailian" title="大模型服务平台百炼">大模型服务平台百炼</a>
+<a href="https://developer.aliyun.com/modelstudio/" title="相关技术圈">相关技术圈</a>
+</div>
+ </div>
+ <script>
+var _performance_domEnd = window.performance && window.performance.now();
+</script>
+<footer><div id="c128e122f505853933ddf03e4f5a1b67"><div class="_18a32969382a277c44015217fbc5cb5a_box"><footer class="_49ada0cd752f65901c49f2eed0d6c3d5_container" aria-label="PC 端页尾"><div class="_49ada0cd752f65901c49f2eed0d6c3d5_inner"><div class="b34f022d45e42bd104ce1362bc0808b1_services"><nav class="b34f022d45e42bd104ce1362bc0808b1_homepage-footer-main-services" aria-label="页脚导航"><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">为什么选择阿里云</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/about/what-is-cloud-computing" target="_blank">什么是云计算</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://infrastructure.aliyun.com/" target="_blank">全球基础设施</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/why-us/leading-technology" target="_blank">技术领先</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/why-us/reliability" target="_blank">稳定可靠</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/why-us/security-compliance" target="_blank">安全合规</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/analyst-reports" target="_blank">分析师报告</a></section><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">大模型</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/product/tongyi" target="_blank">通义大模型</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://bailian.console.aliyun.com/?tab=model#/model-market" target="_blank" rel="nofollow">大模型服务</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://bailian.console.aliyun.com/app-center?tab=app#/app-center" target="_blank" rel="nofollow">AI应用构建</a></section><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">产品和定价</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/product/list" target="_blank">全部产品</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://free.aliyun.com/" target="_blank">免费试用</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/product/news/" target="_blank">产品动态</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/price/detail" target="_blank">产品定价</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/price/cpq/list" target="_blank">配置报价器</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/price/cost-management" target="_blank">云上成本管理</a></section><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">技术内容</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/solution/tech-solution" target="_blank">技术解决方案</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://help.aliyun.com/" target="_blank">帮助文档</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://developer.aliyun.com/" target="_blank">开发者社区</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://tianchi.aliyun.com/" target="_blank">天池大赛</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://edu.aliyun.com/" target="_blank">阿里云认证</a></section><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">权益</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://free.aliyun.com/" target="_blank">免费试用</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/solution/free" target="_blank">解决方案免费试用</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://university.aliyun.com/" target="_blank">高校计划</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/benefit/form/index" target="_blank">5亿算力补贴</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://dashi.aliyun.com/?ambRef=shouYeDaoHang2&amp;pageCode=yunparterIndex" target="_blank">推荐返现计划</a></section><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">服务</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/service" target="_blank">基础服务</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/service/supportplans" target="_blank">企业增值服务</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/service/devopsimpl/devopsimpl_cloudmigration_public_cn" target="_blank">迁云服务</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/notice/" target="_blank">官网公告</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://status.aliyun.com/" target="_blank">健康看板</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://security.aliyun.com/trust-center" target="_blank">信任中心</a></section></nav><article class="_7b44142961778903dda8af3f769cd06c_focus"><h3 class="_7b44142961778903dda8af3f769cd06c_ali-main-services-title">关注阿里云</h3><p class="_7b44142961778903dda8af3f769cd06c_ali-main-services-desc">关注阿里云公众号或下载阿里云APP，关注云资讯，随时随地运维管控云服务</p><img alt="阿里云APP" src="https://img.alicdn.com/imgextra/i4/O1CN01XLesV31fkf7pYNATb_!!6000000004045-2-tps-400-400.png" class="_7b44142961778903dda8af3f769cd06c_ali-official-code" loading="lazy"/><img alt="阿里云微信" src="https://img.alicdn.com/tfs/TB1AOdINW6qK1RjSZFmXXX0PFXa-258-258.jpg" class="_7b44142961778903dda8af3f769cd06c_ali-official-code" loading="lazy"/><p class="_7b44142961778903dda8af3f769cd06c_consult-text">联系我们：4008013260</p></article></div><div class="_4598709a854bea355ceb6ef9f23f10d4_about-link-wrap"><a href="https://help.aliyun.com/product/67275.html" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">法律声明</a><a href="https://terms.alicdn.com/legal-agreement/terms/platform_service/20220906101446934/20220906101446934.html" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">Cookies政策</a><a href="https://aliyun.jubao.alibaba.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">廉正举报</a><a href="https://report.aliyun.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">安全举报</a><a href="https://www.aliyun.com/contact" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">联系我们</a><a href="https://careers.aliyun.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">加入我们</a></div><section class="_4598709a854bea355ceb6ef9f23f10d4_friend-link-wrap"><h3 hidden="">友情链接</h3><a href="https://www.alibabagroup.com/cn/global/home" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">阿里巴巴集团</a><a href="https://www.taobao.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">淘宝网</a><a href="https://www.tmall.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">天猫</a><a href="https://www.aliexpress.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">全球速卖通</a><a href="https://www.alibaba.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">阿里巴巴国际交易市场</a><a href="https://www.1688.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">1688</a><a href="https://www.alimama.com/index.htm" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">阿里妈妈</a><a href="https://www.fliggy.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">飞猪</a><a href="https://www.aliyun.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">阿里云计算</a><a href="https://wanwang.aliyun.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">万网</a><a href="https://mobile.amap.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">高德</a><a href="https://www.uc.cn/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">UC</a><a href="https://www.umeng.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">友盟</a><a href="https://www.youku.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">优酷</a><a href="https://www.dingtalk.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">钉钉</a><a href="https://www.alipay.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">支付宝</a><a href="https://damo.alibaba.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">达摩院</a><a href="https://world.taobao.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">淘宝海外</a><a href="https://www.aliyundrive.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">阿里云盘</a><a href="https://www.ele.me/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">淘宝闪购</a></section><p class="_4598709a854bea355ceb6ef9f23f10d4_ali-copyright-text">© 2009-现在 Aliyun.com 版权所有 增值电信业务经营许可证： <a href="http://beian.miit.gov.cn/" target="_blank">浙B2-20080101</a> 域名注册服务机构许可： <a href="https://domain.miit.gov.cn/域名注册服务机构/互联网域名/阿里云计算有限公司 " target="_blank">浙D3-20210002</a></p><p class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-wrap"><a href="https://zzlz.gsxt.gov.cn/businessCheck/verifKey.do?showType=p&amp;serial=91330106673959654P-SAIC_SHOW_10000091330106673959654P1710919400712&amp;signData=MEUCIQDEkCd8cK7%2Fyqe6BNMWvoMPtAnsgKa7FZetfPkjZMsvhAIgOX1G9YC6FKyndE7o7hL0KaBVn4f%20V%2Fiof3iAgpsV09o%3D" target="_blank" class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-link"><img src="//gw.alicdn.com/tfs/TB1GxwdSXXXXXa.aXXXXXXXXXXX-65-70.gif" class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-img" alt="" loading="lazy"/></a><a href="http://www.beian.gov.cn/portal/registerSystemInfo" target="_blank" class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-link"><img src="//img.alicdn.com/tfs/TB1..50QpXXXXX7XpXXXXXXXXXX-40-40.png" class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-img" alt="浙公网安备 33010602009975号" loading="lazy"/><span class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-link-text">浙公网安备 33010602009975号</span></a><a href="https://beian.miit.gov.cn/" target="_blank" class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-link"><span class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-link-text _4598709a854bea355ceb6ef9f23f10d4_ali-report-link-text-unique">浙B2-20080101-4</span></a></p></div></footer><footer class="_4b41e3343c851a7a8833c9165b249eb2_container" aria-label="移动端页尾"></footer></div></div></footer>
+
+<script>
+if (_performance_domEnd <= 10000) {
+// pcp上报
+window.ALIYUN_PERF && window.ALIYUN_PERF.report();
+window.ALIYUN_PERF &&
+window.ALIYUN_PERF.getPCP().then((rst) => {
+// pcp埋点
+var data = {
+product: "help.aliyun.com", // 站点
+ua: navigator.userAgent, // ua
+device: "pc", // 设备
+page: "document", // 页面
+lang: window.globalData.language || "zh", //站点语言
+cna: "", // 用户标识
+url: window.location.href,
+action: "pcp",
+userParams1: rst || 0,
+};
+let queryStr = Object.keys(data)
+.map(
+(key) =>
+data[key] &&
+`${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`,
+)
+.join("&");
+fetch(
+"https://help-new.cn-wulanchabu.log.aliyuncs.com/logstores/web-tracking/track?APIVersion=0.6.0&" +
+queryStr,
+);
+});
+}
+// fastLogin标记
+window.FastLoginContext = {
+tenantName: "help-aliyun-com-portal",
+};
+</script>
+<script
+crossorigin
+src="https://g.alicdn.com/code/lib/??react/16.8.6/umd/react.production.min.js,react-dom/16.8.6/umd/react-dom.production.min.js"
+></script>
+<script
+src="https://g.alicdn.com/code/lib/lodash.js/4.17.21/lodash.min.js"
+crossorigin="anonymous"
+></script>
+<script
+async
+src="https://g.alicdn.com/aliyun-help/help-portal-fe/0.12.38/js/vendor.js"
+></script>
+<script
+async
+src="https://g.alicdn.com/aliyun-help/help-portal-fe/0.12.38/js/index.js"
+></script>
+<script
+async
+src="//g.alicdn.com/dawn/assets-loader/scripts/fast-login.js?tenantName=help-aliyun-com-portal"
+></script>
+<script defer src="https://cloud-assets.alicdn.com/website.js"></script>
+<script src="https://g.alicdn.com/code/npm/@ali/??biu-loader/0.1.2/index.js,hmod-preact/0.0.1/index.js,hmod-preact-hooks/0.0.1/index.js,hmod-preact-compat/0.0.1/index.js,hmod-preact-bridge/0.1.4/index.js,hmod-ace-service-loader/0.1.1/index.js"></script>
+<script src="https://g.alicdn.com/aliyun-com/lowcode-engine/0.1.73/renderer/build/js/index.js"></script>
+<script src="https://g.alicdn.com/code/npm/@ali??hmod-ace-2023-box/0.1.0/index.js,hmod-aliyun-com-floating-toolbar/0.2.4/index.js,hmod-aliyun-com-global-nav-search/0.7.15/index.js,hmod-aliyun-com-global-nav/0.3.3/index.js"></script>
+<script src="https://cloud-assets.alicdn.com/lowcode/entry/prod/770f73a3c0ad6ce7da74e547d5948415.js"></script>
+<script src="https://g.alicdn.com/code/npm/@ali??hmod-ace-2023-box/0.1.0/index.js,hmod-ace-2024-global-footer/0.1.2/index.js,hmod-lowcode-normal-page/0.1.0/index.js"></script>
+<script src="https://cloud-assets.alicdn.com/lowcode/entry/prod/c128e122f505853933ddf03e4f5a1b67.js"></script>
+<script src="https://cloud-assets.alicdn.com/website.js"></script>
+</body>
+</html>
+

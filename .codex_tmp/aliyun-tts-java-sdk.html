@@ -1,0 +1,859 @@
+
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="nav-disable" content="flex" />
+ <link
+rel="icon"
+href="https://img.alicdn.com/imgextra/i2/O1CN01TFs5Qw27uYvfA6gib_!!6000000007857-55-tps-32-32.svg"
+type="image/x-icon"
+/>
+ <!-- 搜索引擎icon -->
+<link
+rel="apple-touch-icon"
+href="https://img.alicdn.com/imgextra/i1/O1CN01BEqugB1KebzCRyIJl_!!6000000001189-55-tps-48-48.svg"
+/>
+ <script type="application/ld+json">
+{
+"@context": "https://schema.org",
+"@type": "Organization",
+"name": "阿里云计算",
+"url": "https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-java-sdk",
+"logo": "https://img.alicdn.com/imgextra/i1/O1CN01BEqugB1KebzCRyIJl_!!6000000001189-55-tps-48-48.svg"
+}
+</script>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="renderer" content="webkit" />
+<meta http-equiv="x-ua-compatible" content="ie=edge,chrome=1" />
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"
+/>
+<meta name="applicable-device" content="pc,mobile" />
+<meta name="data-spm" content="a2c4g" />
+<meta name="aplus-core" content="aplus.js" />
+<meta name="aplus-ajax" content="chksum" />
+<meta name="aplus-waiting" content="MAN" />
+<meta name="aplus-pvhash" content="1" />
+<!-- 基础资源 -->
+ <title>使用Java SDK调用通义千问实现实时语音合成-大模型服务平台百炼-阿里云-大模型服务平台百炼(Model Studio)-阿里云帮助中心</title>
+ <link rel="canonical" href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-java-sdk" />
+ <meta name="keywords" content="调用实时语音合成SDK,查看语音合成SDK示例,语音合成Java SDK用法,语音合成SDK接口参考" />
+ <meta name="description" content="本文介绍 DashScope Java SDK 调用实时语音合成-千问时的关键接口与请求参数。" />
+ <meta name="last-modified" content="2026-02-28T13:45:09+08:00" />
+ <meta name="date" content="2025-07-31T03:35:57+08:00" />
+ <meta property="og:title" content="Java SDK" />
+ <meta property="og:type" content="website" />
+ <meta property="og:url" content="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-java-sdk" />
+ <meta property="og:image" content="https://img.alicdn.com/imgextra/i1/O1CN012QgtoH1c1Mu70xD3w_!!6000000003540-2-tps-640-640.png" />
+ <meta property="og:description" content="本文介绍 DashScope Java SDK 调用实时语音合成-千问时的关键接口与请求参数。" />
+
+<link
+href="https://g.alicdn.com/aliyun-help/help-portal-fe/0.12.38/css/index.css"
+rel="stylesheet"
+/>
+<script>
+window.globalData = {
+website: "cn",
+language: "zh",
+nodeId: "2950055",
+};
+window.resourceBaseUrl =
+"https://g.alicdn.com/aliyun-help/help-portal-fe/0.12.38/";
+// UT的全局配置变量，在CDN加载前配置
+window.$ACE_TRACKER_CONFIG = {
+enableHistory: true,
+enableHash: false,
+};
+</script>
+<link href="https://g.alicdn.com/code/npm/@ali??hmod-ace-2023-box/0.1.0/index.css,hmod-aliyun-com-global-nav-search/0.7.15/index.css,hmod-aliyun-com-global-nav/0.3.3/index.css" rel="stylesheet"/>
+<link href="https://g.alicdn.com/code/npm/@ali??hmod-ace-2023-box/0.1.0/index.css,hmod-ace-2024-global-footer/0.1.2/index.css" rel="stylesheet"/>
+</head>
+<body><script>
+with(document)with(body)with(insertBefore(createElement("script"),firstChild))setAttribute("exparams","category=&userid=&aplus&yunid=&&trid=213e055e17740913894907294e7d12&asid=AQAAAAB9fL5pnHMcSwAAAACa4N+9URMc5g==",id="tb-beacon-aplus",src=(location>"https"?"//g":"//g")+".alicdn.com/alilog/mlog/aplus_v2.js")
+</script>
+
+<script>
+var _performance_domStart =
+window.performance && window.performance.now();
+</script>
+<header><div id="770f73a3c0ad6ce7da74e547d5948415"><div class="_18a32969382a277c44015217fbc5cb5a_box"><div class="c97dc5fe8c8f69b0e60edf6a1f709489_pc de5ef2fee09ebcb2b1dcaf0c982523bc_theme bdac01e7d42089a1161e0315c2a68512_reset" data-ai-assistant-text-selection-tooltip="disabled"><header class="b62a767265ae40ce4e5e07aa2336b1be_container   "><button class="_17fcaf1a4ee37405e5ad5fbad24204b4_container _17fcaf1a4ee37405e5ad5fbad24204b4_loading" aria-label="打开菜单" data-spm="d_dashboard_trigger" data-tracker-exp="true"><span class="_17fcaf1a4ee37405e5ad5fbad24204b4_burger "><span class="_17fcaf1a4ee37405e5ad5fbad24204b4_middle"></span></span></button><a href="https://www.aliyun.com/" class="_3f46140aade30bc61f3012933357c477_logo b62a767265ae40ce4e5e07aa2336b1be_logo" data-tracker-content="LOGO" data-spm="d_logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4608 1024" fill="#ff6a00" width="80"><path d="M3266.56 773.12h327.68v-102.4h-327.68v-102.4H3584V35.84H2846.72v532.48h317.44v102.4h-327.68v102.4h327.68v112.64h-353.28v102.4h814.08v-102.4h-353.28v-112.64zM3276.8 138.24h215.04v112.64H3276.8V138.24z m0 215.04h215.04V460.8H3276.8V353.28zM3174.4 460.8h-215.04V353.28H3174.4V460.8z m0-209.92h-215.04V138.24H3174.4v112.64zM537.6 445.44H1075.2v122.88H537.6z"></path><path d="M1341.44 5.12h-353.28L1075.2 128l256 81.92c46.08 15.36 76.8 61.44 76.8 107.52v389.12c0 46.08-30.72 92.16-76.8 107.52l-256 81.92-87.04 122.88h353.28c148.48 0 266.24-117.76 266.24-266.24V276.48c0-148.48-117.76-271.36-266.24-271.36zM276.48 814.08c-46.08-15.36-76.8-61.44-76.8-107.52V317.44c0-46.08 30.72-92.16 76.8-107.52l256-81.92L619.52 5.12H266.24C117.76 5.12 0 128 0 276.48v471.04c0 148.48 117.76 266.24 266.24 266.24h353.28l-87.04-122.88-256-76.8zM2493.44 250.88h-261.12v537.6h261.12V250.88z m-107.52 430.08h-56.32V353.28h56.32v327.68zM1848.32 988.16h102.4V138.24h107.52L1996.8 419.84v102.4h61.44v225.28c0 15.36-10.24 25.6-25.6 25.6h-25.6v102.4h51.2c56.32 0 102.4-46.08 102.4-102.4v-358.4H2099.2l61.44-281.6v-102.4h-312.32v957.44z"></path><path d="M2206.72 138.24H2560v660.48c0 46.08-35.84 87.04-87.04 87.04h-76.8v102.4h107.52c87.04 0 163.84-71.68 163.84-163.84V138.24h35.84v-102.4h-496.64v102.4zM3763.2 40.96h737.28v102.4H3763.2zM4541.44 527.36v-102.4H3727.36v102.4h204.8l-163.84 358.4v102.4h691.2c30.72 0 51.2-25.6 51.2-51.2 0-10.24 0-15.36-5.12-20.48l-87.04-194.56h-112.64l76.8 163.84h-496.64l163.84-358.4h491.52z"></path></svg></a><div class="e76910c82efe8556eb8a6ce6019c5d00_container"><button class="e76910c82efe8556eb8a6ce6019c5d00_controller" data-spm="dscroll-left"><i class="ee52067fb65534cb06d3b35f654f5441_icon ddd10ed9ffa4788f54781e516c4c6560-button_left"></i></button><div class="e76910c82efe8556eb8a6ce6019c5d00_menu-warp"><nav class="_0b0e00051b37611378e027e6ac3a695a_menus"><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/product/tongyi" data-spm="d_menu_0">大模型</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/product/list" data-spm="d_menu_1">产品</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/solution/tech-solution/" data-spm="d_menu_2">解决方案</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/benefit" data-spm="d_menu_3">权益</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/price" data-spm="d_menu_4">定价</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://market.aliyun.com/" data-spm="d_menu_5">云市场</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://partner.aliyun.com/management/v2" data-spm="d_menu_6">伙伴</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/service" data-spm="d_menu_7">服务</a><a class="_2cdcedb5935313401458d214540870bc_menu" href="https://www.aliyun.com/about" data-spm="d_menu_8">了解阿里云</a></nav></div><button class="e76910c82efe8556eb8a6ce6019c5d00_controller" data-spm="dscroll-right"><i class="ee52067fb65534cb06d3b35f654f5441_icon ddd10ed9ffa4788f54781e516c4c6560-button_right"></i></button></div><div class="b62a767265ae40ce4e5e07aa2336b1be_search-wrap "><div class="global-nav-search _626567c051250ffe2f303af907d3fc83_global-nav-search"><div class="global-search-container _626567c051250ffe2f303af907d3fc83_global-nav-search-desktop-container"><div class="ff4f4a96a12f52ffbdd0d6adbdb6a2b0_position-desktop-search-container"><div><div class="f6fd7e4d3293f0634b9ac54848c275b7_default-search-panel  f6fd7e4d3293f0634b9ac54848c275b7_hidden-default-search-panel"></div><div class="_3b4f5487091623b0b6852e2b46d2729e_search-recommend-panel  _3b4f5487091623b0b6852e2b46d2729e_hidden-search-recommend-panel"><button class="_4b65cdd64479a2fabe582b8c0789821e_search-no-content " type="button"><div>查看 “</div><div class="_4b65cdd64479a2fabe582b8c0789821e_search-word"></div><div>” 全部搜索结果</div></button></div></div></div></div><div class="_626567c051250ffe2f303af907d3fc83_global-nav-search-mobile-container"><a class="_626567c051250ffe2f303af907d3fc83_search-button" href="https://www.aliyun.com/search?from=h5-global-nav-search"><span role="img" class="_9a1d73bbcd1a80626a31035a12410804_icon _626567c051250ffe2f303af907d3fc83_search-button-icon"><svg width="1em" height="1em" viewBox="0 0 32 32" focusable="false" color="currentColor" fill="currentColor" class="" data-icon="search"><g fill-rule="evenodd" stroke-width="1"><path d="M14,4 C15.3558127,4 16.653362,4.26210485 17.8926477,4.78631455 C19.0891275,5.29241739 20.1485621,6.00666269 21.0709515,6.92905045 C21.9933389,7.8514363 22.7075837,8.91087023 23.213686,10.1073523 C23.7378953,11.3466396 24,12.6441889 24,14 C24,15.3558159 23.737896,16.6533658 23.2136879,17.8926497 C22.838225,18.7802852 22.3482024,19.5924969 21.7436199,20.3292847 L27.7071819,26.2928467 L26.2929688,27.7070599 L20.3294201,21.7435112 C19.592603,22.3481382 18.7803456,22.8381971 17.8926477,23.2136879 C16.6533607,23.737896 15.3558114,24 14,24 C12.6441879,24 11.3466384,23.737896 10.1073513,23.2136879 C8.91087246,22.7075844 7.85143844,21.9933383 6.92904925,21.0709496 C6.00666173,20.1485621 5.29241653,19.0891282 4.78631365,17.8926477 C4.26210455,16.6533613 4,15.3558121 4,14 C4,12.6441879 4.26210451,11.3466388 4.78631353,10.1073527 C5.29241594,8.91087262 6.00666118,7.85143844 6.92904925,6.92905021 C7.85143812,6.00666118 8.91087198,5.2924157 10.1073508,4.78631377 C11.3466366,4.26210459 12.6441863,4 14,4 Z M14,6 C11.7910172,6 9.90543811,6.78108788 8.34326267,8.34326363 C6.78108756,9.90543874 6,11.7910175 6,14 C6,16.2089825 6.78108756,18.0945616 8.34326267,19.6567373 C9.90543779,21.2189124 11.7910169,22 14,22 C16.2089844,22 18.0945635,21.2189128 19.6567373,19.6567383 C21.2189124,18.0945644 22,16.208985 22,14 C22,11.7910175 21.2189124,9.9054389 19.6567373,8.3432641 C18.0945622,6.78108803 16.2089831,6 14,6 Z"></path></g></svg></span></a></div></div></div><div class="_4af07273271b80d6f43a7fc0a40e8124_container"><a class="_4af07273271b80d6f43a7fc0a40e8124_item _2d3ef330b3f8055912d355b9a255bfcf_btn global-nav-ai-assistant" href="https://www.aliyun.com/ai-assistant?displayMode=side" data-spm="dai_assistant" target="_blank"><div class="LogoStyled-aliyun-ai-assistant-rc-8096__sc-1qusfpt-0 cpJKij"><div class="ai-assistant-brand-logo-icon" style="background:no-repeat center/100%  url(https://img.alicdn.com/imgextra/i4/O1CN012X1Rxl1clAgB5waMK_!!6000000003640-2-tps-52-52.png)"><img src="https://img.alicdn.com/imgextra/i2/O1CN01bYc1m81RrcSAyOjMu_!!6000000002165-54-tps-60-60.apng" loading="lazy"/></div><div class="ai-assistant-brand-logo-tooltip "><div class="ai-assistant-logo-tooltip-content">AI 助理</div></div></div></a><button class="_4af07273271b80d6f43a7fc0a40e8124_item bb3dbc2de557f9f2029f50770c77fab9_button"><i class="ee52067fb65534cb06d3b35f654f5441_icon ddd10ed9ffa4788f54781e516c4c6560-intl"></i></button><button class="_4af07273271b80d6f43a7fc0a40e8124_item"><i class="ee52067fb65534cb06d3b35f654f5441_icon ddd10ed9ffa4788f54781e516c4c6560-contact d42d5e3a0d0e018547c66700af2a2030_icon"></i></button><a class="_4af07273271b80d6f43a7fc0a40e8124_item" href="https://help.aliyun.com/" target="_blank" data-spm="d_quick_access_3">文档</a><a class="_4af07273271b80d6f43a7fc0a40e8124_item" href="https://beian.aliyun.com/" target="_blank" data-spm="d_quick_access_4">备案</a><a class="_4af07273271b80d6f43a7fc0a40e8124_item" href="https://home.console.aliyun.com/home/dashboard/ProductAndService" target="_blank" data-spm="d_quick_access_5" rel="nofollow">控制台</a><span class="_05da28cf18b2b6ee04dbfd3ceb5ad3c9_loading _4af07273271b80d6f43a7fc0a40e8124_item"></span></div></header></div><div class="c97dc5fe8c8f69b0e60edf6a1f709489_mobile de5ef2fee09ebcb2b1dcaf0c982523bc_theme bdac01e7d42089a1161e0315c2a68512_reset"></div><div class="_18a32969382a277c44015217fbc5cb5a_box"></div></div></div></header>
+
+ <div id="app">
+<div class="main-layout" id="docs-container" style="opacity:0;">
+<div class="help-body-head"></div>
+<div class="stick-top-layout">
+<div class="help-layout">
+<nav class="aliyun-docs-toc" id="aliyun-docs-toc"></nav>
+<section class="aliyun-docs-view" id="aliyun-docs-view">
+<div class="product-detail">
+<section class="aliyun-docs-content">
+<header class="aliyun-docs-view-header">
+<div class="header-topbar">
+ <div class="header-topbar-breadcrumb">
+ <span><a href="https://help.aliyun.com/">首页</a></span>
+ <span><a href="/zh/model-studio/">大模型服务平台百炼</a></span>
+ <span><a href="/zh/model-studio/model-api-reference/">API参考（模型）</a></span>
+ <span><a href="/zh/model-studio/speech-synthesis-api-reference/">语音合成</a></span>
+ <span><a href="/zh/model-studio/qwen-tts-realtime-api-reference/">实时语音合成（Qwen-TTS-Realtime）</a></span>
+ <span>Java SDK</span>
+ </div>
+ </div>
+<div class="header-title">
+ <h1>Java SDK</h1>
+ <div class="header-actionbar">
+<span class="update-time">更新时间: 2026-02-28 13:45:09</span>
+</div>
+ </div>
+</header>
+<div
+class="pc-markdown-container unionContainer"
+id="pc-markdown-container"
+>
+<!-- 内容 -->
+<div class="markdown-body">
+ <div><div lang="zh" class="icms-help-docs-content">
+<main id="main-3009630"><p id="1db7daa2676o1" data-tag="shortdesc" class="shortdesc">本文介绍 DashScope Java SDK 调用<a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime" id="b6efe8b4282iz" title="" class="xref">实时语音合成-千问</a>时的关键接口与请求参数。</p><div data-tag="body" class="body"><section id="9734cd388f9i9" docid="5588310" is-conref="true" class="section"><p id="f1afc11bc9v55"><b>用户指南</b>：关于模型介绍和选型建议请参见<a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime" id="4700159d266fq" title="" class="xref">实时语音合成-千问</a>或<a href="https://help.aliyun.com/zh/model-studio/qwen-tts" id="6b9706285bb41" title="" class="xref">语音合成-千问</a>。</p></section><section id="8c3bc6838bbbf" class="section"><h2 id="8779ce97deiou"><b>前期准备</b></h2><p id="60ff274406k5t">DashScope Java SDK 版本需要不低于2.22.7。</p></section><section id="fd096b0eebaem" class="section"><h2 id="3dc1a29b077gt"><b>快速开始</b></h2><section id="107b134bd69ix" class="section"><section id="fcb883a1bbehu" data-tag="tabbed-content-box" outputclass="tabbed-content-box" props="china" data-cond-props="china" class="tabbed-content-box section"><section id="c6a2d47e6c7jo" class="section"><h2 id="6be44a8bcajm4"><b>server commit模式</b></h2><pre code-type="xCode" id="038c6596965b3" index="0" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>import com.alibaba.dashscope.audio.qwen_tts_realtime.*;
+import com.alibaba.dashscope.exception.NoApiKeyException;
+import com.google.gson.JsonObject;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.AudioSystem;
+import java.io.*;
+import java.util.Base64;
+import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+public class Main {
+    static String[] textToSynthesize = {
+            "对吧~我就特别喜欢这种超市",
+            "尤其是过年的时候",
+            "去逛超市",
+            "就会觉得",
+            "超级超级开心！",
+            "想买好多好多的东西呢！"
+    };
+    public static QwenTtsRealtimeAudioFormat ttsFormat = QwenTtsRealtimeAudioFormat.PCM_24000HZ_MONO_16BIT;
+
+    // 实时PCM音频播放器类
+    public static class RealtimePcmPlayer {
+        private int sampleRate;
+        private SourceDataLine line;
+        private AudioFormat audioFormat;
+        private Thread decoderThread;
+        private Thread playerThread;
+        private AtomicBoolean stopped = new AtomicBoolean(false);
+        private Queue&lt;String&gt; b64AudioBuffer = new ConcurrentLinkedQueue&lt;&gt;();
+        private Queue&lt;byte[]&gt; RawAudioBuffer = new ConcurrentLinkedQueue&lt;&gt;();
+        private ByteArrayOutputStream totalAudioStream = new ByteArrayOutputStream();
+
+        // 构造函数初始化音频格式和音频线路
+        public RealtimePcmPlayer(int sampleRate) throws LineUnavailableException {
+            this.sampleRate = sampleRate;
+            this.audioFormat = new AudioFormat(this.sampleRate, 16, 1, true, false);
+            DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
+            line = (SourceDataLine) AudioSystem.getLine(info);
+            line.open(audioFormat);
+            line.start();
+            decoderThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (!stopped.get()) {
+                        String b64Audio = b64AudioBuffer.poll();
+                        if (b64Audio != null) {
+                            byte[] rawAudio = Base64.getDecoder().decode(b64Audio);
+                            RawAudioBuffer.add(rawAudio);
+                            // 将音频数据写入 totalAudioStream
+                            try {
+                                totalAudioStream.write(rawAudio);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else {
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                }
+            });
+            playerThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (!stopped.get()) {
+                        byte[] rawAudio = RawAudioBuffer.poll();
+                        if (rawAudio != null) {
+                            try {
+                                playChunk(rawAudio);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else {
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                }
+            });
+            decoderThread.start();
+            playerThread.start();
+        }
+
+        // 播放一个音频块并阻塞直到播放完成
+        private void playChunk(byte[] chunk) throws IOException, InterruptedException {
+            if (chunk == null || chunk.length == 0) return;
+
+            int bytesWritten = 0;
+            while (bytesWritten &lt; chunk.length) {
+                bytesWritten += line.write(chunk, bytesWritten, chunk.length - bytesWritten);
+            }
+            int audioLength = chunk.length / (this.sampleRate*2/1000);
+            // 等待缓冲区中的音频播放完成
+            Thread.sleep(audioLength - 10);
+        }
+
+        public void write(String b64Audio) {
+            b64AudioBuffer.add(b64Audio);
+        }
+
+        public void cancel() {
+            b64AudioBuffer.clear();
+            RawAudioBuffer.clear();
+        }
+
+        public void waitForComplete() throws InterruptedException {
+            while (!b64AudioBuffer.isEmpty() || !RawAudioBuffer.isEmpty()) {
+                Thread.sleep(100);
+            }
+            line.drain();
+        }
+
+        public void shutdown() throws InterruptedException, IOException {
+            stopped.set(true);
+            decoderThread.join();
+            playerThread.join();
+
+            // 保存完整音频文件
+            File file = new File("TotalAudio_"+ttsFormat.getSampleRate()+"."+ttsFormat.getFormat());
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                fos.write(totalAudioStream.toByteArray());
+            }
+
+            if (line != null &amp;&amp; line.isRunning()) {
+                line.drain();
+                line.close();
+            }
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException, LineUnavailableException, IOException {
+        QwenTtsRealtimeParam param = QwenTtsRealtimeParam.builder()
+                // 如需使用指令控制功能，请将model替换为qwen3-tts-instruct-flash-realtime
+                .model("qwen3-tts-flash-realtime")
+                // 以下为北京地域url，若使用新加坡地域的模型，需将url替换为：wss://dashscope-intl.aliyuncs.com/api-ws/v1/realtime
+                .url("wss://dashscope.aliyuncs.com/api-ws/v1/realtime")
+                // 新加坡和北京地域的API Key不同。获取API Key：https://help.aliyun.com/zh/model-studio/get-api-key
+                .apikey(System.getenv("DASHSCOPE_API_KEY"))
+                .build();
+        AtomicReference&lt;CountDownLatch&gt; completeLatch = new AtomicReference&lt;&gt;(new CountDownLatch(1));
+        final AtomicReference&lt;QwenTtsRealtime&gt; qwenTtsRef = new AtomicReference&lt;&gt;(null);
+
+        // 创建实时音频播放器实例
+        RealtimePcmPlayer audioPlayer = new RealtimePcmPlayer(24000);
+
+        QwenTtsRealtime qwenTtsRealtime = new QwenTtsRealtime(param, new QwenTtsRealtimeCallback() {
+            @Override
+            public void onOpen() {
+                // 连接建立时的处理
+            }
+            @Override
+            public void onEvent(JsonObject message) {
+                String type = message.get("type").getAsString();
+                switch(type) {
+                    case "session.created":
+                        // 会话创建时的处理
+                        if (message.has("session")) {
+                            String eventId = message.get("event_id").getAsString();
+                            String sessionId = message.get("session").getAsJsonObject().get("id").getAsString();
+                            System.out.println("[onEvent] session.created, session_id: "
+                                    + sessionId + ", event_id: " + eventId);
+                        }
+                        break;
+                    case "response.audio.delta":
+                        String recvAudioB64 = message.get("delta").getAsString();
+                        // 实时播放音频
+                        audioPlayer.write(recvAudioB64);
+                        break;
+                    case "response.done":
+                        // 响应完成时的处理
+                        break;
+                    case "session.finished":
+                        // 会话结束时的处理
+                        completeLatch.get().countDown();
+                    default:
+                        break;
+                }
+            }
+            @Override
+            public void onClose(int code, String reason) {
+                // 连接关闭时的处理
+            }
+        });
+        qwenTtsRef.set(qwenTtsRealtime);
+        try {
+            qwenTtsRealtime.connect();
+        } catch (NoApiKeyException e) {
+            throw new RuntimeException(e);
+        }
+        QwenTtsRealtimeConfig config = QwenTtsRealtimeConfig.builder()
+                .voice("Cherry")
+                .responseFormat(ttsFormat)
+                .mode("server_commit")
+                // 如需使用指令控制功能，请取消下方注释，并将model替换为qwen3-tts-instruct-flash-realtime
+                // .instructions("")
+                // .optimizeInstructions(true)
+                .build();
+        qwenTtsRealtime.updateSession(config);
+        for (String text:textToSynthesize) {
+            qwenTtsRealtime.appendText(text);
+            Thread.sleep(100);
+        }
+        qwenTtsRealtime.finish();
+        completeLatch.get().await();
+        qwenTtsRealtime.close();
+
+        // 等待音频播放完成并关闭播放器
+        audioPlayer.waitForComplete();
+        audioPlayer.shutdown();
+        System.exit(0);
+    }
+}</code></pre></section><section id="58f438f115iou" class="section"><h2 id="899c503f8eped"><b>commit模式</b></h2><pre code-type="xCode" id="720bbe7f252k0" index="0" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>import com.alibaba.dashscope.audio.qwen_tts_realtime.*;
+import com.alibaba.dashscope.exception.NoApiKeyException;
+import com.google.gson.JsonObject;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.AudioSystem;
+import java.io.*;
+import java.util.Base64;
+import java.util.Queue;
+import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+public class Main {
+    public static QwenTtsRealtimeAudioFormat ttsFormat = QwenTtsRealtimeAudioFormat.PCM_24000HZ_MONO_16BIT;
+    // 实时PCM音频播放器类
+    public static class RealtimePcmPlayer {
+        private int sampleRate;
+        private SourceDataLine line;
+        private AudioFormat audioFormat;
+        private Thread decoderThread;
+        private Thread playerThread;
+        private AtomicBoolean stopped = new AtomicBoolean(false);
+        private Queue&lt;String&gt; b64AudioBuffer = new ConcurrentLinkedQueue&lt;&gt;();
+        private Queue&lt;byte[]&gt; RawAudioBuffer = new ConcurrentLinkedQueue&lt;&gt;();
+        private ByteArrayOutputStream totalAudioStream = new ByteArrayOutputStream();
+
+
+        // 构造函数初始化音频格式和音频线路
+        public RealtimePcmPlayer(int sampleRate) throws LineUnavailableException {
+            this.sampleRate = sampleRate;
+            this.audioFormat = new AudioFormat(this.sampleRate, 16, 1, true, false);
+            DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
+            line = (SourceDataLine) AudioSystem.getLine(info);
+            line.open(audioFormat);
+            line.start();
+            decoderThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (!stopped.get()) {
+                        String b64Audio = b64AudioBuffer.poll();
+                        if (b64Audio != null) {
+                            byte[] rawAudio = Base64.getDecoder().decode(b64Audio);
+                            RawAudioBuffer.add(rawAudio);
+                            // 将音频数据写入 totalAudioStream
+                            try {
+                                totalAudioStream.write(rawAudio);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else {
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                }
+            });
+            playerThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (!stopped.get()) {
+                        byte[] rawAudio = RawAudioBuffer.poll();
+                        if (rawAudio != null) {
+                            try {
+                                playChunk(rawAudio);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else {
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                }
+            });
+            decoderThread.start();
+            playerThread.start();
+        }
+
+        // 播放一个音频块并阻塞直到播放完成
+        private void playChunk(byte[] chunk) throws IOException, InterruptedException {
+            if (chunk == null || chunk.length == 0) return;
+
+            int bytesWritten = 0;
+            while (bytesWritten &lt; chunk.length) {
+                bytesWritten += line.write(chunk, bytesWritten, chunk.length - bytesWritten);
+            }
+            int audioLength = chunk.length / (this.sampleRate*2/1000);
+            // 等待缓冲区中的音频播放完成
+            Thread.sleep(audioLength - 10);
+        }
+
+        public void write(String b64Audio) {
+            b64AudioBuffer.add(b64Audio);
+        }
+
+        public void cancel() {
+            b64AudioBuffer.clear();
+            RawAudioBuffer.clear();
+        }
+
+        public void waitForComplete() throws InterruptedException {
+            // 等待所有缓冲区中的音频数据播放完成
+            while (!b64AudioBuffer.isEmpty() || !RawAudioBuffer.isEmpty()) {
+                Thread.sleep(100);
+            }
+            // 等待音频线路播放完成
+            line.drain();
+        }
+
+        public void shutdown() throws InterruptedException {
+            stopped.set(true);
+            decoderThread.join();
+            playerThread.join();
+            // 保存完整音频文件
+            File file = new File("TotalAudio_"+ttsFormat.getSampleRate()+"."+ttsFormat.getFormat());
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                fos.write(totalAudioStream.toByteArray());
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            if (line != null &amp;&amp; line.isRunning()) {
+                line.drain();
+                line.close();
+            }
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException, LineUnavailableException, FileNotFoundException {
+        Scanner scanner = new Scanner(System.in);
+
+        QwenTtsRealtimeParam param = QwenTtsRealtimeParam.builder()
+                // 如需使用指令控制功能，请将model替换为qwen3-tts-instruct-flash-realtime
+                .model("qwen3-tts-flash-realtime")
+                // 以下为北京地域url，若使用新加坡地域的模型，需将url替换为：wss://dashscope-intl.aliyuncs.com/api-ws/v1/realtime
+                .url("wss://dashscope.aliyuncs.com/api-ws/v1/realtime")
+                // 新加坡和北京地域的API Key不同。获取API Key：https://help.aliyun.com/zh/model-studio/get-api-key
+                .apikey(System.getenv("DASHSCOPE_API_KEY"))
+                .build();
+
+        AtomicReference&lt;CountDownLatch&gt; completeLatch = new AtomicReference&lt;&gt;(new CountDownLatch(1));
+
+        // 创建实时播放器实例
+        RealtimePcmPlayer audioPlayer = new RealtimePcmPlayer(24000);
+
+        final AtomicReference&lt;QwenTtsRealtime&gt; qwenTtsRef = new AtomicReference&lt;&gt;(null);
+        QwenTtsRealtime qwenTtsRealtime = new QwenTtsRealtime(param, new QwenTtsRealtimeCallback() {
+            //            File file = new File("result_24k.pcm");
+//            FileOutputStream fos = new FileOutputStream(file);
+            @Override
+            public void onOpen() {
+                System.out.println("connection opened");
+                System.out.println("输入文本并按Enter发送，输入'quit'退出程序");
+            }
+            @Override
+            public void onEvent(JsonObject message) {
+                String type = message.get("type").getAsString();
+                switch(type) {
+                    case "session.created":
+                        System.out.println("start session: " + message.get("session").getAsJsonObject().get("id").getAsString());
+                        break;
+                    case "response.audio.delta":
+                        String recvAudioB64 = message.get("delta").getAsString();
+                        byte[] rawAudio = Base64.getDecoder().decode(recvAudioB64);
+                        //                            fos.write(rawAudio);
+                        // 实时播放音频
+                        audioPlayer.write(recvAudioB64);
+                        break;
+                    case "response.done":
+                        System.out.println("response done");
+                        // 等待音频播放完成
+                        try {
+                            audioPlayer.waitForComplete();
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        // 为下一次输入做准备
+                        completeLatch.get().countDown();
+                        break;
+                    case "session.finished":
+                        System.out.println("session finished");
+                        if (qwenTtsRef.get() != null) {
+                            System.out.println("[Metric] response: " + qwenTtsRef.get().getResponseId() +
+                                    ", first audio delay: " + qwenTtsRef.get().getFirstAudioDelay() + " ms");
+                        }
+                        completeLatch.get().countDown();
+                    default:
+                        break;
+                }
+            }
+            @Override
+            public void onClose(int code, String reason) {
+                System.out.println("connection closed code: " + code + ", reason: " + reason);
+                try {
+//                    fos.close();
+                    // 等待播放完成并关闭播放器
+                    audioPlayer.waitForComplete();
+                    audioPlayer.shutdown();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        qwenTtsRef.set(qwenTtsRealtime);
+        try {
+            qwenTtsRealtime.connect();
+        } catch (NoApiKeyException e) {
+            throw new RuntimeException(e);
+        }
+        QwenTtsRealtimeConfig config = QwenTtsRealtimeConfig.builder()
+                .voice("Cherry")
+                .responseFormat(ttsFormat)
+                .mode("commit")
+                // 如需使用指令控制功能，请取消下方注释，并将model替换为qwen3-tts-instruct-flash-realtime
+                // .instructions("")
+                // .optimizeInstructions(true)
+                .build();
+        qwenTtsRealtime.updateSession(config);
+
+        // 循环读取用户输入
+        while (true) {
+            System.out.print("请输入要合成的文本: ");
+            String text = scanner.nextLine();
+
+            // 如果用户输入quit，则退出程序
+            if ("quit".equalsIgnoreCase(text.trim())) {
+                System.out.println("正在关闭连接...");
+                qwenTtsRealtime.finish();
+                completeLatch.get().await();
+                break;
+            }
+
+            // 如果用户输入为空，跳过
+            if (text.trim().isEmpty()) {
+                continue;
+            }
+
+            // 重新初始化倒计时锁存器
+            completeLatch.set(new CountDownLatch(1));
+
+            // 发送文本
+            qwenTtsRealtime.appendText(text);
+            qwenTtsRealtime.commit();
+
+            // 等待本次合成完成
+            completeLatch.get().await();
+        }
+
+        // 清理资源
+        audioPlayer.waitForComplete();
+        audioPlayer.shutdown();
+        scanner.close();
+        System.exit(0);
+    }
+}</code></pre></section></section></section><p uuid="mfgknpgnphyun6258w" id="82cbad04e2s67">访问<a class="" href="https://github.com/aliyun/alibabacloud-bailian-speech-demo/tree/master/samples/conversation/omni" id="ff9cb0908avhh">github</a>下载更多示例代码。</p></section><section id="fe17f319b7yc1" class="section"><h2 uuid="md499whg8vmvqyb7gng" id="cb904fc48ck5u"><b>请求参数</b></h2><p uuid="md49ftvzrcry1c5nxd" id="96e5488128j4y">下述请求参数可以通过<code data-tag="code" uuid="md4c14hyfn2r53fu8ba" id="985965fc40ueq" class="code">QwenTtsRealtimeParam</code>对象的链式方法或setter配置、之后作为参数传入QwenTtsRealtime的构造方法完成配置。</p><table id="a3530c461ew6s" tablewidth="100" tablecolswidth="15.4 10.57 8.08 65.95" autofit="true" class="table"><colgroup colwidth="0.62*" style="width:15.40%"></colgroup><colgroup colwidth="0.42*" style="width:10.57%"></colgroup><colgroup colwidth="0.32*" style="width:8.08%"></colgroup><colgroup colwidth="2.64*" style="width:65.95%"></colgroup><tbody class="tbody"><tr id="9fca4835dcfvl"><td id="736ca99e9ani9" rowspan="1" style="background-color:#e5e5e5;vertical-align:top" colspan="1"><p uuid="md49tibitn6fu2r35d" id="82a17e7c6cncw"><b>参数</b></p></td><td id="2aa4ce161ekaf" rowspan="1" style="background-color:#e5e5e5;vertical-align:top" colspan="1"><p uuid="md49tibi9ewotc2rubf" id="20acf246a72wt"><b>类型</b></p></td><td id="1f1dc8778api4" rowspan="1" style="background-color:#e5e5e5" colspan="1"><p id="36b3c6a136o9i"><b>是否必须</b></p></td><td id="6a94af18cbkwl" rowspan="1" style="background-color:#e5e5e5;vertical-align:top" colspan="1"><p uuid="md49tibihoxq0tbk3n8" id="b1be5e11530wc"><b>说明</b></p></td></tr><tr id="2cc3cc06975bo"><td id="ee6098e56cmqn" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="md49tibisl4cqg146ef" id="95ac7022f10go" style="text-align:left">model</p></td><td id="034b2e79c33dj" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="md49tibio0srjkpx76h" id="525a821992yte" style="text-align:left">String</p></td><td id="dd638c3d71t0o" rowspan="1" colspan="1"><p id="f9ee2e49c0vcv">是</p></td><td id="825bfcbc2cqxf" rowspan="1" style="vertical-align:middle" colspan="1"><section id="60cfe92f10dqc" docid="5602338" is-conref="true" class="section"><p jc="left" uuid="md49tibi7f2tp3zisp4" id="c3bd5cc908h71" style="text-align:left">模型名称。参见<a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime#d2ad2470a394c" id="09211dd5bca2w" title="" class="xref">支持的模型</a>。</p></section></td></tr><tr id="9b762ff9aeqcz"><td id="58f02d3a0byvs" rowspan="1" style="vertical-align:middle" colspan="1"><p id="cef4580c225hh">url</p></td><td id="2d4e961e54gpx" rowspan="1" style="vertical-align:middle" colspan="1"><p id="ac45a761balk3">String</p></td><td id="bf0dc1e46cm7i" rowspan="1" colspan="1"><p id="d5dbb1010a08z">是</p></td><td id="fee45575fbb4o" rowspan="1" style="vertical-align:middle" colspan="1"><section id="638b5c8157kkd" docid="5905597" is-conref="true" class="section"><p id="5802afe2b09aa">中国内地：<code data-tag="code" id="b4ff6f59ec53q" class="code">wss://dashscope.aliyuncs.com/api-ws/v1/realtime</code></p><p id="a9f5d1730ew31">国际：<code data-tag="code" id="b3a9a590e2w8x" data-init-id="b4ff6f59ec53q" class="code">wss://dashscope-intl.aliyuncs.com/api-ws/v1/realtime</code></p></section></td></tr></tbody></table><p uuid="md49s1j5nd31h5wptj" id="80774b8957ua6">下述请求参数可以通过<code data-tag="code" uuid="md4bxlgfizfqbb03ol" id="beadafe393dq5" class="code">QwenTtsRealtimeConfig</code>对象的链式方法或setter配置、之后作为参数传入updateSession接口完成配置。</p><table id="c089428b1drso" tablewidth="100" tablecolswidth="15.15 10.66 8.16 66.03" autofit="true" class="table"><colgroup colwidth="0.61*" style="width:15.15%"></colgroup><colgroup colwidth="0.43*" style="width:10.66%"></colgroup><colgroup colwidth="0.33*" style="width:8.16%"></colgroup><colgroup colwidth="2.64*" style="width:66.03%"></colgroup><tbody class="tbody"><tr id="433ced6ec21br"><td id="de6fe4f842uea" rowspan="1" style="background-color:#e5e5e5;vertical-align:top" colspan="1"><p uuid="mdebd7rxlxh55rts55n" id="3e8a892bea5k9"><b>参数</b></p></td><td id="252c465d79t8r" rowspan="1" style="background-color:#e5e5e5;vertical-align:top" colspan="1"><p uuid="mdebd7rxnon8ozzrph" id="ba60537713a32"><b>类型</b></p></td><td id="2a95bdf904u9t" rowspan="1" style="background-color:#e5e5e5" colspan="1"><p id="61b71ff4efut8"><b>是否必须</b></p></td><td id="ffae280916pwj" rowspan="1" style="background-color:#e5e5e5;vertical-align:top" colspan="1"><p uuid="mdebd7rxndmgipltu6" id="25b9a62ccfic3"><b>说明</b></p></td></tr><tr id="2902520a08cve"><td id="1dd8b705750ue" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="mdebd7rx9bxmigo6vjq" id="68972d9c80gzw" style="text-align:left">voice</p></td><td id="acf76379e5rit" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="mdebd7rxh2zn8139wpl" id="12c7db2f92wsl" style="text-align:left">String</p></td><td id="dfcf96a485ktn" rowspan="1" colspan="1"><p id="16d63d6b62fzf">是</p></td><td id="5a5c84a20f4f6" rowspan="1" style="vertical-align:middle" colspan="1"><section id="f80f5f4a336kn" docid="5905671" is-conref="true" class="section">
+                        <p jc="left" uuid="md49bdok7h2gedhvjgd" id="5c42b07c73lel" style="text-align:left">语音合成所使用的音色。参见<a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime#bac280ddf5a1u" id="c5e4e3a1ff4rr" title="" class="xref">支持的音色</a>。</p>
+                        <section id="2de7393b87iab" class="section">
+                          <p jc="left" uuid="megum80xsc7rl99ho2" id="a7b67463edq29" style="text-align:left">支持系统音色和专属音色：</p>
+                          <ul id="7c9d3776990yp">
+                            <li id="80660904cau68">
+                              <p jc="left" uuid="megumclddlf9fdjp6wc" id="dec924c4229qe" style="text-align:left"><b>系统音色</b>：仅限千问3-TTS-Instruct-Flash-Realtime、千问3-TTS-Flash-Realtime和千问-TTS-Realtime系列模型。音色效果请参见：<a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime#bac280ddf5a1u" id="efa95f75f03iu" title="" class="xref">支持的音色</a>。</p>
+                            </li>
+                            <li id="f100d3f789zz6">
+                              <p id="4576135effsba"><b>专属音色</b></p>
+                              <ul id="f70a6a9cf7c5v">
+                                <li id="324505ba9ajvq">
+                                  <p id="04973c708bsls"><a href="https://help.aliyun.com/zh/model-studio/qwen-tts-voice-cloning" id="23ad6e344d9gt" title="" class="xref">声音复刻（Qwen）</a>功能定制的音色：仅限千问3-TTS-VC-Realtime系列模型</p>
+                                </li>
+                                <li id="a63695381fj3v">
+                                  <p id="b738b187d3zen"><a href="https://help.aliyun.com/zh/model-studio/qwen-tts-voice-design" id="43a02d04a6my2" title="" class="xref">声音设计（Qwen）</a>功能定制的音色：仅限千问3-TTS-VD-Realtime系列模型</p>
+                                </li>
+                              </ul>
+                            </li>
+                          </ul>
+                        </section>
+                      </section></td></tr><tr id="3ef757d431i91"><td id="66a8ecebb6s3x" rowspan="1" style="vertical-align:middle" colspan="1"><p id="50d702754eim2">languageType</p></td><td id="5871935ceav39" rowspan="1" style="vertical-align:middle" colspan="1"><p id="88d82f6cc2iy0">String</p></td><td id="cb5fbd390bz78" rowspan="1" colspan="1"><p id="33d94cda02bx1">否</p></td><td id="fe489e0e9c1w0" rowspan="1" style="vertical-align:middle" colspan="1"><section id="2782a25f9bprp" docid="5905671" is-conref="true" class="section">
+                        <p id="9cd62e2aadb0m">指定合成音频的语种，默认为&nbsp;<code data-tag="code" class="code blog-code" id="c115fc12f4e9n">Auto</code>。</p>
+                        <ul id="8900fe538bsvv">
+                          <li id="88852180e42l4">
+                            <p id="84f914902e6nu"><code data-tag="code" class="code blog-code" id="8573dd9d335lq" data-init-id="c115fc12f4e9n">Auto</code>：适用无法确定文本的语种或文本包含多种语言的场景，模型会自动为文本中的不同语言片段匹配各自的发音，但无法保证发音完全精准。</p>
+                          </li>
+                          <li id="1150372e8a05g">
+                            <p id="e411e6c9afri4">指定语种：适用于文本为单一语种的场景，此时指定为具体语种，能显著提升合成质量，效果通常优于&nbsp;<code data-tag="code" class="code blog-code" id="7401615624dpf">Auto</code>。可选值包括：</p>
+                            <ul id="4b2d26de0a6us">
+                              <li id="c2ece6008e0w2">
+                                <p id="0ad4c0b784syd"><code data-tag="code" id="05b6f41d00wwu" class="code">Chinese</code></p>
+                              </li>
+                              <li id="2caace570fr1n">
+                                <p id="c6ec20ba6fbo3"><code data-tag="code" id="a0eb5b8fc01eu" class="code">English</code></p>
+                              </li>
+                              <li id="2b2e6f5d2891j">
+                                <p id="8a3e911124yxu"><code data-tag="code" id="c288ed4822ajr" data-init-id="a0eb5b8fc01eu" class="code">German</code></p>
+                              </li>
+                              <li id="3de686b069kkq">
+                                <p id="3d8abadd7ct15"><code data-tag="code" id="c830afd300mqx" data-init-id="a0eb5b8fc01eu" class="code">Italian</code></p>
+                              </li>
+                              <li id="38a2c648d5343">
+                                <p id="04337cf992qtu"><code data-tag="code" id="5b913cf1c9sfj" data-init-id="a0eb5b8fc01eu" class="code">Portuguese</code></p>
+                              </li>
+                              <li id="6a2ffee31brcb">
+                                <p id="a7719873c7fn7"><code data-tag="code" id="0168f9c46a3vv" data-init-id="a0eb5b8fc01eu" class="code">Spanish</code></p>
+                              </li>
+                              <li id="92a150103bb9t">
+                                <p id="7e503f8be5h32"><code data-tag="code" id="601e42e59460w" data-init-id="a0eb5b8fc01eu" class="code">Japanese</code></p>
+                              </li>
+                              <li id="2370cdb1d7nv2">
+                                <p id="d341438e57pvv"><code data-tag="code" id="78cec50fdeovv" data-init-id="a0eb5b8fc01eu" class="code">Korean</code></p>
+                              </li>
+                              <li id="690bb819d4l2v">
+                                <p id="0dfb75e639y14"><code data-tag="code" id="105773ade3p39" data-init-id="a0eb5b8fc01eu" class="code">French</code></p>
+                              </li>
+                              <li id="c3631ebf927vu">
+                                <p id="27b45d2e27tez"><code data-tag="code" id="ae30586ce1lao" data-init-id="a0eb5b8fc01eu" class="code">Russian</code></p>
+                              </li>
+                            </ul>
+                          </li>
+                        </ul>
+                      </section></td></tr><tr id="7bb719bbe8snz"><td id="fa8842a3ed2tj" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="mdebd7rxy30obpyaf0g" id="b7b654729cexz" style="text-align:left">mode</p></td><td id="567de12465rdu" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="mdebd7rxx7e3r351m9" id="aeeffc30e9h0g" style="text-align:left">String</p></td><td id="0a4fd7f2e35l0" rowspan="1" colspan="1"><p id="68477a6eb0g0r">否</p></td><td id="411eb257bfxrc" rowspan="1" style="vertical-align:middle" colspan="1"><section id="4c4b3b7749xku" docid="6319772" is-conref="true" class="section">
+                        <p jc="left" uuid="m95147brql0uecf9l49" id="a0df0be21811m" style="text-align:left">交互模式，可选值：</p>
+                        <ul id="2ba00477a3yj2">
+                          <li id="4bb24f13a4scl">
+                            <p id="fed0097204j13"><code data-tag="code" id="ecc116e15b4f2" class="code">server_commit</code>（默认）：服务端自动判断合成时机，平衡延迟与质量，推荐大多数场景使用</p>
+                          </li>
+                          <li id="ea93261edeins">
+                            <p id="f89b1e831fz16"><code data-tag="code" id="e6af13f10amo4" class="code">commit</code>：客户端手动触发合成，延迟最低，但需自行管理句子完整性</p>
+                          </li>
+                        </ul>
+                      </section></td></tr><tr id="b5e5dcfb19quo"><td id="c40ece09636ng" rowspan="1" style="vertical-align:middle" colspan="1"><p id="0867714af7tf6">format</p></td><td id="c469709ea1snv" rowspan="1" style="vertical-align:middle" colspan="1"><p id="e1ba069a74lqx">String</p></td><td id="3530f9ee01le9" rowspan="1" colspan="1"><p id="34bc9dbe0d49n">否</p></td><td id="ac47a3ae3dgzj" rowspan="1" style="vertical-align:middle" colspan="1"><section id="5b171a205amwc" docid="5852628" is-conref="true" class="section">
+                        <p jc="left" uuid="m95147brmszfi4ge5j" id="338a35180el0l" style="text-align:left">模型输出音频的格式。</p>
+                        <p jc="left" uuid="mkqo646456a2lm7fbsa" id="fcbc3c0344gzw" style="text-align:left">支持的格式：</p>
+                        <ul id="fb8c20b773z9r">
+                          <li id="8243e5c298qt7">
+                            <p jc="left" uuid="mhjz0qus7k3v4errqto" id="507709add7468" style="text-align:left"><code data-tag="code" id="645e9cb19fxhv" class="code">pcm</code>（默认）</p>
+                          </li>
+                          <li id="440ff5253b94z">
+                            <p id="c3e9774f64u1e"><code data-tag="code" id="508365e849db9" class="code">wav</code></p>
+                          </li>
+                          <li id="c89dbd5353h3s">
+                            <p id="f7ea70a218in0"><code data-tag="code" id="6727c37b2amaz" class="code">mp3</code></p>
+                          </li>
+                          <li id="6e0478ec5897f">
+                            <p id="8ff9a0632dxmb"><code data-tag="code" id="ce79e189f9kgk" class="code">opus</code></p>
+                          </li>
+                        </ul>
+                        <p id="782c9f26f7fff"><span data-tag="ph" id="ab63c15209m56" class="ph">千问-TTS-Realtime（参见<a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime#a1686e997aquv" id="6a326ee134hku" title="" class="xref">支持的模型</a>）</span>仅支持<code data-tag="code" id="e8415fea98268" class="code">pcm</code>。</p>
+                      </section></td></tr><tr id="51ebc54229hkv"><td id="9cdf8d0a407ev" rowspan="1" style="vertical-align:middle" colspan="1"><p id="597d5c60b0cbm">sampleRate</p></td><td id="7540e46649akj" rowspan="1" style="vertical-align:middle" colspan="1"><p id="5bb7663b04q61">int</p></td><td id="3af184531aus9" rowspan="1" colspan="1"><p id="7222707509mum">否</p></td><td id="6a3976c4591gd" rowspan="1" style="vertical-align:middle" colspan="1"><section id="6975dbf5c5twm" docid="5852628" is-conref="true" class="section">
+                        <p id="b8122a5a530xz">模型输出音频的采样率（Hz）。</p>
+                        <p id="e73b29879ctyo">支持的采样率：</p>
+                        <ul id="1e0b6050e7or3">
+                          <li id="1d370f35c505v">
+                            <p id="d6cf4f90967sp">8000</p>
+                          </li>
+                          <li id="4c83991525xnp">
+                            <p id="a78efdff7230p">16000</p>
+                          </li>
+                          <li id="118f50951frwm">
+                            <p id="517592c14ch6n">24000（默认）</p>
+                          </li>
+                          <li id="ba39bd6b977wo">
+                            <p id="9173716643h4v">48000</p>
+                          </li>
+                        </ul>
+                        <p id="285a469f1efyg"><span data-tag="ph" id="c6e06e718ausr" docid="5905671" is-conref="true" class="ph">千问-TTS-Realtime（参见<a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime#a1686e997aquv" id="6a326ee134hku" title="" class="xref">支持的模型</a>）</span>仅支持24000。</p>
+                      </section></td></tr><tr id="c20e9f48345fr"><td id="5e9ee864ebjz9" rowspan="1" style="vertical-align:middle" colspan="1"><p id="8276eaa77fa5n">speechRate</p></td><td id="f0dcd3a9b770y" rowspan="1" style="vertical-align:middle" colspan="1"><p id="1790911349gib">float</p></td><td id="76ede2cb3ca9n" rowspan="1" colspan="1"><p id="408a6a8dc3sch">否</p></td><td id="168d4977031v6" rowspan="1" style="vertical-align:middle" colspan="1"><section id="81fdb2fba65sf" docid="5852628" is-conref="true" class="section">
+                        <p jc="left" id="b6088396f86jl" style="text-align:left">音频的语速。1.0为正常语速，小于1.0为慢速，大于1.0为快速。</p>
+                        <p id="16e492ea0f7wl">默认值：1.0。</p>
+                        <p id="dcccce26dbqfn">取值范围：[0.5, 2.0]。</p>
+                        <p id="6ba879bebfvuu"><span data-tag="ph" id="650092295cd2h" docid="5905671" data-init-id="08237631daeb1" is-conref="true" class="ph">千问-TTS-Realtime（参见<a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime#a1686e997aquv" id="6a326ee134hku" title="" class="xref">支持的模型</a>）</span>不支持该参数。</p>
+                      </section></td></tr><tr id="6f230d36ee9tm"><td id="9644a53b01m1j" rowspan="1" style="vertical-align:middle" colspan="1"><p id="bf17b42f3d49z">volume</p></td><td id="0ed9236a446kn" rowspan="1" style="vertical-align:middle" colspan="1"><p id="6925675871jo9">int</p></td><td id="5892ae4a70r1o" rowspan="1" colspan="1"><p id="9ab92cbb39n73">否</p></td><td id="34a44f0949bw9" rowspan="1" style="vertical-align:middle" colspan="1"><section id="e2debf94eb2vu" docid="5852628" is-conref="true" class="section">
+                        <p id="7c456d34a2e9k">音频的音量。</p>
+                        <p id="8ffecfae74m8o">默认值：50。</p>
+                        <p id="5f87f823892z7">取值范围：[0, 100]。</p>
+                        <p id="440d83320632q"><span data-tag="ph" id="5bc3a745ffbb4" docid="5905671" data-init-id="08237631daeb1" is-conref="true" class="ph">千问-TTS-Realtime（参见<a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime#a1686e997aquv" id="6a326ee134hku" title="" class="xref">支持的模型</a>）</span>不支持该参数。</p>
+                      </section></td></tr><tr id="17a4736b707vs"><td id="22c97bb372rr8" rowspan="1" style="vertical-align:middle" colspan="1"><p id="1bd58eebd9m5v">pitchRate</p></td><td id="094ab232f3kfk" rowspan="1" style="vertical-align:middle" colspan="1"><p id="59a3d37d95afj">float</p></td><td id="f2d222d1984ge" rowspan="1" colspan="1"><p id="1fe0cb2dcbixi">否</p></td><td id="b6d0e01290oh3" rowspan="1" style="vertical-align:middle" colspan="1"><section id="6409dd4ecakzl" docid="5852628" is-conref="true" class="section">
+                        <p id="e9c5dbe70ef8t">合成音频的语调。</p>
+                        <p id="f98f34ad507jf">默认值：1.0。</p>
+                        <p id="0f18842e44cbu">取值范围：[0.5, 2.0]。</p>
+                        <p id="dd690cb8d56k5"><span data-tag="ph" id="16b371b710hvu" docid="5905671" data-init-id="08237631daeb1" is-conref="true" class="ph">千问-TTS-Realtime（参见<a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime#a1686e997aquv" id="6a326ee134hku" title="" class="xref">支持的模型</a>）</span>不支持该参数。</p>
+                      </section></td></tr><tr id="b5d0d9b4f4au2"><td id="40efc7e7b148i" rowspan="1" style="vertical-align:middle" colspan="1"><p id="fabdf839fdpfy">bitRate</p></td><td id="81b9ad14667cw" rowspan="1" style="vertical-align:middle" colspan="1"><p id="1c2987efd3bqv">int</p></td><td id="24b97c3f48fgv" rowspan="1" colspan="1"><p id="41dea66488psy">否</p></td><td id="c09ca15aadfys" rowspan="1" style="vertical-align:middle" colspan="1"><section id="e78ace0db7m64" docid="5852628" is-conref="true" class="section">
+                        <p jc="left" id="6b2fa8c1394rs" style="text-align:left">指定音频的<a class="" href="https://opus-codec.org/" id="4580d6994bk4k">码率</a>（kbps）。码率越大，音质越好，音频文件体积越大。仅在音频格式（<code data-tag="code" id="87ea5d2599jrd" class="code">response_format</code>）为<code data-tag="code" id="fbbbf38122eea" class="code">opus</code>时可用。</p>
+                        <p id="e50d30858bxrf">默认值：128。</p>
+                        <p id="53cebd3752n7u">取值范围：[6, 510]。</p>
+                        <p id="941d03d4fa5ga"><span data-tag="ph" id="c0132e9c65iwy" docid="5905671" data-init-id="08237631daeb1" is-conref="true" class="ph">千问-TTS-Realtime（参见<a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime#a1686e997aquv" id="6a326ee134hku" title="" class="xref">支持的模型</a>）</span>不支持该参数。</p>
+                      </section></td></tr><tr id="fd9a74c5a6ama"><td id="afe51504026t3" rowspan="1" style="vertical-align:middle" colspan="1"><p id="7e63ba4b3bmzg">instructions</p></td><td id="c7c4cff50arta" rowspan="1" style="vertical-align:middle" colspan="1"><p id="8acbddcb9bnzj">String</p></td><td id="27137575dflhf" rowspan="1" colspan="1"><p id="725178af9bzi9">否</p></td><td id="bcf39c2a9bpq4" rowspan="1" style="vertical-align:middle" colspan="1"><section id="54a7863c503v9" docid="6319772" is-conref="true" class="section">
+                        <p id="86d5cef079zpn">设置指令，参见<a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime#12884a10929p9" id="408249bfe6rvf" title="" class="xref">指令控制</a>。</p>
+                        <p id="6ea3014e87q7d">默认值：无默认值，不设置不生效。</p>
+                        <p id="34fc19fb26crh">长度限制：长度不得超过 1600 Token。</p>
+                        <p id="f79c322b3bvh3">支持语言：仅支持中文和英文。</p>
+                        <p id="637e377318c80">适用范围：该功能仅适用于千问3-TTS-Instruct-Flash-Realtime系列模型。</p>
+                      </section></td></tr><tr id="2a0397fb67u6v"><td id="ea4b90b385p78" rowspan="1" colspan="1"><p id="6091c021615xf">optimizeInstructions</p></td><td id="278aa601d9ulm" rowspan="1" colspan="1"><p id="1916ef5f7bhb8">boolean</p></td><td id="b18ca6a08ezy4" rowspan="1" colspan="1"><p id="a3e9a5cb36qon">否</p></td><td id="bbd1036fc9zvu" rowspan="1" colspan="1"><section id="b4327d4392fhv" docid="6319772" is-conref="true" class="section">
+                        <section id="08ce396529pyn" class="section">
+                          <p id="0cb8a15bf9qkg">是否对 <code data-tag="code" id="354f5f54b7q7n" class="code">instructions</code> 进行优化，以提升语音合成的自然度和表现力。</p>
+                        </section>
+                        <p id="274ad01648aat">默认值：false。</p>
+                        <p id="10de57458a4ym">行为说明：当设置为 true 时，系统将对 <code data-tag="code" id="2833ebb5edhru" class="code">instructions</code> 的内容进行语义增强与重写，生成更适合语音合成的内部指令。</p>
+                        <section id="575045f787wkn" class="section">
+                          <p id="fc450f4b01ezf">适用场景：推荐在追求高品质、精细化语音表达的场景下开启。</p>
+                          <p id="416c5f0d8astr">依赖关系：此参数依赖于 <code data-tag="code" id="832de2587c86k" class="code">instructions</code> 参数被设置。如果 <code data-tag="code" id="d58d968e9fkf5" class="code">instructions</code> 为空，此参数不生效。</p>
+                          <p id="75f7af4b36o41">适用范围：该功能仅适用于千问3-TTS-Instruct-Flash-Realtime系列模型。</p>
+                        </section>
+                      </section></td></tr></tbody></table></section><section id="6da8d24fe048v" class="section"><h2 uuid="md48wzlya7slb3pthjw" id="e580668d035j6"><b>关键接口</b></h2><section id="0254a1ddd6gj6" class="section"><h3 uuid="md495umakzhjx32h8rn" id="37a6cc33a7jk8">QwenTtsRealtime<b>类</b></h3><p uuid="md4c8aeq2s0yr6gxodj" id="bd2480f882k9v">引入方法：</p><pre code-type="xCode" id="5c58effcb41o9" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>import com.alibaba.dashscope.audio.qwen_tts_realtime.QwenTtsRealtime;</code></pre><table id="a94be864ba3fp" tablewidth="100" tablecolswidth="8.627858627858629 34.92723492723493 34.92723492723493 21.51767151767152" autofit="true" class="table"><colgroup colwidth="0.35*" style="width:8.63%"></colgroup><colgroup colwidth="1.4*" style="width:34.93%"></colgroup><colgroup colwidth="1.4*" style="width:34.93%"></colgroup><colgroup colwidth="0.86*" style="width:21.52%"></colgroup><tbody class="tbody"><tr id="09a8620078x54"><td id="07403f8f82gz2" rowspan="1" style="background-color:#e5e5e5;vertical-align:top" colspan="1"><p jc="left" uuid="mdebfbp87w0vbejn7y3" id="c136df9ff72d8" style="text-align:left"><b>成员方法</b></p></td><td id="f95084f1ea71l" rowspan="1" style="background-color:#e5e5e5;vertical-align:top" colspan="1"><p jc="left" uuid="mdebfbp8cn3n15t44dd" id="024556fc74g55" style="text-align:left"><b>方法签名</b></p></td><td id="8c5de774aaku6" rowspan="1" style="background-color:#e5e5e5;vertical-align:top" colspan="1"><p uuid="mdebfbp88ddcp5g32yt" id="32c4f325eegg0"><b>服务端响应事件（通过回调下发）</b></p></td><td id="07249de005l0p" rowspan="1" style="background-color:#e5e5e5;vertical-align:top" colspan="1"><p jc="left" uuid="mdebfbp8t3vcwbutsds" id="22cf793e64ein" style="text-align:left"><b>说明</b></p></td></tr><tr id="f107e89dc82l3"><td id="e814ceb8e7pe7" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="mdebfbp8ss3ayriedbo" id="04f983c4ecvh4" style="text-align:left">connect</p></td><td id="4fedf3edfbrn4" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="mdebfbp8ljn74lk1myr" id="17ac31119ajtl" style="text-align:left"></p><pre code-type="xCode" id="fd1fb91a287p1" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>public void connect() throws NoApiKeyException, InterruptedException</code></pre></td><td id="ca16368f83eam" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="md4as0k6po3jccmju3n" id="2169b670a27i3" style="text-align:left"><a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events#05bb97c283l2n" id="e8fd8d216dcpc" title="" class="xref">session.created</a></p><blockquote uuid="md4as0k6hscx7g4czw" id="ee6eaa5af95fx">会话已创建</blockquote><p jc="left" uuid="md4as0k6e5a0d9qbxev" id="6afa1c285eo9t" style="text-align:left"><a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events#58f078ab61di5" id="e3ae2dd39ecbh" title="" class="xref">session.updated</a></p><blockquote uuid="md4as0k6tx5nqf42zg" id="53b9b4650239q">会话配置已更新</blockquote></td><td id="c3cf654c119c0" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="mdebfbp89kgofqetnuv" id="9bd3f5f54dqdj" style="text-align:left">和服务端创建连接。</p></td></tr><tr id="172e067ebbkpm"><td id="e252cceb42b48" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp8gshec93up6l" id="3b4e8b1725bty">updateSession</p></td><td id="4ea8d1efb5k3g" rowspan="1" style="vertical-align:middle" colspan="1"><pre code-type="xCode" id="563b41cb629bh" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>public void updateSession(QwenTtsRealtimeConfig config)</code></pre></td><td id="193e9d6062af8" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="md4as37iwfvjbitd41k" id="eef5ce155am8r" style="text-align:left"><a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events#58f078ab61di5" id="f6882f2cbaapj" title="" class="xref">session.updated</a></p><blockquote uuid="md4as37ig71ekgpxkwl" id="5135fee1f9edn">会话配置已更新</blockquote></td><td id="38274a78969gn" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp8p6tz2yfgyj" id="7821a993adn7t">更新本次会话交互的默认配置。参数配置请参考《请求参数》章节。</p><p uuid="mdebfbp84rr736xrvy" id="98bf169859i6w">在您建立链接，服务端会及时返回用于此会话的默认输出输入配置。如果您需要更新默认会话配置，我们也推荐您总是在建立链接后即刻调用此接口。</p><p uuid="mdebfbp81cqg5p637f8" id="4f5e1531c6dwz">服务端在收到session.update事件后，会进行参数校验，如果参数不合法则返回错误，否则更新服务端侧的会话配置。</p></td></tr><tr id="94c06b71605b7"><td id="ba27c2b6cdf53" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp8nlqmsnqv7wn" id="c064d23f37s31">appendText</p></td><td id="9a9ab23913gwd" rowspan="1" style="vertical-align:middle" colspan="1"><pre code-type="xCode" id="afeaaf8aee3rg" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>public void appendText(String text)</code></pre><p uuid="mdebfbp850kwlkbdhgb" id="75029240d5fg1"></p></td><td id="e9810a5e41dty" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp8uusjhrmiwgd" id="819c7446fd4c9">无</p></td><td id="7d2abc0d4ax6l" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp8t7vsmk3kslf" id="a4e53e3cadbom">将文本片段追加到云端输入文本缓冲区。 缓冲区是你可以写入并稍后提交的临时存储。</p><p uuid="mdebfbp840ivd4vhhs9" id="057d0cb70fm92"></p><ul id="481d6d3da8t3a"><li id="60d375355eq4s"><p id="46d658c8b9nof">"server_commit"模式下，服务器决定何时提交并合成文本缓冲区中的文本。</p></li><li id="b5a39ef911kjm"><p id="df3f538b9eclr"> "commit"模式下，客户端需要主动通过commit触发语音合成。</p></li></ul></td></tr><tr id="ceeaf03d5c5f9"><td id="2005d51b78zz6" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp8qmu8rkp2vab" id="804cf1e3a403a">clearAppendedText</p></td><td id="c5e553a0eaz19" rowspan="1" style="vertical-align:middle" colspan="1"><pre code-type="xCode" id="263b98ef4eqal" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>public void clearAppendedText() </code></pre><p uuid="mdebfbp84s3pyqomhgn" id="9571cc8639y35"></p></td><td id="8c4bb25154lxj" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="md4asijoe7bgky9kpm" id="2b341916bbugx"><a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events#7a04edb8840o7" id="e35339838cifh" title="" class="xref">input_text_buffer.cleared</a></p><blockquote uuid="md4awqtnj7eozqcsnah" id="9619f5f60cjhy">清空服务端收到的文本</blockquote></td><td id="d1606216f2ulr" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp8629hxmzbg0d" id="e75b23f988vpu">删除当前云端缓冲区的文本。</p></td></tr><tr id="cf225523ab7jj"><td id="59b75121ea2ea" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp8b3b677x8a9" id="1197f52e632m2">commit</p></td><td id="e5795f5e39rr1" rowspan="1" style="vertical-align:middle" colspan="1"><pre code-type="xCode" id="22ac6ac96arqu" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>public void commit()</code></pre><p uuid="mdebfbp8rqbxbo2l1c" id="25d76017a52wd"></p></td><td id="0693e6d6ecrpj" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="md4ars5y84jz3j8z9k7" id="5dcb4be362n06" style="text-align:left"><a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events#76abc25665qt8" id="68ddd50491s3v" title="" class="xref">input_text_buffer.committed</a></p><blockquote uuid="md4ars5z7vwpfafm5gr" id="b845fc11e7ags">提交文本并触发语音合成</blockquote><p jc="left" uuid="mde9t6mz2k58o29cwxa" id="a35751fd1f3kr" style="text-align:left"><a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events#efd58c096b3bv" id="1f1751c0fe4us" title="" class="xref">response.output_item.added</a></p><blockquote uuid="mde9t6n0lzzvw2y39o" id="4c3f781a75fhh">响应时有新的输出内容</blockquote><p jc="left" uuid="mde9t6n1ikslfn1djvi" id="726833646e76h" style="text-align:left"><a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events#141bec9bb11yi" id="1cc7fcd8dbd8n" title="" class="xref">response.content_part.added</a></p><blockquote uuid="mde9t6n12cgs79hzi5c" id="caf6c6108ennz">新的输出内容添加到assistant message 项</blockquote><p jc="left" uuid="mde9t6n2mbv0uov03ls" id="4fb30bf312p9h" style="text-align:left"><a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events#a2b95643bdvnl" id="90676c08cdurz" title="" class="xref">response.audio.delta</a></p><blockquote uuid="mde9t6n2km9dhzoc2pl" id="4058ef26217ba">模型增量生成的音频</blockquote><p jc="left" uuid="mde9t6n3uwdg658emh" id="a48909c96ej09" style="text-align:left"><a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events#faa3f9bc106tj" id="1af6668552pv6" title="" class="xref">response.audio.done</a></p><blockquote uuid="mde9t6n3g571f0vslnt" id="8fec2608f955e">完成音频生成</blockquote><p jc="left" uuid="mde9t6n3mcacndu08ql" id="1b1ce44a15g4s" style="text-align:left"><a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events#5244e1dbc9vw6" id="d6683ba71bkiq" title="" class="xref">response.content_part.done</a></p><blockquote uuid="mde9t6n3lxwwuq7mbxp" id="435ba1db82otv">Assistant message 的音频内容流式输出完成</blockquote><p jc="left" uuid="mde9t6n46vyh4v5xxoy" id="5f4cd9429beym" style="text-align:left"><a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events#a922404106vzd" id="bae7339ce8jzb" title="" class="xref">response.output_item.done</a></p><blockquote uuid="mde9t6n4pgapg4rlt7l" id="eb4fb3402ddza">Assistant message 的整个输出项流式传输完成</blockquote><p jc="left" uuid="mde9t6n48t0xveyf2vv" id="d93b30fa48fph" style="text-align:left"><a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events#91f767e7440pc" id="7c10345a65ygk" title="" class="xref">response.done</a></p><blockquote uuid="mde9t6n5kxhnw1kvq9d" id="1c39212e10wqn">响应完成</blockquote></td><td id="98d3ec514f2va" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp81zeddx6ibcdj" id="95bcd940242if">提交之前通过append添加到云端缓冲区的文本，并立刻合成所有文本。如果输入的文本缓冲区为空将产生错误。</p><ul id="a8cd3dd651kw6"><li id="108fc9e76fry1"><p id="313f8967d3bo4">"server_commit"模式下，客户端不需要发送此事件，服务器会自动提交文本缓冲区。</p></li><li id="10a8d2f996jxo"><p id="a3cc6568e8m61">"commit"模式下，客户端必须通过commit触发语音合成。</p></li></ul></td></tr><tr id="07a71378d3mkn"><td id="082f70b8f22rs" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mde9wfho7nopf4gorf" id="e44c7d1756kxv">finish</p></td><td id="5607887b3d1to" rowspan="1" style="vertical-align:middle" colspan="1"><pre code-type="xCode" id="b93f9a6007dvv" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>public void finish()</code></pre></td><td id="34b5e281f5ryl" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="mde9x4cdduj3t8lhs7l" id="18a6a6dac3l5l" style="text-align:left"><a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events#ac332f7d78oxg" id="2c76ec1ed80i1" title="" class="xref">session.finished</a></p><blockquote uuid="mde9x4cdfzczwf0tw" id="34c721737bzmm">响应完成</blockquote></td><td id="a4ed52d035t8s" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mde9wfhopr5eubw30ke" id="ceebd5e207lbl">终止任务。</p></td></tr><tr id="04473a8a4dt79"><td id="ece1ebe8ceead" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp86ivbnz4ps06" id="8239e77c63e7m">close</p></td><td id="cb7fe061afz0y" rowspan="1" style="vertical-align:middle" colspan="1"><pre code-type="xCode" id="1e57f105503hx" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>public void close()</code></pre><p uuid="mdebfbp89at1o6q4zbw" id="39c1c8f72681g"></p></td><td id="4481758d77edi" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp8n9ga4nlqkf" id="a1794bba7fac0">无</p></td><td id="5511b73e7bbew" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp8iqrw358qo3" id="9587bda1f6nvk">关闭连接。</p></td></tr><tr id="6b82435f066nh"><td id="790cea33e8afw" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp8mf7vvguyqud" id="203688a403ipx">getSessionId</p></td><td id="5c464ac777vkr" rowspan="1" style="vertical-align:middle" colspan="1"><pre code-type="xCode" id="ddbf6894e453y" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>public String getSessionId()</code></pre><p uuid="mdebfbp9y9xwzdsj97" id="b9256e1a6fpki"></p></td><td id="ac755e8b92kk4" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp9r8u44o7iays" id="306888f2281a5">无</p></td><td id="16a725905172n" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp9puf1fdyxm3l" id="153d311143bg5">获取当前任务的session_id。</p></td></tr><tr id="6aa4f77cc5muw"><td id="0d937893ca80k" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp9v60xqv1hn6" id="2bde722063p3b">getResponseId</p></td><td id="84955cd5d5s9h" rowspan="1" style="vertical-align:middle" colspan="1"><pre code-type="xCode" id="3f15f98d05vq2" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>public String getResponseId() </code></pre><p uuid="mdebfbp9cod4yzoajjs" id="b36482bd3dk5l"></p></td><td id="0f9670329a590" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp9rz7lytavt" id="f84a2e8cdaq7j">无</p></td><td id="828a80013b1br" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp927awp172fvj" id="6c0a6c21716jp">获取最近一次response的response_id。</p></td></tr><tr id="e1f21a00f0lbx"><td id="564f75c35a56o" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp9v7qkmcg71m9" id="6c9ff744945iw">getFirstAudioDelay</p></td><td id="80cc8c93dbq3n" rowspan="1" style="vertical-align:middle" colspan="1"><pre code-type="xCode" id="1c9015cf61u63" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>public long getFirstAudioDelay()</code></pre><p uuid="mdebfbp9gjsqv6tb8nl" id="f6262827136at"></p></td><td id="52e0087abfekd" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp9sq4jv7c6wm" id="36f3da84cej47">无</p></td><td id="e9c6f1aefeng7" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="mdebfbp9646so0sa4nk" id="b0a530a688kn1">获取首包音频延迟。</p></td></tr></tbody></table></section><section id="d19ac166c24tp" class="section"><h3 uuid="md4aqxm0uj0vles588k" id="7d80f97d4fgc3"><b>回调接口（</b>QwenTtsRealtimeCallback<b>）</b></h3><table id="cbaecca71b1lx" tablewidth="100" tablecolswidth="25.05197505197505 25.05197505197505 25.05197505197505 24.844074844074846" autofit="true" class="table"><colgroup colwidth="1*" style="width:25.05%"></colgroup><colgroup colwidth="1*" style="width:25.05%"></colgroup><colgroup colwidth="1*" style="width:25.05%"></colgroup><colgroup colwidth="0.99*" style="width:24.84%"></colgroup><tbody class="tbody"><tr id="23cc4a40d36uf"><td id="567570cef4rhh" rowspan="1" style="background-color:rgb(229, 229, 229);vertical-align:top" colspan="1"><p jc="left" uuid="md4bahdk2iu4z64yxhj" id="91b2c91aa861c" style="text-align:left">方法</p></td><td id="384dfdbaafyix" rowspan="1" style="background-color:rgb(229, 229, 229);vertical-align:top" colspan="1"><p jc="left" uuid="md4bahdk1r5p2zcyqou" id="9e4d21aa3fvsk" style="text-align:left">参数</p></td><td id="3650f008f0f95" rowspan="1" style="background-color:rgb(229, 229, 229);vertical-align:top" colspan="1"><p jc="left" uuid="md4bahdk7vm4j832xq7" id="7684432a19auy" style="text-align:left">返回值</p></td><td id="f8fe3ecf36lcu" rowspan="1" style="background-color:rgb(229, 229, 229);vertical-align:top" colspan="1"><p jc="left" uuid="md4bahdkqg3q10ep74" id="94d09d16fc6a1" style="text-align:left">描述</p></td></tr><tr id="527f3e47d008h"><td id="2cb1993fee5tu" rowspan="1" style="vertical-align:middle" colspan="1"><pre code-type="xCode" id="d8b4197cfcge0" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>public void onOpen()</code></pre></td><td id="c99ad58657nyl" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="md4bahdk98zt0yn7c1" id="e37e45366ba1o" style="text-align:left">无</p></td><td id="145ec59ad9yxj" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="md4bahdklk75t8u2n6p" id="9000c7e107x9p" style="text-align:left">无</p></td><td id="4b1eb445dapav" rowspan="1" style="vertical-align:middle" colspan="1"><p jc="left" uuid="md4bahdkkn7vnh3jqn" id="ff9ab95033mds" style="text-align:left">当和服务端建立连接完成后，该方法立刻被回调。</p></td></tr><tr id="e48b327f50mj2"><td id="6dbadab550rht" rowspan="1" style="vertical-align:middle" colspan="1"><pre code-type="xCode" id="ce234fff27n8o" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>public abstract void onEvent(JsonObject message)</code></pre></td><td id="d70a9ec1968v8" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="md4bdstu32gpknchzf8" id="5ff154a2b9iab">message：服务端响应事件。</p></td><td id="7355516e6cza5" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="md4bdstuv5kmu1qixia" id="2e5d25496dtw3">无</p></td><td id="86add1945cl68" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="md4bdstuzfitdmqza4m" id="4dd51e3bacnev">包括对接口调用的回复响应和模型生成的文本和音频。具体可以参考：<a href="https://help.aliyun.com/zh/model-studio/qwen-tts-realtime-server-events" id="0422cb26148we" title="" class="xref">服务端事件</a></p></td></tr><tr id="1c6589f564lwb"><td id="381798bc86tv3" rowspan="1" style="vertical-align:middle" colspan="1"><pre code-type="xCode" id="219c91e5daxaa" data-tag="codeblock" outputclass="language-java" class="pre codeblock language-java"><code>public abstract void onClose(int code, String reason)</code></pre></td><td id="794ec0b1f2luw" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="md4bapj944kqwr7ldpa" id="b0f631253bf74">code：关闭WebSocket的状态码。</p><p uuid="md4bc10xi3ye5bm51vk" id="bfa56c15e57cu">reason：关闭WebSocket的关闭信息。</p></td><td id="12cdadcfde6z1" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="md4bapj94kvsttxg049" id="5013da0811sd6">无</p></td><td id="be7b909488g6w" rowspan="1" style="vertical-align:middle" colspan="1"><p uuid="md4bapj9pbt7439g5bb" id="69fbfbcacennd">当服务已经关闭连接后进行回调。</p></td></tr></tbody></table></section></section></div></main>
+
+</div></div>
+ <a href="/zh/model-studio/qwen-tts-realtime-python-sdk" title="Python SDK"
+>上一篇: Python SDK</a
+>
+ <a href="/zh/model-studio/interactive-process-of-qwen-tts-realtime-synthesis" title="实时语音合成交互流程"
+>下一篇: 实时语音合成交互流程</a
+>
+ </div>
+</div>
+<div class="help-footer-recommend"></div>
+</section>
+<div
+class="aliyun-docs-synopsis"
+id="aliyun-docs-synopsis"
+></div>
+</div>
+</section>
+</div>
+</div>
+</div>
+ <div class="aliyun-app-layout">
+<!-- seo -->
+<a href="https://www.aliyun.com/">阿里云首页</a>
+<a href="https://www.aliyun.com/product/bailian" title="大模型服务平台百炼">大模型服务平台百炼</a>
+<a href="https://developer.aliyun.com/modelstudio/" title="相关技术圈">相关技术圈</a>
+</div>
+ </div>
+ <script>
+var _performance_domEnd = window.performance && window.performance.now();
+</script>
+<footer><div id="c128e122f505853933ddf03e4f5a1b67"><div class="_18a32969382a277c44015217fbc5cb5a_box"><footer class="_49ada0cd752f65901c49f2eed0d6c3d5_container" aria-label="PC 端页尾"><div class="_49ada0cd752f65901c49f2eed0d6c3d5_inner"><div class="b34f022d45e42bd104ce1362bc0808b1_services"><nav class="b34f022d45e42bd104ce1362bc0808b1_homepage-footer-main-services" aria-label="页脚导航"><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">为什么选择阿里云</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/about/what-is-cloud-computing" target="_blank">什么是云计算</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://infrastructure.aliyun.com/" target="_blank">全球基础设施</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/why-us/leading-technology" target="_blank">技术领先</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/why-us/reliability" target="_blank">稳定可靠</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/why-us/security-compliance" target="_blank">安全合规</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/analyst-reports" target="_blank">分析师报告</a></section><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">大模型</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/product/tongyi" target="_blank">通义大模型</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://bailian.console.aliyun.com/?tab=model#/model-market" target="_blank" rel="nofollow">大模型服务</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://bailian.console.aliyun.com/app-center?tab=app#/app-center" target="_blank" rel="nofollow">AI应用构建</a></section><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">产品和定价</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/product/list" target="_blank">全部产品</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://free.aliyun.com/" target="_blank">免费试用</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/product/news/" target="_blank">产品动态</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/price/detail" target="_blank">产品定价</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/price/cpq/list" target="_blank">配置报价器</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/price/cost-management" target="_blank">云上成本管理</a></section><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">技术内容</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/solution/tech-solution" target="_blank">技术解决方案</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://help.aliyun.com/" target="_blank">帮助文档</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://developer.aliyun.com/" target="_blank">开发者社区</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://tianchi.aliyun.com/" target="_blank">天池大赛</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://edu.aliyun.com/" target="_blank">阿里云认证</a></section><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">权益</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://free.aliyun.com/" target="_blank">免费试用</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/solution/free" target="_blank">解决方案免费试用</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://university.aliyun.com/" target="_blank">高校计划</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/benefit/form/index" target="_blank">5亿算力补贴</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://dashi.aliyun.com/?ambRef=shouYeDaoHang2&amp;pageCode=yunparterIndex" target="_blank">推荐返现计划</a></section><section class="a52e48969cced2d562e47543eeb73ebb_ali-main-services"><h3 class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-title">服务</h3><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/service" target="_blank">基础服务</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/service/supportplans" target="_blank">企业增值服务</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/service/devopsimpl/devopsimpl_cloudmigration_public_cn" target="_blank">迁云服务</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://www.aliyun.com/notice/" target="_blank">官网公告</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://status.aliyun.com/" target="_blank">健康看板</a><a class="a52e48969cced2d562e47543eeb73ebb_ali-main-services-link" href="https://security.aliyun.com/trust-center" target="_blank">信任中心</a></section></nav><article class="_7b44142961778903dda8af3f769cd06c_focus"><h3 class="_7b44142961778903dda8af3f769cd06c_ali-main-services-title">关注阿里云</h3><p class="_7b44142961778903dda8af3f769cd06c_ali-main-services-desc">关注阿里云公众号或下载阿里云APP，关注云资讯，随时随地运维管控云服务</p><img alt="阿里云APP" src="https://img.alicdn.com/imgextra/i4/O1CN01XLesV31fkf7pYNATb_!!6000000004045-2-tps-400-400.png" class="_7b44142961778903dda8af3f769cd06c_ali-official-code" loading="lazy"/><img alt="阿里云微信" src="https://img.alicdn.com/tfs/TB1AOdINW6qK1RjSZFmXXX0PFXa-258-258.jpg" class="_7b44142961778903dda8af3f769cd06c_ali-official-code" loading="lazy"/><p class="_7b44142961778903dda8af3f769cd06c_consult-text">联系我们：4008013260</p></article></div><div class="_4598709a854bea355ceb6ef9f23f10d4_about-link-wrap"><a href="https://help.aliyun.com/product/67275.html" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">法律声明</a><a href="https://terms.alicdn.com/legal-agreement/terms/platform_service/20220906101446934/20220906101446934.html" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">Cookies政策</a><a href="https://aliyun.jubao.alibaba.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">廉正举报</a><a href="https://report.aliyun.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">安全举报</a><a href="https://www.aliyun.com/contact" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">联系我们</a><a href="https://careers.aliyun.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-about-link" target="_blank">加入我们</a></div><section class="_4598709a854bea355ceb6ef9f23f10d4_friend-link-wrap"><h3 hidden="">友情链接</h3><a href="https://www.alibabagroup.com/cn/global/home" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">阿里巴巴集团</a><a href="https://www.taobao.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">淘宝网</a><a href="https://www.tmall.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">天猫</a><a href="https://www.aliexpress.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">全球速卖通</a><a href="https://www.alibaba.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">阿里巴巴国际交易市场</a><a href="https://www.1688.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">1688</a><a href="https://www.alimama.com/index.htm" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">阿里妈妈</a><a href="https://www.fliggy.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">飞猪</a><a href="https://www.aliyun.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">阿里云计算</a><a href="https://wanwang.aliyun.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">万网</a><a href="https://mobile.amap.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">高德</a><a href="https://www.uc.cn/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">UC</a><a href="https://www.umeng.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">友盟</a><a href="https://www.youku.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">优酷</a><a href="https://www.dingtalk.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">钉钉</a><a href="https://www.alipay.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">支付宝</a><a href="https://damo.alibaba.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">达摩院</a><a href="https://world.taobao.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">淘宝海外</a><a href="https://www.aliyundrive.com/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">阿里云盘</a><a href="https://www.ele.me/" class="_4598709a854bea355ceb6ef9f23f10d4_ali-friend-link" target="_blank">淘宝闪购</a></section><p class="_4598709a854bea355ceb6ef9f23f10d4_ali-copyright-text">© 2009-现在 Aliyun.com 版权所有 增值电信业务经营许可证： <a href="http://beian.miit.gov.cn/" target="_blank">浙B2-20080101</a> 域名注册服务机构许可： <a href="https://domain.miit.gov.cn/域名注册服务机构/互联网域名/阿里云计算有限公司 " target="_blank">浙D3-20210002</a></p><p class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-wrap"><a href="https://zzlz.gsxt.gov.cn/businessCheck/verifKey.do?showType=p&amp;serial=91330106673959654P-SAIC_SHOW_10000091330106673959654P1710919400712&amp;signData=MEUCIQDEkCd8cK7%2Fyqe6BNMWvoMPtAnsgKa7FZetfPkjZMsvhAIgOX1G9YC6FKyndE7o7hL0KaBVn4f%20V%2Fiof3iAgpsV09o%3D" target="_blank" class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-link"><img src="//gw.alicdn.com/tfs/TB1GxwdSXXXXXa.aXXXXXXXXXXX-65-70.gif" class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-img" alt="" loading="lazy"/></a><a href="http://www.beian.gov.cn/portal/registerSystemInfo" target="_blank" class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-link"><img src="//img.alicdn.com/tfs/TB1..50QpXXXXX7XpXXXXXXXXXX-40-40.png" class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-img" alt="浙公网安备 33010602009975号" loading="lazy"/><span class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-link-text">浙公网安备 33010602009975号</span></a><a href="https://beian.miit.gov.cn/" target="_blank" class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-link"><span class="_4598709a854bea355ceb6ef9f23f10d4_ali-report-link-text _4598709a854bea355ceb6ef9f23f10d4_ali-report-link-text-unique">浙B2-20080101-4</span></a></p></div></footer><footer class="_4b41e3343c851a7a8833c9165b249eb2_container" aria-label="移动端页尾"></footer></div></div></footer>
+
+<script>
+if (_performance_domEnd <= 10000) {
+// pcp上报
+window.ALIYUN_PERF && window.ALIYUN_PERF.report();
+window.ALIYUN_PERF &&
+window.ALIYUN_PERF.getPCP().then((rst) => {
+// pcp埋点
+var data = {
+product: "help.aliyun.com", // 站点
+ua: navigator.userAgent, // ua
+device: "pc", // 设备
+page: "document", // 页面
+lang: window.globalData.language || "zh", //站点语言
+cna: "", // 用户标识
+url: window.location.href,
+action: "pcp",
+userParams1: rst || 0,
+};
+let queryStr = Object.keys(data)
+.map(
+(key) =>
+data[key] &&
+`${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`,
+)
+.join("&");
+fetch(
+"https://help-new.cn-wulanchabu.log.aliyuncs.com/logstores/web-tracking/track?APIVersion=0.6.0&" +
+queryStr,
+);
+});
+}
+// fastLogin标记
+window.FastLoginContext = {
+tenantName: "help-aliyun-com-portal",
+};
+</script>
+<script
+crossorigin
+src="https://g.alicdn.com/code/lib/??react/16.8.6/umd/react.production.min.js,react-dom/16.8.6/umd/react-dom.production.min.js"
+></script>
+<script
+src="https://g.alicdn.com/code/lib/lodash.js/4.17.21/lodash.min.js"
+crossorigin="anonymous"
+></script>
+<script
+async
+src="https://g.alicdn.com/aliyun-help/help-portal-fe/0.12.38/js/vendor.js"
+></script>
+<script
+async
+src="https://g.alicdn.com/aliyun-help/help-portal-fe/0.12.38/js/index.js"
+></script>
+<script
+async
+src="//g.alicdn.com/dawn/assets-loader/scripts/fast-login.js?tenantName=help-aliyun-com-portal"
+></script>
+<script defer src="https://cloud-assets.alicdn.com/website.js"></script>
+<script src="https://g.alicdn.com/code/npm/@ali/??biu-loader/0.1.2/index.js,hmod-preact/0.0.1/index.js,hmod-preact-hooks/0.0.1/index.js,hmod-preact-compat/0.0.1/index.js,hmod-preact-bridge/0.1.4/index.js,hmod-ace-service-loader/0.1.1/index.js"></script>
+<script src="https://g.alicdn.com/aliyun-com/lowcode-engine/0.1.73/renderer/build/js/index.js"></script>
+<script src="https://g.alicdn.com/code/npm/@ali??hmod-ace-2023-box/0.1.0/index.js,hmod-aliyun-com-floating-toolbar/0.2.4/index.js,hmod-aliyun-com-global-nav-search/0.7.15/index.js,hmod-aliyun-com-global-nav/0.3.3/index.js"></script>
+<script src="https://cloud-assets.alicdn.com/lowcode/entry/prod/770f73a3c0ad6ce7da74e547d5948415.js"></script>
+<script src="https://g.alicdn.com/code/npm/@ali??hmod-ace-2023-box/0.1.0/index.js,hmod-ace-2024-global-footer/0.1.2/index.js,hmod-lowcode-normal-page/0.1.0/index.js"></script>
+<script src="https://cloud-assets.alicdn.com/lowcode/entry/prod/c128e122f505853933ddf03e4f5a1b67.js"></script>
+<script src="https://cloud-assets.alicdn.com/website.js"></script>
+</body>
+</html>
+
