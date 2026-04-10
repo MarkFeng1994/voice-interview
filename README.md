@@ -89,6 +89,17 @@ $env:SPRING_PROFILES_ACTIVE='dev,openai'
 mvn spring-boot:run
 ```
 
+### AI Provider Layout
+
+- `langchain4j`：基于 `app.openai.ai.*` 做 LLM 编排（当前默认 AI provider）。
+- `openai`：legacy direct HTTP fallback。
+- `mock`：用于本地稳定测试。
+- `ASR/TTS` provider 继续独立配置，不与 LLM provider 强绑定。
+
+### Why LangChain4j
+
+保留 `ASR/TTS` provider 独立演进，同时将 LLM 编排统一迁到 `LangChain4j`，便于后续平滑扩展 `tools / memory / RAG / agent` 能力。
+
 如果三条能力共用同一个兼容站，至少需要这些环境变量：
 
 ```powershell
