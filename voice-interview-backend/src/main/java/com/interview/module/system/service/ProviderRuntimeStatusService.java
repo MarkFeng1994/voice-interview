@@ -41,19 +41,26 @@ public class ProviderRuntimeStatusService {
 			return new CapabilityStatus("mock", "UP", "mock LLM", Map.of());
 		}
 		if ("openai".equalsIgnoreCase(aiProvider)) {
-			String baseUrl = openAiProperties.resolveAiBaseUrl();
-			String apiKey = openAiProperties.resolveAiApiKey();
-			String model = openAiProperties.resolveAiModel();
-			Map<String, Object> details = new LinkedHashMap<>();
-			details.put("baseUrl", baseUrl);
-			details.put("model", model);
-			details.put("apiKeyConfigured", apiKey != null && !apiKey.isBlank());
-			if (apiKey == null || apiKey.isBlank()) {
-				return new CapabilityStatus("openai", "DOWN", "LLM missing API Key", details);
-			}
-			return new CapabilityStatus("openai", "CONFIGURED", "LLM configured", details);
+			return inspectOpenAiCompatibleAi("openai");
+		}
+		if ("langchain4j".equalsIgnoreCase(aiProvider)) {
+			return inspectOpenAiCompatibleAi("langchain4j");
 		}
 		return new CapabilityStatus(aiProvider, "UNKNOWN", "Unknown LLM provider", Map.of());
+	}
+
+	private CapabilityStatus inspectOpenAiCompatibleAi(String providerName) {
+		String baseUrl = openAiProperties.resolveAiBaseUrl();
+		String apiKey = openAiProperties.resolveAiApiKey();
+		String model = openAiProperties.resolveAiModel();
+		Map<String, Object> details = new LinkedHashMap<>();
+		details.put("baseUrl", baseUrl);
+		details.put("model", model);
+		details.put("apiKeyConfigured", apiKey != null && !apiKey.isBlank());
+		if (apiKey == null || apiKey.isBlank()) {
+			return new CapabilityStatus(providerName, "DOWN", "LLM missing API Key", details);
+		}
+		return new CapabilityStatus(providerName, "CONFIGURED", "LLM configured", details);
 	}
 
 	private CapabilityStatus inspectAsr() {
