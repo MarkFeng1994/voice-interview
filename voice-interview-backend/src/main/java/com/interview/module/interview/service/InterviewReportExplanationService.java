@@ -19,6 +19,7 @@ import com.interview.module.interview.engine.model.InterviewRoundRecord;
 @Service
 public class InterviewReportExplanationService {
 
+	private static final String SUMMARY_SLOT_PREFIX = "SUMMARY";
 	private static final String EVIDENCE_SLOT_PREFIX = "E";
 	private static final String SUGGESTION_SLOT_PREFIX = "S";
 
@@ -257,20 +258,26 @@ public class InterviewReportExplanationService {
 			InterviewReportView report,
 			InterviewOverallExplanationView ruleExplanation
 	) {
-		if (ruleExplanation == null) {
-			return null;
+		if (ruleExplanation == null || ruleExplanation.level() == null) {
+			return ruleExplanation;
 		}
+		String taggedRuleSummary = tagSummary("OVERALL", ruleExplanation.level(), ruleExplanation.summaryText());
 		List<String> taggedRuleEvidencePoints = tagItems(ruleExplanation.evidencePoints(), EVIDENCE_SLOT_PREFIX);
 		List<String> taggedRuleSuggestions = tagItems(ruleExplanation.improvementSuggestions(), SUGGESTION_SLOT_PREFIX);
 		InterviewReportExplanationResult polished = polishExplanation(new InterviewReportExplanationCommand(
 				"OVERALL",
 				report == null ? null : report.title(),
 				report == null ? null : report.overallComment(),
-				ruleExplanation == null ? null : ruleExplanation.level(),
-				ruleExplanation == null ? null : ruleExplanation.summaryText(),
+				ruleExplanation.level(),
+				taggedRuleSummary,
 				taggedRuleEvidencePoints,
 				taggedRuleSuggestions
 		));
+		String polishedSummary = stripTaggedSummary(
+				polished == null ? null : polished.summaryText(),
+				"OVERALL",
+				ruleExplanation.level()
+		);
 		List<String> polishedEvidencePoints = stripTaggedItems(
 				polished == null ? null : polished.evidencePoints(),
 				taggedRuleEvidencePoints.size(),
@@ -281,12 +288,12 @@ public class InterviewReportExplanationService {
 				taggedRuleSuggestions.size(),
 				SUGGESTION_SLOT_PREFIX
 		);
-		if (!hasValidPolishSummary(polished) || polishedEvidencePoints == null || polishedSuggestions == null) {
+		if (polishedSummary == null || polishedEvidencePoints == null || polishedSuggestions == null) {
 			return ruleExplanation;
 		}
 		return new InterviewOverallExplanationView(
 				ruleExplanation.level(),
-				polished.summaryText().trim(),
+				polishedSummary,
 				polishedEvidencePoints,
 				polishedSuggestions,
 				"RULE_PLUS_LLM"
@@ -298,20 +305,26 @@ public class InterviewReportExplanationService {
 			InterviewQuestionReportView questionReport,
 			InterviewQuestionExplanationView ruleExplanation
 	) {
-		if (ruleExplanation == null) {
-			return null;
+		if (ruleExplanation == null || ruleExplanation.performanceLevel() == null) {
+			return ruleExplanation;
 		}
+		String taggedRuleSummary = tagSummary("QUESTION", ruleExplanation.performanceLevel(), ruleExplanation.summaryText());
 		List<String> taggedRuleEvidencePoints = tagItems(ruleExplanation.evidencePoints(), EVIDENCE_SLOT_PREFIX);
 		List<String> taggedRuleSuggestions = tagItems(suggestionAsList(ruleExplanation.improvementSuggestion()), SUGGESTION_SLOT_PREFIX);
 		InterviewReportExplanationResult polished = polishExplanation(new InterviewReportExplanationCommand(
 				"QUESTION",
 				questionReport == null ? null : questionReport.title(),
 				questionReport == null ? question == null ? null : question.promptSnapshot() : questionReport.prompt(),
-				ruleExplanation == null ? null : ruleExplanation.performanceLevel(),
-				ruleExplanation == null ? null : ruleExplanation.summaryText(),
+				ruleExplanation.performanceLevel(),
+				taggedRuleSummary,
 				taggedRuleEvidencePoints,
 				taggedRuleSuggestions
 		));
+		String polishedSummary = stripTaggedSummary(
+				polished == null ? null : polished.summaryText(),
+				"QUESTION",
+				ruleExplanation.performanceLevel()
+		);
 		List<String> polishedEvidencePoints = stripTaggedItems(
 				polished == null ? null : polished.evidencePoints(),
 				taggedRuleEvidencePoints.size(),
@@ -322,7 +335,7 @@ public class InterviewReportExplanationService {
 				taggedRuleSuggestions.size(),
 				SUGGESTION_SLOT_PREFIX
 		);
-		if (!hasValidPolishSummary(polished)
+		if (polishedSummary == null
 				|| polishedEvidencePoints == null
 				|| polishedSuggestions == null
 				|| polishedSuggestions.size() != 1) {
@@ -330,7 +343,7 @@ public class InterviewReportExplanationService {
 		}
 		return new InterviewQuestionExplanationView(
 				ruleExplanation.performanceLevel(),
-				polished.summaryText().trim(),
+				polishedSummary,
 				polishedEvidencePoints,
 				polishedSuggestions.get(0),
 				"RULE_PLUS_LLM"
@@ -393,6 +406,29 @@ public class InterviewReportExplanationService {
 		return List.copyOf(normalized);
 	}
 
+	private String tagSummary(String scope, String level, String summaryText) {
+		if (summaryText == null || summaryText.isBlank()) {
+			return null;
+		}
+		return summarySlotTag(scope, level) + " " + summaryText.trim();
+	}
+
+	private String stripTaggedSummary(String summaryText, String scope, String level) {
+		if (summaryText == null || summaryText.isBlank()) {
+			return null;
+		}
+		String normalized = summaryText.trim();
+		String tag = summarySlotTag(scope, level);
+		if (!normalized.startsWith(tag)) {
+			return null;
+		}
+		String content = normalized.substring(tag.length()).trim();
+		if (content.isBlank()) {
+			return null;
+		}
+		return content;
+	}
+
 	private List<String> tagItems(List<String> items, String slotPrefix) {
 		List<String> normalized = normalizeItems(items);
 		List<String> tagged = new ArrayList<>();
@@ -430,10 +466,8 @@ public class InterviewReportExplanationService {
 		return "[" + slotPrefix + slotIndex + "]";
 	}
 
-	private boolean hasValidPolishSummary(InterviewReportExplanationResult result) {
-		return result != null
-				&& result.summaryText() != null
-				&& !result.summaryText().isBlank();
+	private String summarySlotTag(String scope, String level) {
+		return "[" + SUMMARY_SLOT_PREFIX + ":" + scope + ":" + level + "]";
 	}
 
 	private String levelFromScore(Integer score) {

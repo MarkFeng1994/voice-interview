@@ -122,13 +122,14 @@ public class LangChain4jAiService implements AiService {
 			);
 			InterviewReportExplanationResult output = parseJsonObject(content, InterviewReportExplanationResult.class);
 			if (output == null) {
-				return null;
+				throw new IllegalStateException("Failed to parse report explanation polish result as JSON");
 			}
-			return new InterviewReportExplanationResult(
+			InterviewReportExplanationResult normalizedOutput = new InterviewReportExplanationResult(
 					blankToNull(output.summaryText()),
 					normalizeList(output.evidencePoints()),
 					normalizeList(output.improvementSuggestions())
 			);
+			return validateReportExplanationContract(command, normalizedOutput);
 		});
 	}
 
@@ -246,5 +247,34 @@ public class LangChain4jAiService implements AiService {
 			normalized = normalized.substring(0, normalized.length() - 3);
 		}
 		return normalized.trim();
+	}
+
+	private InterviewReportExplanationResult validateReportExplanationContract(
+			InterviewReportExplanationCommand command,
+			InterviewReportExplanationResult result
+	) {
+		if (result.summaryText() == null || result.summaryText().isBlank()) {
+			throw new IllegalStateException("Invalid report explanation contract: summaryText is missing");
+		}
+		String expectedSummaryTag = extractLeadingTag(command.summaryText());
+		if (expectedSummaryTag == null || !result.summaryText().trim().startsWith(expectedSummaryTag)) {
+			throw new IllegalStateException("Invalid report explanation contract: summaryText slot marker is missing");
+		}
+		return result;
+	}
+
+	private String extractLeadingTag(String value) {
+		if (value == null || value.isBlank()) {
+			return null;
+		}
+		String normalized = value.trim();
+		if (!normalized.startsWith("[")) {
+			return null;
+		}
+		int tagEnd = normalized.indexOf(']');
+		if (tagEnd <= 1) {
+			return null;
+		}
+		return normalized.substring(0, tagEnd + 1);
 	}
 }

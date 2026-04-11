@@ -1,6 +1,7 @@
 package com.interview.module.ai.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -75,10 +76,11 @@ class OpenAiCompatibleAiServiceTest {
 	@Test
 	void should_fallback_to_streaming_responses_for_report_explanation_polish() throws Exception {
 		String responseJson = """
-				{"summaryText":"润色后的总结","evidencePoints":["[E1] 润色后的证据"],"improvementSuggestions":["[S1] 润色后的建议"]}
+				{"summaryText":"[SUMMARY:OVERALL:MEDIUM] 润色后的总结","evidencePoints":["[E1] 润色后的证据"],"improvementSuggestions":["[S1] 润色后的建议"]}
 				""";
 		try (StubAiGateway gateway = new StubAiGateway(responseJson)) {
-			OpenAiCompatibleAiService service = createService(gateway.baseUrl());
+			ProviderMetricsService metricsService = new ProviderMetricsService();
+			OpenAiCompatibleAiService service = createService(gateway.baseUrl(), metricsService);
 
 			InterviewReportExplanationResult result = service.polishInterviewReportExplanation(
 					new InterviewReportExplanationCommand(
@@ -86,7 +88,7 @@ class OpenAiCompatibleAiServiceTest {
 							"Redis",
 							"整体基础可用。",
 							"MEDIUM",
-							"规则总结",
+							"[SUMMARY:OVERALL:MEDIUM] 规则总结",
 							List.of("[E1] 规则证据"),
 							List.of("[S1] 规则建议")
 					)
@@ -95,21 +97,58 @@ class OpenAiCompatibleAiServiceTest {
 			String requestBody = gateway.lastResponsesRequestBody();
 			String input = new ObjectMapper().readTree(requestBody).path("input").asText();
 			String instructions = new ObjectMapper().readTree(requestBody).path("instructions").asText();
-			assertThat(result.summaryText()).isEqualTo("润色后的总结");
+			assertThat(result.summaryText()).isEqualTo("[SUMMARY:OVERALL:MEDIUM] 润色后的总结");
 			assertThat(result.evidencePoints()).containsExactly("[E1] 润色后的证据");
 			assertThat(result.improvementSuggestions()).containsExactly("[S1] 润色后的建议");
+			ProviderMetricsService.ProviderMetricView metric = findMetric(metricsService, "AI_REPORT_EXPLANATION");
+			assertThat(metric.successCalls()).isEqualTo(1);
+			assertThat(metric.failureCalls()).isEqualTo(0);
 			assertThat(gateway.chatCalls()).isEqualTo(1);
 			assertThat(gateway.responsesCalls()).isEqualTo(1);
 			assertThat(requestBody).contains("\"stream\":true");
-			assertThat(instructions).contains("[E1]").contains("[S1]").contains("槽位标记");
+			assertThat(instructions).contains("[SUMMARY:OVERALL:MEDIUM]").contains("[E1]").contains("[S1]").contains("槽位标记");
 			assertThat(input).contains("\"scope\":\"OVERALL\"");
-			assertThat(input).contains("\"summaryText\":\"规则总结\"");
+			assertThat(input).contains("\"summaryText\":\"[SUMMARY:OVERALL:MEDIUM] 规则总结\"");
 			assertThat(input).contains("\"evidencePoints\":[\"[E1] 规则证据\"]");
 			assertThat(input).contains("\"improvementSuggestions\":[\"[S1] 规则建议\"]");
 		}
 	}
 
+	@Test
+	void should_record_failure_when_report_explanation_contract_is_invalid() throws Exception {
+		String responseJson = """
+				```json
+				{"summaryText":"润色后的总结","evidencePoints":["[E1] 润色后的证据"],"improvementSuggestions":["[S1] 润色后的建议"]}
+				```
+				""";
+		try (StubAiGateway gateway = new StubAiGateway(responseJson)) {
+			ProviderMetricsService metricsService = new ProviderMetricsService();
+			OpenAiCompatibleAiService service = createService(gateway.baseUrl(), metricsService);
+
+			assertThatThrownBy(() -> service.polishInterviewReportExplanation(
+					new InterviewReportExplanationCommand(
+							"OVERALL",
+							"Redis",
+							"整体基础可用。",
+							"MEDIUM",
+							"[SUMMARY:OVERALL:MEDIUM] 规则总结",
+							List.of("[E1] 规则证据"),
+							List.of("[S1] 规则建议")
+					)
+			)).isInstanceOf(IllegalStateException.class)
+					.hasMessageContaining("summaryText");
+
+			ProviderMetricsService.ProviderMetricView metric = findMetric(metricsService, "AI_REPORT_EXPLANATION");
+			assertThat(metric.successCalls()).isEqualTo(0);
+			assertThat(metric.failureCalls()).isEqualTo(1);
+		}
+	}
+
 	private OpenAiCompatibleAiService createService(String baseUrl) {
+		return createService(baseUrl, new ProviderMetricsService());
+	}
+
+	private OpenAiCompatibleAiService createService(String baseUrl, ProviderMetricsService metricsService) {
 		OpenAiProperties properties = new OpenAiProperties();
 		properties.getAi().setBaseUrl(baseUrl);
 		properties.getAi().setApiKey("test-key");
@@ -118,8 +157,15 @@ class OpenAiCompatibleAiServiceTest {
 				RestClient.builder(),
 				new ObjectMapper(),
 				properties,
-				new ProviderMetricsService()
+				metricsService
 		);
+	}
+
+	private ProviderMetricsService.ProviderMetricView findMetric(ProviderMetricsService metricsService, String capability) {
+		return metricsService.snapshot().stream()
+				.filter(metric -> capability.equals(metric.capability()))
+				.findFirst()
+				.orElseThrow();
 	}
 
 	private static final class StubAiGateway implements AutoCloseable {

@@ -10,9 +10,9 @@ public interface InterviewReportExplanationAssistant {
 
 	@SystemMessage("""
 			你是面试报告解释润色助手。
-			evidencePoints 和 improvementSuggestions 的每一项都会带稳定槽位标记，例如 [E1]、[E2]、[S1]。
-			只允许润色槽位标记后面的文案，不允许改写原有结论、证据事实、建议方向、强弱判断，也不允许改动槽位标记、列表顺序或数量。
-			保持 evidencePoints 和 improvementSuggestions 的语义不变，仅优化措辞。
+			summaryText、evidencePoints 和 improvementSuggestions 都会带稳定槽位标记，例如 [SUMMARY:OVERALL:MEDIUM]、[SUMMARY:QUESTION:WEAK]、[E1]、[S1]。
+			只允许润色槽位标记后面的文案，不允许改写原有结论、证据事实、建议方向、强弱判断，也不允许改动 summaryText 的槽位标记、列表槽位标记、列表顺序或数量。
+			保持 summaryText、evidencePoints 和 improvementSuggestions 的语义不变，仅优化措辞。
 			如果无法严格保留每个槽位标记及其顺序，就原样返回对应项，不要自行重排。
 			只返回符合 InterviewReportExplanationResult 的 JSON。
 			""")

@@ -1,6 +1,7 @@
 package com.interview.module.ai.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -231,13 +232,13 @@ class LangChain4jAiServiceTest {
 				"Redis",
 				"请说明 Redis 的使用场景和一致性策略。",
 				"MEDIUM",
-				"规则总结",
+				"[SUMMARY:QUESTION:MEDIUM] 规则总结",
 				List.of("[E1] 规则证据"),
 				List.of("[S1] 规则建议")
 		)).thenReturn("""
 				```json
 				{
-				  "summaryText": "润色后的总结",
+				  "summaryText": "[SUMMARY:QUESTION:MEDIUM] 润色后的总结",
 				  "evidencePoints": ["[E1] 润色后的证据"],
 				  "improvementSuggestions": ["[S1] 润色后的建议"]
 				}
@@ -258,13 +259,13 @@ class LangChain4jAiServiceTest {
 						"Redis",
 						"请说明 Redis 的使用场景和一致性策略。",
 						"MEDIUM",
-						"规则总结",
+						"[SUMMARY:QUESTION:MEDIUM] 规则总结",
 						List.of("[E1] 规则证据"),
 						List.of("[S1] 规则建议")
 				)
 		);
 
-		assertThat(result.summaryText()).isEqualTo("润色后的总结");
+		assertThat(result.summaryText()).isEqualTo("[SUMMARY:QUESTION:MEDIUM] 润色后的总结");
 		assertThat(result.evidencePoints()).containsExactly("[E1] 润色后的证据");
 		assertThat(result.improvementSuggestions()).containsExactly("[S1] 润色后的建议");
 		ProviderMetricView metric = findMetric(metricsService, "AI_REPORT_EXPLANATION");
@@ -277,10 +278,56 @@ class LangChain4jAiServiceTest {
 				"Redis",
 				"请说明 Redis 的使用场景和一致性策略。",
 				"MEDIUM",
-				"规则总结",
+				"[SUMMARY:QUESTION:MEDIUM] 规则总结",
 				List.of("[E1] 规则证据"),
 				List.of("[S1] 规则建议")
 		);
+	}
+
+	@Test
+	void should_record_failure_when_report_explanation_contract_is_invalid() {
+		InterviewReportExplanationAssistant assistant = mock(InterviewReportExplanationAssistant.class);
+		when(assistant.polish(
+				"QUESTION",
+				"Redis",
+				"请说明 Redis 的使用场景和一致性策略。",
+				"MEDIUM",
+				"[SUMMARY:QUESTION:MEDIUM] 规则总结",
+				List.of("[E1] 规则证据"),
+				List.of("[S1] 规则建议")
+		)).thenReturn("""
+				{
+				  "summaryText": "润色后的总结",
+				  "evidencePoints": ["[E1] 润色后的证据"],
+				  "improvementSuggestions": ["[S1] 润色后的建议"]
+				}
+				""");
+
+		ProviderMetricsService metricsService = new ProviderMetricsService();
+		LangChain4jAiService service = createService(
+				metricsService,
+				mock(InterviewReplyAssistant.class),
+				mock(ResumeKeywordAssistant.class),
+				mock(ResumeQuestionAssistant.class),
+				assistant
+		);
+
+		assertThatThrownBy(() -> service.polishInterviewReportExplanation(
+				new InterviewReportExplanationCommand(
+						"QUESTION",
+						"Redis",
+						"请说明 Redis 的使用场景和一致性策略。",
+						"MEDIUM",
+						"[SUMMARY:QUESTION:MEDIUM] 规则总结",
+						List.of("[E1] 规则证据"),
+						List.of("[S1] 规则建议")
+				)
+		)).isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("summaryText");
+
+		ProviderMetricView metric = findMetric(metricsService, "AI_REPORT_EXPLANATION");
+		assertThat(metric.successCalls()).isEqualTo(0);
+		assertThat(metric.failureCalls()).isEqualTo(1);
 	}
 
 	@Test
@@ -290,7 +337,7 @@ class LangChain4jAiServiceTest {
 				.getAnnotation(SystemMessage.class);
 
 		assertThat(systemMessage).isNotNull();
-		assertThat(systemMessage.value()[0]).contains("[E1]").contains("[S1]").contains("槽位标记");
+		assertThat(systemMessage.value()[0]).contains("[SUMMARY:OVERALL:MEDIUM]").contains("[SUMMARY:QUESTION:").contains("[E1]").contains("[S1]").contains("槽位标记");
 	}
 
 	private LangChain4jAiService createService(

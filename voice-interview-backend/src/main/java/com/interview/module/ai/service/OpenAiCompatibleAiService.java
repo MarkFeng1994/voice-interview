@@ -47,8 +47,8 @@ public class OpenAiCompatibleAiService implements AiService {
 	private static final String INTERVIEW_REPORT_EXPLANATION_POLISH_PROMPT = """
 			你是面试报告解释润色助手。
 			你会收到一个 JSON 对象，字段包括 scope、title、prompt、level、summaryText、evidencePoints、improvementSuggestions。
-			evidencePoints 和 improvementSuggestions 的每一项都会带稳定槽位标记，例如 [E1]、[E2]、[S1]。
-			只允许润色槽位标记后面的文案，不允许改写原有结论、证据事实、建议方向、强弱判断，也不允许改动槽位标记、列表顺序或数量。
+			summaryText、evidencePoints 和 improvementSuggestions 都会带稳定槽位标记，例如 [SUMMARY:OVERALL:MEDIUM]、[SUMMARY:QUESTION:WEAK]、[E1]、[S1]。
+			只允许润色槽位标记后面的文案，不允许改写原有结论、证据事实、建议方向、强弱判断，也不允许改动 summaryText 的槽位标记、列表槽位标记、列表顺序或数量。
 			保持 summaryText、evidencePoints、improvementSuggestions 的语义一致，仅优化措辞、清晰度和可读性。
 			如果无法严格保留每个槽位标记及其顺序，就原样返回对应项，不要自行重排。
 			返回 JSON 格式：
@@ -211,16 +211,16 @@ public class OpenAiCompatibleAiService implements AiService {
 					serializeInterviewReportExplanationCommand(command),
 					true
 			);
-			try {
-				JsonNode result = objectMapper.readTree(content);
-				return new InterviewReportExplanationResult(
-						valueOrNull(result.path("summaryText").asText(null)),
-						jsonArrayToList(result.path("evidencePoints")),
-						jsonArrayToList(result.path("improvementSuggestions"))
-				);
-			} catch (Exception ex) {
-				return null;
+			JsonNode result = parseJsonNode(content);
+			if (result == null || !result.isObject()) {
+				throw new IllegalStateException("Failed to parse report explanation polish result as JSON");
 			}
+			InterviewReportExplanationResult explanationResult = new InterviewReportExplanationResult(
+					valueOrNull(result.path("summaryText").asText(null)),
+					jsonArrayToList(result.path("evidencePoints")),
+					jsonArrayToList(result.path("improvementSuggestions"))
+			);
+			return validateReportExplanationContract(command, explanationResult);
 		});
 	}
 
@@ -370,6 +370,74 @@ public class OpenAiCompatibleAiService implements AiService {
 			}
 		}
 		return result;
+	}
+
+	private InterviewReportExplanationResult validateReportExplanationContract(
+			InterviewReportExplanationCommand command,
+			InterviewReportExplanationResult result
+	) {
+		if (result == null || result.summaryText() == null || result.summaryText().isBlank()) {
+			throw new IllegalStateException("Invalid report explanation contract: summaryText is missing");
+		}
+		String expectedSummaryTag = extractLeadingTag(command.summaryText());
+		if (expectedSummaryTag == null || !result.summaryText().trim().startsWith(expectedSummaryTag)) {
+			throw new IllegalStateException("Invalid report explanation contract: summaryText slot marker is missing");
+		}
+		return result;
+	}
+
+	private String extractLeadingTag(String value) {
+		if (value == null || value.isBlank()) {
+			return null;
+		}
+		String normalized = value.trim();
+		if (!normalized.startsWith("[")) {
+			return null;
+		}
+		int tagEnd = normalized.indexOf(']');
+		if (tagEnd <= 1) {
+			return null;
+		}
+		return normalized.substring(0, tagEnd + 1);
+	}
+
+	private JsonNode parseJsonNode(String content) {
+		if (content == null || content.isBlank()) {
+			return null;
+		}
+		String normalized = stripCodeFence(content.trim());
+		JsonNode directNode = readJsonNode(normalized);
+		if (directNode != null) {
+			return directNode;
+		}
+		int start = normalized.indexOf('{');
+		int end = normalized.lastIndexOf('}');
+		if (start >= 0 && end > start) {
+			return readJsonNode(normalized.substring(start, end + 1));
+		}
+		return null;
+	}
+
+	private JsonNode readJsonNode(String value) {
+		try {
+			return objectMapper.readTree(value);
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+
+	private String stripCodeFence(String value) {
+		String normalized = value;
+		if (normalized.startsWith("```")) {
+			int firstNewLine = normalized.indexOf('\n');
+			if (firstNewLine >= 0) {
+				normalized = normalized.substring(firstNewLine + 1);
+			}
+		}
+		if (normalized.endsWith("```")) {
+			normalized = normalized.substring(0, normalized.length() - 3);
+		}
+		return normalized.trim();
 	}
 
 	private String serializeInterviewReportExplanationCommand(InterviewReportExplanationCommand command) throws Exception {

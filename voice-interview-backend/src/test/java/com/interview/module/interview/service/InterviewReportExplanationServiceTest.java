@@ -163,13 +163,13 @@ class InterviewReportExplanationServiceTest {
 					InterviewReportExplanationCommand command = invocation.getArgument(0, InterviewReportExplanationCommand.class);
 					if ("OVERALL".equals(command.scope())) {
 						return new InterviewReportExplanationResult(
-								"LLM 润色后的整体总结",
+								"[SUMMARY:OVERALL:MEDIUM] LLM 润色后的整体总结",
 								List.of("[E1] LLM 润色后的整体证据 1", "[E2] LLM 润色后的整体证据 2"),
 								List.of("[S1] LLM 润色后的整体建议 1", "[S2] LLM 润色后的整体建议 2")
 						);
 					}
 					return new InterviewReportExplanationResult(
-							"LLM 润色后的分题总结",
+							"[SUMMARY:QUESTION:MEDIUM] LLM 润色后的分题总结",
 							List.of("[E1] LLM 润色后的分题证据"),
 							List.of("[S1] LLM 润色后的分题建议")
 					);
@@ -220,12 +220,14 @@ class InterviewReportExplanationServiceTest {
 
 		assertThat(enrichedReport.overallExplanation().generatedBy()).isEqualTo("RULE_PLUS_LLM");
 		assertThat(enrichedReport.overallExplanation().summaryText()).isEqualTo("LLM 润色后的整体总结");
+		assertThat(enrichedReport.overallExplanation().summaryText()).doesNotContain("[SUMMARY:");
 		assertThat(enrichedReport.overallExplanation().evidencePoints()).containsExactly("LLM 润色后的整体证据 1", "LLM 润色后的整体证据 2");
 		assertThat(enrichedReport.overallExplanation().evidencePoints()).allSatisfy(item -> assertThat(item).doesNotContain("[E"));
 		assertThat(enrichedReport.overallExplanation().improvementSuggestions()).containsExactly("LLM 润色后的整体建议 1", "LLM 润色后的整体建议 2");
 		assertThat(enrichedReport.overallExplanation().improvementSuggestions()).allSatisfy(item -> assertThat(item).doesNotContain("[S"));
 		assertThat(enrichedReport.questionReports().get(0).explanation().generatedBy()).isEqualTo("RULE_PLUS_LLM");
 		assertThat(enrichedReport.questionReports().get(0).explanation().summaryText()).isEqualTo("LLM 润色后的分题总结");
+		assertThat(enrichedReport.questionReports().get(0).explanation().summaryText()).doesNotContain("[SUMMARY:");
 		assertThat(enrichedReport.questionReports().get(0).explanation().evidencePoints()).containsExactly("LLM 润色后的分题证据");
 		assertThat(enrichedReport.questionReports().get(0).explanation().evidencePoints()).allSatisfy(item -> assertThat(item).doesNotContain("[E"));
 		assertThat(enrichedReport.questionReports().get(0).explanation().improvementSuggestion()).isEqualTo("LLM 润色后的分题建议");
@@ -236,6 +238,7 @@ class InterviewReportExplanationServiceTest {
 		assertThat(commandCaptor.getAllValues())
 				.anySatisfy(command -> {
 					assertThat(command.scope()).isEqualTo("OVERALL");
+					assertThat(command.summaryText()).isEqualTo("[SUMMARY:OVERALL:MEDIUM] 整体基础可用，但关键点覆盖和追问深度还不够稳定，部分题目仍需要继续补强。");
 					assertThat(command.evidencePoints()).containsExactly(
 							"[E1] 共有 1 个答题轮次暴露出关键点缺失，回答覆盖度还不够稳定。",
 							"[E2] 本轮触发了 1 次继续追问，说明部分题目需要靠补充说明才能站稳。"
@@ -247,9 +250,132 @@ class InterviewReportExplanationServiceTest {
 				})
 				.anySatisfy(command -> {
 					assertThat(command.scope()).isEqualTo("QUESTION");
+					assertThat(command.summaryText()).isEqualTo("[SUMMARY:QUESTION:MEDIUM] Redis 这题还缺少对 一致性策略 的说明，核心覆盖不够完整。");
 					assertThat(command.evidencePoints()).containsExactly("[E1] 缺少关键点：一致性策略");
 					assertThat(command.improvementSuggestions()).containsExactly("[S1] 补充 一致性策略，并明确你的方案、取舍和落地方式。");
 				});
+	}
+
+	@Test
+	void should_skip_polish_for_no_data_explanations_when_ai_is_enabled() {
+		AiService aiService = mock(AiService.class);
+		InterviewReportExplanationService service = new InterviewReportExplanationService(aiService);
+
+		InterviewReportView enrichedReport = service.enrichReport(
+				new InterviewReportView(
+						"session-1",
+						"COMPLETED",
+						"缓存设计",
+						null,
+						"当前暂无完整结论。",
+						List.of(),
+						List.of(),
+						List.of(),
+						List.of(new InterviewQuestionReportView(
+								1,
+								"缓存设计",
+								"请说明 Redis 的使用场景和一致性策略。",
+								null,
+								"当前题目还没有形成有效评分。",
+								null
+						)),
+						null
+				),
+				List.of(new InterviewQuestionSnapshot(1, "缓存设计", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
+				List.of(new InterviewRoundRecord(
+						"r1",
+						1,
+						0,
+						"QUESTION",
+						"题目",
+						null,
+						0L,
+						null,
+						null,
+						null,
+						null,
+						"2026-04-11T00:00:00Z",
+						null,
+						null,
+						null,
+						null,
+						List.of()
+				))
+		);
+
+		assertThat(enrichedReport.overallExplanation().generatedBy()).isEqualTo("RULE");
+		assertThat(enrichedReport.overallExplanation().summaryText()).contains("尚未形成完整诊断");
+		assertThat(enrichedReport.questionReports().get(0).explanation().generatedBy()).isEqualTo("RULE");
+		assertThat(enrichedReport.questionReports().get(0).explanation().summaryText()).containsAnyOf("未作答", "数据不足", "尚未形成有效评分");
+		verify(aiService, times(0)).polishInterviewReportExplanation(any());
+	}
+
+	@Test
+	void should_fallback_to_rule_overall_explanation_when_summary_slot_marker_is_missing() {
+		AiService aiService = mock(AiService.class);
+		when(aiService.polishInterviewReportExplanation(any()))
+				.thenAnswer(invocation -> {
+					InterviewReportExplanationCommand command = invocation.getArgument(0, InterviewReportExplanationCommand.class);
+					if ("OVERALL".equals(command.scope())) {
+						return new InterviewReportExplanationResult(
+								"LLM 直接改写后的整体总结",
+								List.of("[E1] LLM 润色后的整体证据 1", "[E2] LLM 润色后的整体证据 2"),
+								List.of("[S1] LLM 润色后的整体建议 1", "[S2] LLM 润色后的整体建议 2")
+						);
+					}
+					return new InterviewReportExplanationResult(
+							"[SUMMARY:QUESTION:MEDIUM] LLM 润色后的分题总结",
+							List.of("[E1] LLM 润色后的分题证据"),
+							List.of("[S1] LLM 润色后的分题建议")
+					);
+				});
+		InterviewReportExplanationService service = new InterviewReportExplanationService(aiService);
+
+		InterviewReportView enrichedReport = service.enrichReport(
+				new InterviewReportView(
+						"session-1",
+						"COMPLETED",
+						"Redis",
+						68,
+						"整体基础可用。",
+						List.of("优点"),
+						List.of("短板"),
+						List.of("建议"),
+						List.of(new InterviewQuestionReportView(
+								1,
+								"Redis",
+								"请说明 Redis 的使用场景和一致性策略。",
+								60,
+								"核心点回答到了，但细节与例子还可以更深入。",
+								null
+						)),
+						null
+				),
+				List.of(new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
+				List.of(new InterviewRoundRecord(
+						"r1",
+						1,
+						0,
+						"QUESTION",
+						"题目",
+						null,
+						0L,
+						60,
+						"我们主要用 Redis 做缓存。",
+						null,
+						"TEXT",
+						"2026-04-11T00:00:00Z",
+						"2026-04-11T00:00:10Z",
+						"缺少关键点：一致性策略",
+						"FOLLOW_UP",
+						"缺少关键点：一致性策略",
+						List.of("一致性策略")
+				))
+		);
+
+		assertThat(enrichedReport.overallExplanation().generatedBy()).isEqualTo("RULE");
+		assertThat(enrichedReport.overallExplanation().summaryText()).contains("整体");
+		assertThat(enrichedReport.questionReports().get(0).explanation().generatedBy()).isEqualTo("RULE_PLUS_LLM");
 	}
 
 	@Test
@@ -314,13 +440,13 @@ class InterviewReportExplanationServiceTest {
 					InterviewReportExplanationCommand command = invocation.getArgument(0, InterviewReportExplanationCommand.class);
 					if ("OVERALL".equals(command.scope())) {
 						return new InterviewReportExplanationResult(
-								"LLM 润色后的整体总结",
+								"[SUMMARY:OVERALL:MEDIUM] LLM 润色后的整体总结",
 								List.of("只返回一条整体证据"),
 								List.of("LLM 润色后的整体建议 1", "LLM 润色后的整体建议 2")
 						);
 					}
 					return new InterviewReportExplanationResult(
-							"LLM 润色后的分题总结",
+							"[SUMMARY:QUESTION:MEDIUM] LLM 润色后的分题总结",
 							List.of("[E1] LLM 润色后的分题证据"),
 							List.of("[S1] LLM 润色后的分题建议")
 					);
@@ -382,13 +508,13 @@ class InterviewReportExplanationServiceTest {
 					InterviewReportExplanationCommand command = invocation.getArgument(0, InterviewReportExplanationCommand.class);
 					if ("OVERALL".equals(command.scope())) {
 						return new InterviewReportExplanationResult(
-								"LLM 润色后的整体总结",
+								"[SUMMARY:OVERALL:MEDIUM] LLM 润色后的整体总结",
 								List.of("[E2] LLM 润色后的整体证据 2", "[E1] LLM 润色后的整体证据 1"),
 								List.of("[S1] LLM 润色后的整体建议 1", "[S2] LLM 润色后的整体建议 2")
 						);
 					}
 					return new InterviewReportExplanationResult(
-							"LLM 润色后的分题总结",
+							"[SUMMARY:QUESTION:MEDIUM] LLM 润色后的分题总结",
 							List.of("[E1] LLM 润色后的分题证据"),
 							List.of("[S1] LLM 润色后的分题建议")
 					);
@@ -450,13 +576,13 @@ class InterviewReportExplanationServiceTest {
 					InterviewReportExplanationCommand command = invocation.getArgument(0, InterviewReportExplanationCommand.class);
 					if ("QUESTION".equals(command.scope())) {
 						return new InterviewReportExplanationResult(
-								"LLM 润色后的分题总结",
+								"[SUMMARY:QUESTION:MEDIUM] LLM 润色后的分题总结",
 								List.of("LLM 润色后的分题证据"),
 								List.of("LLM 润色后的分题建议 1", "LLM 润色后的分题建议 2")
 						);
 					}
 					return new InterviewReportExplanationResult(
-							"LLM 润色后的整体总结",
+							"[SUMMARY:OVERALL:MEDIUM] LLM 润色后的整体总结",
 							List.of("[E1] LLM 润色后的整体证据 1", "[E2] LLM 润色后的整体证据 2"),
 							List.of("[S1] LLM 润色后的整体建议 1", "[S2] LLM 润色后的整体建议 2")
 					);
@@ -518,13 +644,13 @@ class InterviewReportExplanationServiceTest {
 					InterviewReportExplanationCommand command = invocation.getArgument(0, InterviewReportExplanationCommand.class);
 					if ("QUESTION".equals(command.scope())) {
 						return new InterviewReportExplanationResult(
-								"LLM 润色后的分题总结",
+								"[SUMMARY:QUESTION:MEDIUM] LLM 润色后的分题总结",
 								List.of("LLM 润色后的分题证据 1", "LLM 润色后的分题证据 2"),
 								List.of("LLM 润色后的分题建议")
 						);
 					}
 					return new InterviewReportExplanationResult(
-							"LLM 润色后的整体总结",
+							"[SUMMARY:OVERALL:MEDIUM] LLM 润色后的整体总结",
 							List.of("[E1] LLM 润色后的整体证据 1", "[E2] LLM 润色后的整体证据 2"),
 							List.of("[S1] LLM 润色后的整体建议 1", "[S2] LLM 润色后的整体建议 2")
 					);
@@ -586,13 +712,13 @@ class InterviewReportExplanationServiceTest {
 					InterviewReportExplanationCommand command = invocation.getArgument(0, InterviewReportExplanationCommand.class);
 					if ("QUESTION".equals(command.scope())) {
 						return new InterviewReportExplanationResult(
-								"LLM 润色后的分题总结",
+								"[SUMMARY:QUESTION:MEDIUM] LLM 润色后的分题总结",
 								List.of("[E2] LLM 润色后的分题证据 2", "[E1] LLM 润色后的分题证据 1"),
 								List.of("[S1] LLM 润色后的分题建议")
 						);
 					}
 					return new InterviewReportExplanationResult(
-							"LLM 润色后的整体总结",
+							"[SUMMARY:OVERALL:MEDIUM] LLM 润色后的整体总结",
 							List.of("[E1] LLM 润色后的整体证据 1"),
 							List.of("[S1] LLM 润色后的整体建议 1")
 					);
@@ -665,5 +791,73 @@ class InterviewReportExplanationServiceTest {
 		assertThat(enrichedReport.overallExplanation().generatedBy()).isEqualTo("RULE_PLUS_LLM");
 		assertThat(enrichedReport.questionReports().get(0).explanation().generatedBy()).isEqualTo("RULE");
 		assertThat(enrichedReport.questionReports().get(0).explanation().summaryText()).contains("深度").contains("细节");
+	}
+
+	@Test
+	void should_fallback_to_rule_question_explanation_when_summary_slot_marker_is_wrong() {
+		AiService aiService = mock(AiService.class);
+		when(aiService.polishInterviewReportExplanation(any()))
+				.thenAnswer(invocation -> {
+					InterviewReportExplanationCommand command = invocation.getArgument(0, InterviewReportExplanationCommand.class);
+					if ("QUESTION".equals(command.scope())) {
+						return new InterviewReportExplanationResult(
+								"[SUMMARY:QUESTION:WEAK] LLM 润色后的分题总结",
+								List.of("[E1] LLM 润色后的分题证据"),
+								List.of("[S1] LLM 润色后的分题建议")
+						);
+					}
+					return new InterviewReportExplanationResult(
+							"[SUMMARY:OVERALL:MEDIUM] LLM 润色后的整体总结",
+							List.of("[E1] LLM 润色后的整体证据 1", "[E2] LLM 润色后的整体证据 2"),
+							List.of("[S1] LLM 润色后的整体建议 1", "[S2] LLM 润色后的整体建议 2")
+					);
+				});
+		InterviewReportExplanationService service = new InterviewReportExplanationService(aiService);
+
+		InterviewReportView enrichedReport = service.enrichReport(
+				new InterviewReportView(
+						"session-1",
+						"COMPLETED",
+						"Redis",
+						68,
+						"整体基础可用。",
+						List.of("优点"),
+						List.of("短板"),
+						List.of("建议"),
+						List.of(new InterviewQuestionReportView(
+								1,
+								"Redis",
+								"请说明 Redis 的使用场景和一致性策略。",
+								60,
+								"核心点回答到了，但细节与例子还可以更深入。",
+								null
+						)),
+						null
+				),
+				List.of(new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
+				List.of(new InterviewRoundRecord(
+						"r1",
+						1,
+						0,
+						"QUESTION",
+						"题目",
+						null,
+						0L,
+						60,
+						"我们主要用 Redis 做缓存。",
+						null,
+						"TEXT",
+						"2026-04-11T00:00:00Z",
+						"2026-04-11T00:00:10Z",
+						"缺少关键点：一致性策略",
+						"FOLLOW_UP",
+						"缺少关键点：一致性策略",
+						List.of("一致性策略")
+				))
+		);
+
+		assertThat(enrichedReport.overallExplanation().generatedBy()).isEqualTo("RULE_PLUS_LLM");
+		assertThat(enrichedReport.questionReports().get(0).explanation().generatedBy()).isEqualTo("RULE");
+		assertThat(enrichedReport.questionReports().get(0).explanation().summaryText()).contains("一致性策略");
 	}
 }
