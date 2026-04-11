@@ -138,6 +138,44 @@ class InterviewReportExplanationServiceTest {
 	}
 
 	@Test
+	void should_ignore_earlier_missing_points_once_final_round_is_complete() {
+		InterviewReportExplanationService service = new InterviewReportExplanationService();
+
+		InterviewQuestionExplanationView explanation = service.buildQuestionExplanation(
+				new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1),
+				new InterviewQuestionReportView(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", 88, "回答较完整。", null),
+				List.of(
+						new InterviewRoundRecord("r1", 1, 0, "QUESTION", "题目", null, 0L, 60, "我们主要用 Redis 做缓存。", null, "TEXT", "2026-04-11T00:00:00Z", "2026-04-11T00:00:10Z", "缺少关键点：一致性策略", "FOLLOW_UP", "缺少关键点：一致性策略", List.of("一致性策略")),
+						new InterviewRoundRecord(
+								"r2",
+								1,
+								1,
+								"FOLLOW_UP",
+								"继续展开",
+								null,
+								0L,
+								88,
+								"我们主要把 Redis 用在热点缓存，因为读多写少能降低数据库压力。涉及一致性时，我会先更新数据库，然后删除缓存，最后通过订阅 binlog 异步校正，权衡点是短暂不一致但吞吐更高。",
+								null,
+								"TEXT",
+								"2026-04-11T00:00:11Z",
+								"2026-04-11T00:00:20Z",
+								"回答完整",
+								"NEXT_QUESTION",
+								"当前回答已达到继续下一题的标准",
+								List.of()
+						)
+				)
+		);
+
+		assertThat(explanation.performanceLevel()).isEqualTo("STRONG");
+		assertThat(explanation.summaryText()).contains("回答较完整");
+		assertThat(explanation.summaryText()).doesNotContain("还缺少对");
+		assertThat(explanation.evidencePoints()).noneMatch(item -> item.contains("缺少关键点"));
+		assertThat(explanation.improvementSuggestion()).contains("表达结构");
+	}
+
+	@Test
 	void should_build_question_explanation_for_unanswered_or_unscored_question() {
 		InterviewReportExplanationService service = new InterviewReportExplanationService();
 

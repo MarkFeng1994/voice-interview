@@ -151,13 +151,14 @@ public class SimpleInterviewEngine implements InterviewEngine {
 					sessionState.getMaxFollowUpPerQuestion(),
 					expectedPoints
 			));
+			updateLatestRoundScoreSuggestion(sessionState, aiReply.scoreSuggestion());
 			if (decision.action() == FollowUpDecision.Action.FOLLOW_UP) {
 				sessionState.setFollowUpIndex(sessionState.getFollowUpIndex() + 1);
 				appendAssistantRound(
 						sessionState,
 						buildFollowUpPrompt(aiReply, decision, analysis),
 						"FOLLOW_UP",
-						aiReply.scoreSuggestion()
+						null
 				);
 				sessionStore.save(sessionState);
 				return toView(sessionState);
@@ -171,7 +172,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 						sessionState,
 						buildClosingText(aiReply.scoreSuggestion()),
 						"END_INTERVIEW",
-						aiReply.scoreSuggestion()
+						null
 				);
 				sessionStore.save(sessionState);
 				persistReport(sessionState);
@@ -183,7 +184,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 				sessionState.setFollowUpIndex(0);
 				sessionState.setStage(resolveStage(sessionState));
 				InterviewQuestionSnapshot nextQuestion = currentQuestion(sessionState);
-				appendAssistantRound(sessionState, nextQuestion.promptSnapshot(), "QUESTION", aiReply.scoreSuggestion());
+				appendAssistantRound(sessionState, nextQuestion.promptSnapshot(), "QUESTION", null);
 				sessionStore.save(sessionState);
 				return toView(sessionState);
 			}
@@ -195,7 +196,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 					sessionState,
 					buildClosingText(aiReply.scoreSuggestion()),
 					"END_INTERVIEW",
-					aiReply.scoreSuggestion()
+					null
 			);
 			sessionStore.save(sessionState);
 			persistReport(sessionState);
@@ -358,6 +359,15 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		));
 	}
 
+	private void updateLatestRoundScoreSuggestion(InterviewSessionState sessionState, Integer scoreSuggestion) {
+		int latestRoundIndex = sessionState.getRounds().size() - 1;
+		if (latestRoundIndex < 0) {
+			throw new IllegalStateException("No round exists to attach the score suggestion");
+		}
+		InterviewRoundRecord latestRound = sessionState.getRounds().get(latestRoundIndex);
+		sessionState.getRounds().set(latestRoundIndex, latestRound.withScoreSuggestion(scoreSuggestion));
+	}
+
 	private InterviewSessionView toView(InterviewSessionState sessionState) {
 		InterviewQuestionSnapshot currentQuestion = sessionState.getCurrentQuestionIndex() < sessionState.getQuestions().size()
 				? sessionState.getQuestions().get(sessionState.getCurrentQuestionIndex())
@@ -447,14 +457,16 @@ public class SimpleInterviewEngine implements InterviewEngine {
 	}
 
 	private InterviewReportView toReportView(InterviewSessionState sessionState) {
-		Map<Integer, InterviewRoundRecord> latestRoundByQuestion = new LinkedHashMap<>();
+		Map<Integer, InterviewRoundRecord> latestAnsweredRoundByQuestion = new LinkedHashMap<>();
 		for (InterviewRoundRecord round : sessionState.getRounds()) {
-			latestRoundByQuestion.put(round.questionIndex(), round);
+			if (round.userAnswerText() != null) {
+				latestAnsweredRoundByQuestion.put(round.questionIndex(), round);
+			}
 		}
 
 		List<InterviewQuestionReportView> questionReports = new ArrayList<>();
 		for (InterviewQuestionSnapshot question : sessionState.getQuestions()) {
-			InterviewRoundRecord round = latestRoundByQuestion.get(question.questionIndex());
+			InterviewRoundRecord round = latestAnsweredRoundByQuestion.get(question.questionIndex());
 			Integer score = round == null ? null : round.scoreSuggestion();
 			String summary = score == null
 					? "当前题目还没有形成有效评分。"

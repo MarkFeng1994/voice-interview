@@ -56,4 +56,26 @@ public record InterviewRoundRecord(
 				missingPointsSnapshot
 		);
 	}
+
+	public InterviewRoundRecord withScoreSuggestion(Integer scoreSuggestion) {
+		return new InterviewRoundRecord(
+				roundId,
+				questionIndex,
+				followUpIndex,
+				roundType,
+				aiMessageText,
+				aiAudioUrl,
+				aiAudioDurationMs,
+				scoreSuggestion,
+				userAnswerText,
+				userAudioUrl,
+				userAnswerMode,
+				createdAt,
+				answeredAt,
+				analysisReason,
+				followUpDecision,
+				followUpDecisionReason,
+				missingPointsSnapshot
+		);
+	}
 }

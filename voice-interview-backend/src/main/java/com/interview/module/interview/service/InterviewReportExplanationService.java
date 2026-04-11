@@ -177,36 +177,35 @@ public class InterviewReportExplanationService {
 	) {
 		List<InterviewRoundRecord> safeQuestionRounds = safeRounds(questionRounds);
 		LinkedHashSet<String> evidencePoints = new LinkedHashSet<>();
-		LinkedHashSet<String> missingPoints = new LinkedHashSet<>();
 		int followUpCount = 0;
-		boolean hasRiskSignal = false;
-		boolean hasDepthGapSignal = false;
-		boolean hasEffectiveAnswer = false;
+		InterviewRoundRecord latestAnsweredRound = null;
+		InterviewRoundRecord latestEffectiveRound = null;
 
 		for (InterviewRoundRecord round : safeQuestionRounds) {
 			if ("FOLLOW_UP".equals(round.followUpDecision())) {
 				followUpCount++;
 			}
+			if (hasAnsweredRound(round)) {
+				latestAnsweredRound = round;
+			}
 			if (hasEffectiveAnswer(round)) {
-				hasEffectiveAnswer = true;
-			}
-			if (round.analysisReason() != null && !round.analysisReason().isBlank()) {
-				evidencePoints.add(round.analysisReason().trim());
-			}
-			if (!round.missingPointsSnapshot().isEmpty()) {
-				missingPoints.addAll(round.missingPointsSnapshot());
-			}
-			if (containsRiskSignal(round.analysisReason()) || containsRiskSignal(round.followUpDecisionReason())) {
-				hasRiskSignal = true;
-			}
-			if (containsDepthGapSignal(round.analysisReason()) || containsDepthGapSignal(round.followUpDecisionReason())) {
-				hasDepthGapSignal = true;
+				latestEffectiveRound = round;
 			}
 		}
 
 		String questionTitle = question != null && question.titleSnapshot() != null && !question.titleSnapshot().isBlank()
 				? question.titleSnapshot()
 				: questionReport == null ? "当前题目" : questionReport.title();
+		InterviewRoundRecord terminalRound = latestEffectiveRound == null ? latestAnsweredRound : latestEffectiveRound;
+		List<String> finalMissingPoints = terminalRound == null ? List.of() : terminalRound.missingPointsSnapshot();
+		boolean hasRiskSignal = terminalRound != null
+				&& (containsRiskSignal(terminalRound.analysisReason()) || containsRiskSignal(terminalRound.followUpDecisionReason()));
+		boolean hasDepthGapSignal = terminalRound != null
+				&& (containsDepthGapSignal(terminalRound.analysisReason()) || containsDepthGapSignal(terminalRound.followUpDecisionReason()));
+		boolean hasEffectiveAnswer = latestEffectiveRound != null;
+		if (terminalRound != null && terminalRound.analysisReason() != null && !terminalRound.analysisReason().isBlank()) {
+			evidencePoints.add(terminalRound.analysisReason().trim());
+		}
 		boolean noData = !hasEffectiveAnswer || questionReport == null || questionReport.score() == null;
 		String performanceLevel = noData ? null : levelFromScore(questionReport.score());
 		String summaryText;
@@ -225,8 +224,8 @@ public class InterviewReportExplanationService {
 			improvementSuggestion = hasEffectiveAnswer
 					? "补充更完整的作答并完成当前题目，形成有效评分后再看具体问题。"
 					: "先补充作答并形成有效评分，再根据结果做针对性复盘。";
-		} else if (!missingPoints.isEmpty()) {
-			String missingPointsText = String.join("、", missingPoints);
+		} else if (!finalMissingPoints.isEmpty()) {
+			String missingPointsText = String.join("、", finalMissingPoints);
 			evidencePoints.add("缺少关键点：" + missingPointsText);
 			summaryText = questionTitle + " 这题还缺少对 " + missingPointsText + " 的说明，核心覆盖不够完整。";
 			improvementSuggestion = "补充 " + missingPointsText + "，并明确你的方案、取舍和落地方式。";
@@ -512,6 +511,10 @@ public class InterviewReportExplanationService {
 			return false;
 		}
 		return !"候选人未提供有效回答。".equals(round.userAnswerText().trim());
+	}
+
+	private boolean hasAnsweredRound(InterviewRoundRecord round) {
+		return round != null && round.userAnswerText() != null;
 	}
 
 	private List<String> limit(LinkedHashSet<String> items, int maxSize) {

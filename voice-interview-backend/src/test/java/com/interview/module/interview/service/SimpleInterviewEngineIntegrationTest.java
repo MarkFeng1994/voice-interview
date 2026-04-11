@@ -24,6 +24,7 @@ import com.interview.module.interview.entity.SessionEntity;
 import com.interview.module.interview.entity.SessionQuestionEntity;
 import com.interview.module.interview.engine.SimpleInterviewEngine;
 import com.interview.module.interview.engine.model.InterviewQuestionCard;
+import com.interview.module.interview.engine.model.InterviewQuestionReportView;
 import com.interview.module.interview.engine.model.InterviewQuestionSnapshot;
 import com.interview.module.interview.engine.model.InterviewReportView;
 import com.interview.module.interview.engine.model.InterviewSessionOwner;
@@ -472,6 +473,92 @@ class SimpleInterviewEngineIntegrationTest {
 		assertThat(report.overallExplanation().summaryText()).doesNotContain("整体基础可用");
 	}
 
+	@Test
+	void should_keep_score_on_answered_round_instead_of_next_question_opening_round() {
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
+				Map.of("reportStore", new NoopInterviewReportStore())
+		);
+		SimpleInterviewEngine engine = new SimpleInterviewEngine(
+				sessionStore,
+				beanFactory.getBeanProvider(InterviewReportStore.class),
+				new SequencedAiService(List.of(84)),
+				new StubTtsService(),
+				defaultDecisionEngine()
+		);
+
+		var view = engine.startSession(
+				List.of(
+						new InterviewQuestionCard("自我介绍", "请做一个简短的自我介绍。"),
+						new InterviewQuestionCard("Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", null, null, 1)
+				),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		var answered = engine.answer(
+				view.sessionId(),
+				"1",
+				"TEXT",
+				"我有五年 Java 后端开发经验，最近主要负责交易系统。",
+				null
+		);
+		InterviewReportView report = engine.getReport(view.sessionId(), "1");
+
+		assertThat(answered.rounds()).hasSize(2);
+		assertThat(answered.rounds().get(0).questionIndex()).isEqualTo(1);
+		assertThat(answered.rounds().get(0).scoreSuggestion()).isEqualTo(84);
+		assertThat(answered.rounds().get(1).questionIndex()).isEqualTo(2);
+		assertThat(answered.rounds().get(1).scoreSuggestion()).isNull();
+		assertThat(report.questionReports()).extracting(InterviewQuestionReportView::score)
+				.containsExactly(84, null);
+	}
+
+	@Test
+	void should_drop_early_missing_points_after_follow_up_completion_in_final_report() {
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
+				Map.of("reportStore", new NoopInterviewReportStore())
+		);
+		SimpleInterviewEngine engine = new SimpleInterviewEngine(
+				sessionStore,
+				beanFactory.getBeanProvider(InterviewReportStore.class),
+				new SequencedAiService(List.of(60, 88)),
+				new StubTtsService(),
+				defaultDecisionEngine()
+		);
+
+		var view = engine.startSession(
+				List.of(new InterviewQuestionCard("Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", null, null, 1)),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		var followUp = engine.answer(view.sessionId(), "1", "TEXT", "我们主要用 Redis 做缓存。", null);
+		engine.answer(
+				followUp.sessionId(),
+				"1",
+				"TEXT",
+				"Redis 的使用场景主要是热点缓存，因为读多写少能降低数据库压力。涉及一致性时，我会先更新数据库，然后删除缓存，最后通过订阅 binlog 异步校正，权衡点是短暂不一致但吞吐更高。",
+				null
+		);
+		InterviewReportView report = engine.getReport(view.sessionId(), "1");
+
+		assertThat(report.questionReports()).hasSize(1);
+		assertThat(report.questionReports().get(0).score()).isEqualTo(88);
+		assertThat(report.questionReports().get(0).explanation()).isNotNull();
+		assertThat(report.questionReports().get(0).explanation().summaryText()).doesNotContain("还缺少对");
+		assertThat(report.questionReports().get(0).explanation().summaryText()).contains("回答较完整");
+		assertThat(report.questionReports().get(0).explanation().evidencePoints())
+				.noneMatch(item -> item.contains("缺少关键点"));
+	}
+
 	private SimpleInterviewEngine defaultEngine() {
 		InterviewSessionStore sessionStore = new InMemorySessionStore();
 		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
@@ -555,6 +642,37 @@ class SimpleInterviewEngineIntegrationTest {
 		public AnswerEvidence analyzeInterviewAnswer(String question, String answer, List<String> expectedPoints) {
 			this.lastAnalysis = InterviewAnswerAnalyzer.heuristic().analyze(question, answer, expectedPoints);
 			return this.lastAnalysis;
+		}
+	}
+
+	private static final class SequencedAiService implements AiService {
+		private final List<Integer> scores;
+		private int replyIndex = 0;
+
+		private SequencedAiService(List<Integer> scores) {
+			this.scores = List.copyOf(scores);
+		}
+
+		@Override
+		public AiReply generateInterviewReply(InterviewReplyCommand command) {
+			int score = scores.get(Math.min(replyIndex, scores.size() - 1));
+			replyIndex++;
+			return new AiReply("继续", "NEXT_QUESTION", score);
+		}
+
+		@Override
+		public ResumeKeywordExtractionResult extractResumeKeywords(String resumeText) {
+			return new ResumeKeywordExtractionResult("summary", List.of(), List.of());
+		}
+
+		@Override
+		public List<GeneratedResumeQuestion> generateResumeQuestions(ResumeQuestionGenerationCommand command) {
+			return List.of();
+		}
+
+		@Override
+		public AnswerEvidence analyzeInterviewAnswer(String question, String answer, List<String> expectedPoints) {
+			return InterviewAnswerAnalyzer.heuristic().analyze(question, answer, expectedPoints);
 		}
 	}
 
