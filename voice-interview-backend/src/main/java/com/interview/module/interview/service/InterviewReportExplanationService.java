@@ -254,6 +254,9 @@ public class InterviewReportExplanationService {
 			InterviewReportView report,
 			InterviewOverallExplanationView ruleExplanation
 	) {
+		if (ruleExplanation == null) {
+			return null;
+		}
 		InterviewReportExplanationResult polished = polishExplanation(new InterviewReportExplanationCommand(
 				"OVERALL",
 				report == null ? null : report.title(),
@@ -263,14 +266,16 @@ public class InterviewReportExplanationService {
 				ruleExplanation == null ? List.of() : ruleExplanation.evidencePoints(),
 				ruleExplanation == null ? List.of() : ruleExplanation.improvementSuggestions()
 		));
-		if (!isValidPolishResult(polished)) {
+		List<String> polishedEvidencePoints = normalizeItems(polished == null ? null : polished.evidencePoints());
+		List<String> polishedSuggestions = normalizeItems(polished == null ? null : polished.improvementSuggestions());
+		if (!isValidOverallPolishResult(ruleExplanation, polished, polishedEvidencePoints, polishedSuggestions)) {
 			return ruleExplanation;
 		}
 		return new InterviewOverallExplanationView(
 				ruleExplanation.level(),
 				polished.summaryText().trim(),
-				normalizeItems(polished.evidencePoints()),
-				normalizeItems(polished.improvementSuggestions()),
+				polishedEvidencePoints,
+				polishedSuggestions,
 				"RULE_PLUS_LLM"
 		);
 	}
@@ -280,6 +285,9 @@ public class InterviewReportExplanationService {
 			InterviewQuestionReportView questionReport,
 			InterviewQuestionExplanationView ruleExplanation
 	) {
+		if (ruleExplanation == null) {
+			return null;
+		}
 		InterviewReportExplanationResult polished = polishExplanation(new InterviewReportExplanationCommand(
 				"QUESTION",
 				questionReport == null ? null : questionReport.title(),
@@ -289,14 +297,15 @@ public class InterviewReportExplanationService {
 				ruleExplanation == null ? List.of() : ruleExplanation.evidencePoints(),
 				ruleExplanation == null ? List.of() : suggestionAsList(ruleExplanation.improvementSuggestion())
 		));
-		if (!isValidPolishResult(polished)) {
+		List<String> polishedEvidencePoints = normalizeItems(polished == null ? null : polished.evidencePoints());
+		List<String> polishedSuggestions = normalizeItems(polished == null ? null : polished.improvementSuggestions());
+		if (!isValidQuestionPolishResult(ruleExplanation, polished, polishedEvidencePoints, polishedSuggestions)) {
 			return ruleExplanation;
 		}
-		List<String> polishedSuggestions = normalizeItems(polished.improvementSuggestions());
 		return new InterviewQuestionExplanationView(
 				ruleExplanation.performanceLevel(),
 				polished.summaryText().trim(),
-				normalizeItems(polished.evidencePoints()),
+				polishedEvidencePoints,
 				polishedSuggestions.get(0),
 				"RULE_PLUS_LLM"
 		);
@@ -358,12 +367,34 @@ public class InterviewReportExplanationService {
 		return List.copyOf(normalized);
 	}
 
-	private boolean isValidPolishResult(InterviewReportExplanationResult result) {
+	private boolean isValidOverallPolishResult(
+			InterviewOverallExplanationView ruleExplanation,
+			InterviewReportExplanationResult result,
+			List<String> polishedEvidencePoints,
+			List<String> polishedSuggestions
+	) {
+		return hasValidPolishSummary(result)
+				&& polishedEvidencePoints.size() == normalizeItems(ruleExplanation.evidencePoints()).size()
+				&& polishedSuggestions.size() == normalizeItems(ruleExplanation.improvementSuggestions()).size();
+	}
+
+	private boolean isValidQuestionPolishResult(
+			InterviewQuestionExplanationView ruleExplanation,
+			InterviewReportExplanationResult result,
+			List<String> polishedEvidencePoints,
+			List<String> polishedSuggestions
+	) {
+		List<String> ruleSuggestions = suggestionAsList(ruleExplanation.improvementSuggestion());
+		return hasValidPolishSummary(result)
+				&& polishedEvidencePoints.size() == normalizeItems(ruleExplanation.evidencePoints()).size()
+				&& polishedSuggestions.size() == 1
+				&& polishedSuggestions.size() == ruleSuggestions.size();
+	}
+
+	private boolean hasValidPolishSummary(InterviewReportExplanationResult result) {
 		return result != null
 				&& result.summaryText() != null
-				&& !result.summaryText().isBlank()
-				&& !normalizeItems(result.evidencePoints()).isEmpty()
-				&& !normalizeItems(result.improvementSuggestions()).isEmpty();
+				&& !result.summaryText().isBlank();
 	}
 
 	private String levelFromScore(Integer score) {
