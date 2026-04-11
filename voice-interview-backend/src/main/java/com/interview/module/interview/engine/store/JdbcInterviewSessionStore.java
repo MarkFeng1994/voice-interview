@@ -198,7 +198,7 @@ public class JdbcInterviewSessionStore implements InterviewSessionStore {
 			entity.setFinalUserAnswerText(round.userAnswerText());
 			entity.setUserAudioUrl(round.userAudioUrl());
 			entity.setAiMessageText(round.aiMessageText());
-			entity.setAiAnalysis(round.analysisReason());
+			entity.setAiAnalysis(serializeRoundAnalysis(round));
 			entity.setTtsAudioUrl(round.aiAudioUrl());
 			entity.setScore(round.scoreSuggestion());
 			entity.setDurationMs(round.aiAudioDurationMs());
@@ -209,6 +209,7 @@ public class JdbcInterviewSessionStore implements InterviewSessionStore {
 	}
 
 	private InterviewRoundRecord toRoundRecord(RoundEntity e) {
+		RoundAnalysisPayload payload = parseRoundAnalysis(e.getAiAnalysis());
 		return new InterviewRoundRecord(
 				String.valueOf(e.getId()),
 				e.getQuestionIndex(),
@@ -223,8 +224,37 @@ public class JdbcInterviewSessionStore implements InterviewSessionStore {
 				e.getUserAnswerMode(),
 				e.getCreatedAt() == null ? null : e.getCreatedAt().toString(),
 				e.getAnsweredAt() == null ? null : e.getAnsweredAt().toString(),
-				e.getAiAnalysis()
+				payload.analysisReason(),
+				payload.followUpDecision(),
+				payload.followUpDecisionReason(),
+				payload.missingPointsSnapshot()
 		);
+	}
+
+	private String serializeRoundAnalysis(InterviewRoundRecord round) {
+		try {
+			return objectMapper.writeValueAsString(new RoundAnalysisPayload(
+					round.analysisReason(),
+					round.followUpDecision(),
+					round.followUpDecisionReason(),
+					round.missingPointsSnapshot()
+			));
+		} catch (JsonProcessingException ex) {
+			throw new IllegalStateException("Failed to serialize round analysis", ex);
+		}
+	}
+
+	private RoundAnalysisPayload parseRoundAnalysis(String aiAnalysis) {
+		if (aiAnalysis == null || aiAnalysis.isBlank()) {
+			return new RoundAnalysisPayload(null, null, null, List.of());
+		}
+		try {
+			if (aiAnalysis.startsWith("{")) {
+				return objectMapper.readValue(aiAnalysis, RoundAnalysisPayload.class);
+			}
+		} catch (Exception ignored) {
+		}
+		return new RoundAnalysisPayload(aiAnalysis, null, null, List.of());
 	}
 
 	private Integer computeOverallScore(List<InterviewRoundRecord> rounds) {
@@ -297,6 +327,17 @@ public class JdbcInterviewSessionStore implements InterviewSessionStore {
 
 	private record SessionRow(long id, String sessionKey, String userId, String status,
 			int currentQuestionIndex, String configJson) {}
+
+	private record RoundAnalysisPayload(
+			String analysisReason,
+			String followUpDecision,
+			String followUpDecisionReason,
+			List<String> missingPointsSnapshot
+	) {
+		private RoundAnalysisPayload {
+			missingPointsSnapshot = missingPointsSnapshot == null ? List.of() : List.copyOf(missingPointsSnapshot);
+		}
+	}
 
 	private record SessionConfig(String ownerNickname, int maxFollowUpPerQuestion,
 			Integer interviewerSpeakerId, Double interviewerSpeechSpeed, String stage, Integer durationMinutes) {

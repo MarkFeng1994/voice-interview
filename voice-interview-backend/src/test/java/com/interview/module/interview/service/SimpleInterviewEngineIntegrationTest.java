@@ -64,7 +64,8 @@ class SimpleInterviewEngineIntegrationTest {
 				sessionStore,
 				beanFactory.getBeanProvider(InterviewReportStore.class),
 				new StubAiService(),
-				new StubTtsService()
+				new StubTtsService(),
+				defaultDecisionEngine()
 		);
 
 		InterviewQuestionCard question = new InterviewQuestionCard(
@@ -113,7 +114,8 @@ class SimpleInterviewEngineIntegrationTest {
 				sessionStore,
 				beanFactory.getBeanProvider(InterviewReportStore.class),
 				new StubAiService(),
-				new StubTtsService()
+				new StubTtsService(),
+				defaultDecisionEngine()
 		);
 
 		var view = engine.startSession(
@@ -231,6 +233,56 @@ class SimpleInterviewEngineIntegrationTest {
 	}
 
 	@Test
+	void should_follow_up_when_missing_key_points_and_record_decision_metadata() {
+		var engine = defaultEngine();
+		var view = engine.startSession(
+				List.of(new InterviewQuestionCard("Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", null, null, 1)),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		var answered = engine.answer(view.sessionId(), "1", "TEXT", "我们主要用 Redis 做缓存。", null);
+
+		assertThat(answered.status()).isEqualTo("IN_PROGRESS");
+		assertThat(answered.followUpIndex()).isEqualTo(1);
+		assertThat(answered.rounds().get(0).followUpDecision()).isEqualTo("FOLLOW_UP");
+		assertThat(answered.rounds().get(0).followUpDecisionReason()).contains("缺少关键点");
+		assertThat(answered.rounds().get(0).missingPointsSnapshot()).contains("一致性策略");
+	}
+
+	@Test
+	void should_stop_following_up_after_policy_limit_for_normal_questions() {
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
+				Map.of("reportStore", new NoopInterviewReportStore())
+		);
+		SimpleInterviewEngine engine = new SimpleInterviewEngine(
+				sessionStore,
+				beanFactory.getBeanProvider(InterviewReportStore.class),
+				new StubAiService(),
+				new StubTtsService(),
+				new FollowUpDecisionEngine(new InterviewFlowPolicy(60, 120, 1, 2, 1, 0))
+		);
+		var view = engine.startSession(
+				List.of(new InterviewQuestionCard("Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", null, null, 1)),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		engine.answer(view.sessionId(), "1", "TEXT", "我们用 Redis 做缓存。", null);
+		var second = engine.answer(view.sessionId(), "1", "TEXT", "还是主要做缓存。", null);
+
+		assertThat(second.followUpIndex()).isZero();
+		assertThat(second.currentQuestionIndex()).isGreaterThanOrEqualTo(1);
+	}
+
+	@Test
 	void should_pass_question_context_into_ai_service_command() {
 		InterviewSessionStore sessionStore = new InMemorySessionStore();
 		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
@@ -241,7 +293,8 @@ class SimpleInterviewEngineIntegrationTest {
 				sessionStore,
 				beanFactory.getBeanProvider(InterviewReportStore.class),
 				aiService,
-				new StubTtsService()
+				new StubTtsService(),
+				defaultDecisionEngine()
 		);
 
 		var view = engine.startSession(
@@ -274,7 +327,8 @@ class SimpleInterviewEngineIntegrationTest {
 				sessionStore,
 				beanFactory.getBeanProvider(InterviewReportStore.class),
 				aiService,
-				new StubTtsService()
+				new StubTtsService(),
+				defaultDecisionEngine()
 		);
 
 		var view = engine.startSession(
@@ -302,8 +356,13 @@ class SimpleInterviewEngineIntegrationTest {
 				sessionStore,
 				beanFactory.getBeanProvider(InterviewReportStore.class),
 				new StubAiService(),
-				new StubTtsService()
+				new StubTtsService(),
+				defaultDecisionEngine()
 		);
+	}
+
+	private static FollowUpDecisionEngine defaultDecisionEngine() {
+		return new FollowUpDecisionEngine(new InterviewFlowPolicy(60, 120, 1, 2, 1, 0));
 	}
 
 	private static final class InMemorySessionStore implements InterviewSessionStore {

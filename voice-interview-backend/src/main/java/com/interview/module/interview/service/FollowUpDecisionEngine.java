@@ -1,7 +1,10 @@
 package com.interview.module.interview.service;
 
+import org.springframework.stereotype.Service;
+
 import com.interview.module.interview.engine.model.InterviewQuestionSnapshot;
 
+@Service
 public class FollowUpDecisionEngine {
 
 	private final InterviewFlowPolicy flowPolicy;
