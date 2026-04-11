@@ -128,8 +128,11 @@ public class InterviewAnswerAnalyzer {
 			AnswerEvidence.Depth depth,
 			AnswerEvidence.CorrectnessRisk correctnessRisk
 	) {
-		if (correctnessRisk != AnswerEvidence.CorrectnessRisk.CONSISTENT) {
+		if (correctnessRisk == AnswerEvidence.CorrectnessRisk.SUSPECTED_CONTRADICTION) {
 			return "CLARIFY_CONTRADICTION";
+		}
+		if (correctnessRisk == AnswerEvidence.CorrectnessRisk.CLEARLY_WRONG) {
+			return "MISSING_KEY_POINT";
 		}
 		if (completeness != AnswerEvidence.Completeness.HIGH) {
 			return "MISSING_KEY_POINT";

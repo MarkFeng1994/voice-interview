@@ -283,6 +283,46 @@ class SimpleInterviewEngineIntegrationTest {
 	}
 
 	@Test
+	void should_allow_follow_up_on_last_question_when_answer_is_incomplete() {
+		var engine = defaultEngine();
+		var view = engine.startSession(
+				List.of(
+						new InterviewQuestionCard("自我介绍", "请做一个简短的自我介绍。"),
+						new InterviewQuestionCard("Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", null, null, 1)
+				),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		var first = engine.answer(view.sessionId(), "1", "TEXT", "我有五年 Java 后端开发经验。", null);
+		var second = engine.answer(first.sessionId(), "1", "TEXT", "我们主要用 Redis 做缓存。", null);
+
+		assertThat(second.status()).isEqualTo("IN_PROGRESS");
+		assertThat(second.followUpIndex()).isEqualTo(1);
+		assertThat(second.rounds().get(2).roundType()).isEqualTo("FOLLOW_UP");
+	}
+
+	@Test
+	void should_use_off_topic_follow_up_text_for_clearly_wrong_answer() {
+		var engine = defaultEngine();
+		var view = engine.startSession(
+				List.of(new InterviewQuestionCard("消息队列", "请说明你们系统是否用了消息队列。", "PRESET", null, null, 1)),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		var answered = engine.answer(view.sessionId(), "1", "TEXT", "我们主要通过乐观锁解决并发更新。", null);
+
+		assertThat(answered.rounds().get(1).aiMessageText()).contains("回到题目本身");
+	}
+
+	@Test
 	void should_pass_question_context_into_ai_service_command() {
 		InterviewSessionStore sessionStore = new InMemorySessionStore();
 		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(

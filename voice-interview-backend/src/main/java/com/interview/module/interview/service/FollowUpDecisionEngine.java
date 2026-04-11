@@ -28,8 +28,11 @@ public class FollowUpDecisionEngine {
 		if (followUpIndex >= followUpLimit) {
 			return FollowUpDecision.nextQuestion("FOLLOW_UP_LIMIT_REACHED", "已达到追问上限");
 		}
-		if (evidence.correctnessRisk() != AnswerEvidence.CorrectnessRisk.CONSISTENT) {
+		if (evidence.correctnessRisk() == AnswerEvidence.CorrectnessRisk.SUSPECTED_CONTRADICTION) {
 			return FollowUpDecision.followUp("CLARIFY_CONTRADICTION", "CORRECTNESS_RISK", evidence.summaryReason());
+		}
+		if (evidence.correctnessRisk() == AnswerEvidence.CorrectnessRisk.CLEARLY_WRONG) {
+			return FollowUpDecision.followUp("MISSING_KEY_POINT", "OFF_TOPIC_OR_WRONG", evidence.summaryReason());
 		}
 		if (evidence.completeness() == AnswerEvidence.Completeness.LOW) {
 			return FollowUpDecision.followUp("MISSING_KEY_POINT", "LOW_COMPLETENESS", evidence.summaryReason());

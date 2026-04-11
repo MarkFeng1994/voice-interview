@@ -596,6 +596,9 @@ public class SimpleInterviewEngine implements InterviewEngine {
 	}
 
 	private String buildFollowUpPrompt(AiReply aiReply, FollowUpDecision decision, AnswerEvidence analysis) {
+		if (analysis.correctnessRisk() == AnswerEvidence.CorrectnessRisk.CLEARLY_WRONG) {
+			return "你的回答和题目核心不太一致，请回到题目本身，重新说明你的实际方案。";
+		}
 		if ("MISSING_KEY_POINT".equals(decision.direction()) && !analysis.missingPoints().isEmpty()) {
 			return "你刚才的回答还缺少这些点：" + String.join("、", analysis.missingPoints()) + "。请补充说明。";
 		}
@@ -613,9 +616,6 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		int currentIndex = sessionState.getCurrentQuestionIndex();
 		if (currentIndex <= 0) {
 			return InterviewStage.OPENING.name();
-		}
-		if (currentIndex >= Math.max(1, totalQuestions - 1)) {
-			return InterviewStage.WRAP_UP.name();
 		}
 		if (currentIndex <= Math.max(1, totalQuestions / 2)) {
 			return InterviewStage.JAVA_CORE.name();
