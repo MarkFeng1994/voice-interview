@@ -176,6 +176,120 @@ class InterviewReportExplanationServiceTest {
 	}
 
 	@Test
+	void should_ignore_earlier_risk_signal_once_final_round_is_aligned() {
+		InterviewReportExplanationService service = new InterviewReportExplanationService();
+
+		InterviewQuestionExplanationView explanation = service.buildQuestionExplanation(
+				new InterviewQuestionSnapshot(1, "消息队列", "请说明消息队列削峰和解耦的区别。", "PRESET", 1),
+				new InterviewQuestionReportView(1, "消息队列", "请说明消息队列削峰和解耦的区别。", 88, "回答较完整。", null),
+				List.of(
+						new InterviewRoundRecord(
+								"r1",
+								1,
+								0,
+								"QUESTION",
+								"题目",
+								null,
+								0L,
+								58,
+								"我们主要讲了数据库分库分表。",
+								null,
+								"TEXT",
+								"2026-04-11T00:00:00Z",
+								"2026-04-11T00:00:10Z",
+								"回答有答偏风险，和题目核心不一致",
+								"FOLLOW_UP",
+								"需要回到题目本身重新回答",
+								List.of()
+						),
+						new InterviewRoundRecord(
+								"r2",
+								1,
+								1,
+								"FOLLOW_UP",
+								"继续展开",
+								null,
+								0L,
+								88,
+								"削峰是平滑流量峰值，解耦是把上下游时序拆开，核心目标和实现侧重点不同。",
+								null,
+								"TEXT",
+								"2026-04-11T00:00:11Z",
+								"2026-04-11T00:00:20Z",
+								"回答较完整，核心点覆盖到位",
+								"NEXT_QUESTION",
+								"当前回答已达到继续下一题的标准",
+								List.of()
+						)
+				)
+		);
+
+		assertThat(explanation.performanceLevel()).isEqualTo("STRONG");
+		assertThat(explanation.summaryText()).contains("回答较完整");
+		assertThat(explanation.summaryText()).doesNotContain("答偏风险");
+		assertThat(explanation.evidencePoints()).noneMatch(item -> item.contains("答偏"));
+		assertThat(explanation.evidencePoints()).noneMatch(item -> item.contains("不一致风险"));
+		assertThat(explanation.improvementSuggestion()).contains("表达结构");
+	}
+
+	@Test
+	void should_ignore_earlier_depth_gap_signal_once_final_round_is_complete() {
+		InterviewReportExplanationService service = new InterviewReportExplanationService();
+
+		InterviewQuestionExplanationView explanation = service.buildQuestionExplanation(
+				new InterviewQuestionSnapshot(1, "分布式事务", "请说明你们系统里分布式事务的处理方案。", "PRESET", 1),
+				new InterviewQuestionReportView(1, "分布式事务", "请说明你们系统里分布式事务的处理方案。", 88, "回答较完整。", null),
+				List.of(
+						new InterviewRoundRecord(
+								"r1",
+								1,
+								0,
+								"QUESTION",
+								"题目",
+								null,
+								0L,
+								66,
+								"我们用了最终一致性。",
+								null,
+								"TEXT",
+								"2026-04-11T00:00:00Z",
+								"2026-04-11T00:00:10Z",
+								"回答偏结论化，缺少过程细节和案例支撑",
+								"FOLLOW_UP",
+								"细节不足，需要补充实际处理过程",
+								List.of()
+						),
+						new InterviewRoundRecord(
+								"r2",
+								1,
+								1,
+								"FOLLOW_UP",
+								"继续展开",
+								null,
+								0L,
+								88,
+								"我们在订单场景采用事务消息+补偿任务，失败后依赖状态机重试并人工兜底。",
+								null,
+								"TEXT",
+								"2026-04-11T00:00:11Z",
+								"2026-04-11T00:00:20Z",
+								"回答较完整，核心点覆盖到位",
+								"NEXT_QUESTION",
+								"当前回答已达到继续下一题的标准",
+								List.of()
+						)
+				)
+		);
+
+		assertThat(explanation.performanceLevel()).isEqualTo("STRONG");
+		assertThat(explanation.summaryText()).contains("回答较完整");
+		assertThat(explanation.summaryText()).doesNotContain("深度和细节还不够扎实");
+		assertThat(explanation.evidencePoints()).noneMatch(item -> item.contains("缺少过程细节"));
+		assertThat(explanation.evidencePoints()).noneMatch(item -> item.contains("细节不足"));
+		assertThat(explanation.improvementSuggestion()).contains("表达结构");
+	}
+
+	@Test
 	void should_build_question_explanation_for_unanswered_or_unscored_question() {
 		InterviewReportExplanationService service = new InterviewReportExplanationService();
 

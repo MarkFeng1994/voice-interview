@@ -518,6 +518,109 @@ class SimpleInterviewEngineIntegrationTest {
 	}
 
 	@Test
+	void should_keep_score_on_answered_round_when_last_question_naturally_completes() {
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
+				Map.of("reportStore", new NoopInterviewReportStore())
+		);
+		SimpleInterviewEngine engine = new SimpleInterviewEngine(
+				sessionStore,
+				beanFactory.getBeanProvider(InterviewReportStore.class),
+				new SequencedAiService(List.of(86)),
+				new StubTtsService(),
+				defaultDecisionEngine()
+		);
+
+		var view = engine.startSession(
+				List.of(new InterviewQuestionCard("自我介绍", "请做一个简短的自我介绍。")),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		var answered = engine.answer(
+				view.sessionId(),
+				"1",
+				"TEXT",
+				"我有五年 Java 后端开发经验，最近主要负责交易系统。",
+				null
+		);
+		InterviewReportView report = engine.getReport(view.sessionId(), "1");
+
+		assertThat(answered.status()).isEqualTo("COMPLETED");
+		assertThat(answered.rounds()).hasSize(2);
+		assertThat(answered.rounds().get(0).roundType()).isEqualTo("QUESTION");
+		assertThat(answered.rounds().get(0).questionIndex()).isEqualTo(1);
+		assertThat(answered.rounds().get(0).scoreSuggestion()).isEqualTo(86);
+		assertThat(answered.rounds().get(1).roundType()).isEqualTo("END_INTERVIEW");
+		assertThat(answered.rounds().get(1).questionIndex()).isEqualTo(1);
+		assertThat(answered.rounds().get(1).scoreSuggestion()).isNull();
+		assertThat(report.questionReports()).extracting(InterviewQuestionReportView::score)
+				.containsExactly(86);
+	}
+
+	@Test
+	void should_keep_score_on_answered_round_when_decision_forces_end_interview() {
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
+				Map.of("reportStore", new NoopInterviewReportStore())
+		);
+		FollowUpDecisionEngine forcedEndDecisionEngine = new FollowUpDecisionEngine(new InterviewFlowPolicy(60, 120, 1, 2, 1, 0)) {
+			@Override
+			public FollowUpDecision decide(
+					InterviewQuestionSnapshot question,
+					String stage,
+					int followUpIndex,
+					int sessionMaxFollowUp,
+					AnswerEvidence evidence
+			) {
+				return FollowUpDecision.endInterview("FORCED_END", "达到收尾条件");
+			}
+		};
+		SimpleInterviewEngine engine = new SimpleInterviewEngine(
+				sessionStore,
+				beanFactory.getBeanProvider(InterviewReportStore.class),
+				new SequencedAiService(List.of(77)),
+				new StubTtsService(),
+				forcedEndDecisionEngine
+		);
+
+		var view = engine.startSession(
+				List.of(
+						new InterviewQuestionCard("Redis", "请说明 Redis 的使用场景和一致性策略。"),
+						new InterviewQuestionCard("消息队列", "请说明消息队列削峰和解耦的区别。")
+				),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		var answered = engine.answer(
+				view.sessionId(),
+				"1",
+				"TEXT",
+				"Redis 主要用于热点缓存，一致性上我会先更新数据库再删除缓存。",
+				null
+		);
+		InterviewReportView report = engine.getReport(view.sessionId(), "1");
+
+		assertThat(answered.status()).isEqualTo("COMPLETED");
+		assertThat(answered.rounds()).hasSize(2);
+		assertThat(answered.rounds().get(0).roundType()).isEqualTo("QUESTION");
+		assertThat(answered.rounds().get(0).questionIndex()).isEqualTo(1);
+		assertThat(answered.rounds().get(0).scoreSuggestion()).isEqualTo(77);
+		assertThat(answered.rounds().get(1).roundType()).isEqualTo("END_INTERVIEW");
+		assertThat(answered.rounds().get(1).questionIndex()).isEqualTo(1);
+		assertThat(answered.rounds().get(1).scoreSuggestion()).isNull();
+		assertThat(report.questionReports()).extracting(InterviewQuestionReportView::score)
+				.containsExactly(77, null);
+	}
+
+	@Test
 	void should_drop_early_missing_points_after_follow_up_completion_in_final_report() {
 		InterviewSessionStore sessionStore = new InMemorySessionStore();
 		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
