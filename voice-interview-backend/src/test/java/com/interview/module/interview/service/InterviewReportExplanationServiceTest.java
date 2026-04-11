@@ -93,6 +93,23 @@ class InterviewReportExplanationServiceTest {
 	}
 
 	@Test
+	void should_prioritize_risk_signal_over_missing_points_when_both_exist() {
+		InterviewReportExplanationService service = new InterviewReportExplanationService();
+
+		InterviewQuestionExplanationView explanation = service.buildQuestionExplanation(
+				new InterviewQuestionSnapshot(1, "消息队列", "请说明消息队列削峰和解耦的区别。", "PRESET", 1),
+				new InterviewQuestionReportView(1, "消息队列", "请说明消息队列削峰和解耦的区别。", 55, "回答偏题。", null),
+				List.of(
+						new InterviewRoundRecord("r1", 1, 0, "QUESTION", "题目", null, 0L, 55, "我们主要通过乐观锁控制并发。", null, "TEXT", "2026-04-11T00:00:00Z", "2026-04-11T00:00:10Z", "回答与题目核心不一致", "FOLLOW_UP", "需要回到题目本身重新回答", List.of("削峰", "解耦"))
+				)
+		);
+
+		assertThat(explanation.summaryText()).contains("答偏风险");
+		assertThat(explanation.summaryText()).doesNotContain("缺少对");
+		assertThat(explanation.improvementSuggestion()).contains("题干");
+	}
+
+	@Test
 	void should_build_question_explanation_for_strong_answer() {
 		InterviewReportExplanationService service = new InterviewReportExplanationService();
 
@@ -108,5 +125,23 @@ class InterviewReportExplanationServiceTest {
 		assertThat(explanation.summaryText()).contains("回答较完整");
 		assertThat(explanation.evidencePoints()).contains("得分较高且额外追问较少，说明回答完整度和稳定性都不错。");
 		assertThat(explanation.improvementSuggestion()).contains("表达结构");
+	}
+
+	@Test
+	void should_build_question_explanation_for_unanswered_or_unscored_question() {
+		InterviewReportExplanationService service = new InterviewReportExplanationService();
+
+		InterviewQuestionExplanationView explanation = service.buildQuestionExplanation(
+				new InterviewQuestionSnapshot(1, "缓存设计", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1),
+				new InterviewQuestionReportView(1, "缓存设计", "请说明 Redis 的使用场景和一致性策略。", null, "当前题目还没有形成有效评分。", null),
+				List.of(
+						new InterviewRoundRecord("r1", 1, 0, "QUESTION", "题目", null, 0L, null, null, null, null, "2026-04-11T00:00:00Z", null, null, null, null, List.of())
+				)
+		);
+
+		assertThat(explanation.performanceLevel()).isEqualTo("MEDIUM");
+		assertThat(explanation.summaryText()).containsAnyOf("未作答", "数据不足", "尚未形成有效评分");
+		assertThat(explanation.summaryText()).doesNotContain("基础回答有了");
+		assertThat(explanation.improvementSuggestion()).containsAnyOf("补充作答", "形成有效评分", "重新回答");
 	}
 }

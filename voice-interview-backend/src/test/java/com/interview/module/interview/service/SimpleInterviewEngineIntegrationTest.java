@@ -409,6 +409,48 @@ class SimpleInterviewEngineIntegrationTest {
 		assertThat(report.questionReports().get(0).explanation().generatedBy()).isEqualTo("RULE");
 	}
 
+	@Test
+	void should_prioritize_risk_explanation_over_missing_points_in_report_view() {
+		var engine = defaultEngine();
+		var view = engine.startSession(
+				List.of(new InterviewQuestionCard("消息队列", "请说明消息队列削峰和解耦的区别。", "PRESET", null, null, 1)),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		engine.answer(view.sessionId(), "1", "TEXT", "我们主要通过乐观锁解决并发更新。", null);
+		InterviewReportView report = engine.getReport(view.sessionId(), "1");
+
+		assertThat(report.questionReports()).hasSize(1);
+		assertThat(report.questionReports().get(0).explanation()).isNotNull();
+		assertThat(report.questionReports().get(0).explanation().summaryText()).contains("答偏风险");
+		assertThat(report.questionReports().get(0).explanation().summaryText()).doesNotContain("缺少对");
+	}
+
+	@Test
+	void should_mark_unanswered_question_as_insufficient_data_in_report_view() {
+		var engine = defaultEngine();
+		var view = engine.startSession(
+				List.of(new InterviewQuestionCard("缓存设计", "请说明 Redis 的使用场景和一致性策略。", "PRESET", null, null, 1)),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		InterviewReportView report = engine.getReport(view.sessionId(), "1");
+
+		assertThat(report.questionReports()).hasSize(1);
+		assertThat(report.questionReports().get(0).score()).isNull();
+		assertThat(report.questionReports().get(0).explanation()).isNotNull();
+		assertThat(report.questionReports().get(0).explanation().summaryText()).containsAnyOf("未作答", "数据不足", "尚未形成有效评分");
+		assertThat(report.questionReports().get(0).explanation().summaryText()).doesNotContain("基础回答有了");
+	}
+
 	private SimpleInterviewEngine defaultEngine() {
 		InterviewSessionStore sessionStore = new InMemorySessionStore();
 		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(

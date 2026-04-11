@@ -143,15 +143,20 @@ public class InterviewReportExplanationService {
 			List<InterviewRoundRecord> questionRounds
 	) {
 		String performanceLevel = levelFromScore(questionReport == null ? null : questionReport.score());
+		List<InterviewRoundRecord> safeQuestionRounds = safeRounds(questionRounds);
 		LinkedHashSet<String> evidencePoints = new LinkedHashSet<>();
 		LinkedHashSet<String> missingPoints = new LinkedHashSet<>();
 		int followUpCount = 0;
 		boolean hasRiskSignal = false;
 		boolean hasDepthGapSignal = false;
+		boolean hasEffectiveAnswer = false;
 
-		for (InterviewRoundRecord round : safeRounds(questionRounds)) {
+		for (InterviewRoundRecord round : safeQuestionRounds) {
 			if ("FOLLOW_UP".equals(round.followUpDecision())) {
 				followUpCount++;
+			}
+			if (hasEffectiveAnswer(round)) {
+				hasEffectiveAnswer = true;
 			}
 			if (round.analysisReason() != null && !round.analysisReason().isBlank()) {
 				evidencePoints.add(round.analysisReason().trim());
@@ -172,15 +177,25 @@ public class InterviewReportExplanationService {
 				: questionReport == null ? "当前题目" : questionReport.title();
 		String summaryText;
 		String improvementSuggestion;
-		if (!missingPoints.isEmpty()) {
+		if (hasRiskSignal) {
+			evidencePoints.add("分析中出现了答偏或前后不一致风险信号。");
+			summaryText = questionTitle + " 这题存在答偏风险，说明回答和题目核心的对齐度还不够稳定。";
+			improvementSuggestion = "先拆清题干，再按“结论、依据、方案”顺序作答，避免偏离问题本身。";
+		} else if (!hasEffectiveAnswer || questionReport == null || questionReport.score() == null) {
+			evidencePoints.add(hasEffectiveAnswer
+					? "当前题目已有零散记录，但还没有形成可用于判断质量的有效评分。"
+					: "当前题目还没有有效作答记录，暂时无法判断回答质量。");
+			summaryText = hasEffectiveAnswer
+					? questionTitle + " 这题目前数据不足，尚未形成有效评分，暂时无法给出稳定判断。"
+					: questionTitle + " 这题目前未作答或数据不足，尚未形成有效评分。";
+			improvementSuggestion = hasEffectiveAnswer
+					? "补充更完整的作答并完成当前题目，形成有效评分后再看具体问题。"
+					: "先补充作答并形成有效评分，再根据结果做针对性复盘。";
+		} else if (!missingPoints.isEmpty()) {
 			String missingPointsText = String.join("、", missingPoints);
 			evidencePoints.add("缺少关键点：" + missingPointsText);
 			summaryText = questionTitle + " 这题还缺少对 " + missingPointsText + " 的说明，核心覆盖不够完整。";
 			improvementSuggestion = "补充 " + missingPointsText + "，并明确你的方案、取舍和落地方式。";
-		} else if (hasRiskSignal) {
-			evidencePoints.add("分析中出现了答偏或前后不一致风险信号。");
-			summaryText = questionTitle + " 这题存在答偏风险，说明回答和题目核心的对齐度还不够稳定。";
-			improvementSuggestion = "先拆清题干，再按“结论、依据、方案”顺序作答，避免偏离问题本身。";
 		} else if ((hasDepthGapSignal || followUpCount >= 2)
 				&& (questionReport == null || questionReport.score() == null || questionReport.score() < 80)) {
 			evidencePoints.add("同一题触发了 " + followUpCount + " 次继续追问，说明细节展开还不够稳定。");
@@ -267,6 +282,13 @@ public class InterviewReportExplanationService {
 				|| text.contains("案例支撑")
 				|| text.contains("补充实际处理过程")
 				|| text.contains("展开不足");
+	}
+
+	private boolean hasEffectiveAnswer(InterviewRoundRecord round) {
+		if (round == null || round.userAnswerText() == null || round.userAnswerText().isBlank()) {
+			return false;
+		}
+		return !"候选人未提供有效回答。".equals(round.userAnswerText().trim());
 	}
 
 	private List<String> limit(LinkedHashSet<String> items, int maxSize) {
