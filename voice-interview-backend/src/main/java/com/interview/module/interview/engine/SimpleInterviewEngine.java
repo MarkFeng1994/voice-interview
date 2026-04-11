@@ -109,15 +109,16 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		InterviewSessionState sessionState = requireSession(sessionId, requesterUserId);
 		synchronized (sessionState) {
 			requireActive(sessionState);
+			String analysisText = normalizeForAnalysis(userText);
 			String normalizedText = normalize(userText);
 			InterviewQuestionSnapshot currentQuestion = currentQuestion(sessionState);
 			List<String> expectedPoints = expectedPoints(currentQuestion);
 			AnswerEvidence analysis = aiService.analyzeInterviewAnswer(
 					currentQuestion.promptSnapshot(),
-					normalizedText,
+					analysisText,
 					expectedPoints
 			);
-			appendUserAnswer(sessionState, normalizedText, userAudioUrl, answerMode, analysis.reason());
+			appendUserAnswer(sessionState, normalizedText, userAudioUrl, answerMode, analysis.summaryReason());
 
 			AiReply aiReply = aiService.generateInterviewReply(new InterviewReplyCommand(
 					currentQuestion.promptSnapshot(),
@@ -258,7 +259,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 			AiReply aiReply,
 			AnswerEvidence analysis
 	) {
-		return (analysis.followUpNeeded() || "FOLLOW_UP".equalsIgnoreCase(aiReply.decisionSuggestion()))
+		return (!analysis.missingPoints().isEmpty() || "FOLLOW_UP".equalsIgnoreCase(aiReply.decisionSuggestion()))
 				&& sessionState.getFollowUpIndex() < sessionState.getMaxFollowUpPerQuestion();
 	}
 
@@ -488,6 +489,10 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		return text.trim();
 	}
 
+	private String normalizeForAnalysis(String text) {
+		return text == null ? "" : text.trim();
+	}
+
 	private String normalizeQuestionSource(String sourceType) {
 		if (sourceType == null || sourceType.isBlank()) {
 			return "PRESET";
@@ -535,7 +540,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 	}
 
 	private String buildFollowUpPrompt(AiReply aiReply, AnswerEvidence analysis) {
-		if (analysis.followUpNeeded() && !analysis.missingPoints().isEmpty()) {
+		if (!analysis.missingPoints().isEmpty()) {
 			return "你刚才的回答还缺少这些点：" + String.join("、", analysis.missingPoints()) + "。请补充说明。";
 		}
 		return aiReply.spokenText();

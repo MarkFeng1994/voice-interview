@@ -263,6 +263,36 @@ class SimpleInterviewEngineIntegrationTest {
 		assertThat(aiService.lastCommand.expectedPoints()).contains("并发控制");
 	}
 
+	@Test
+	void should_pass_blank_answer_to_analyzer_as_unanswered() {
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
+				Map.of("reportStore", new NoopInterviewReportStore())
+		);
+		RecordingAiService aiService = new RecordingAiService();
+		SimpleInterviewEngine engine = new SimpleInterviewEngine(
+				sessionStore,
+				beanFactory.getBeanProvider(InterviewReportStore.class),
+				aiService,
+				new StubTtsService()
+		);
+
+		var view = engine.startSession(
+				List.of(new InterviewQuestionCard("缓存设计", "请说明 Redis 的使用场景和一致性策略。")),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		engine.answer(view.sessionId(), "1", "TEXT", "   ", null);
+
+		assertThat(aiService.lastAnalysis).isNotNull();
+		assertThat(aiService.lastAnalysis.answered()).isFalse();
+		assertThat(aiService.lastAnalysis.reasonCodes()).contains("ANSWER_EMPTY");
+	}
+
 	private SimpleInterviewEngine defaultEngine() {
 		InterviewSessionStore sessionStore = new InMemorySessionStore();
 		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
@@ -319,6 +349,7 @@ class SimpleInterviewEngineIntegrationTest {
 
 	private static final class RecordingAiService implements AiService {
 		private InterviewReplyCommand lastCommand;
+		private AnswerEvidence lastAnalysis;
 
 		@Override
 		public AiReply generateInterviewReply(InterviewReplyCommand command) {
@@ -338,7 +369,8 @@ class SimpleInterviewEngineIntegrationTest {
 
 		@Override
 		public AnswerEvidence analyzeInterviewAnswer(String question, String answer, List<String> expectedPoints) {
-			return InterviewAnswerAnalyzer.heuristic().analyze(question, answer, expectedPoints);
+			this.lastAnalysis = InterviewAnswerAnalyzer.heuristic().analyze(question, answer, expectedPoints);
+			return this.lastAnalysis;
 		}
 	}
 

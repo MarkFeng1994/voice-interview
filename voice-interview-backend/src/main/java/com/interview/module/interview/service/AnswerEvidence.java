@@ -20,18 +20,6 @@ public record AnswerEvidence(
 		summaryReason = summaryReason == null ? "" : summaryReason;
 	}
 
-	public boolean followUpNeeded() {
-		return !"NEXT_QUESTION".equalsIgnoreCase(recommendedFollowUpDirection);
-	}
-
-	public String followUpDirection() {
-		return recommendedFollowUpDirection;
-	}
-
-	public String reason() {
-		return summaryReason;
-	}
-
 	public enum Completeness {
 		HIGH, MEDIUM, LOW
 	}
