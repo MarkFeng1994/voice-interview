@@ -208,7 +208,7 @@ class SimpleInterviewEngineIntegrationTest {
 		List<SessionQuestionEntity> storedQuestions = questionCaptor.getAllValues();
 
 		assertThat(storedQuestions).extracting(SessionQuestionEntity::getSourceSnapshot)
-				.containsExactly("PRESET", "PRESET");
+				.containsExactly("MANUAL", "MANUAL");
 		assertThat(storedQuestions).extracting(SessionQuestionEntity::getDifficultySnapshot)
 				.containsExactly(1, 1);
 	}
