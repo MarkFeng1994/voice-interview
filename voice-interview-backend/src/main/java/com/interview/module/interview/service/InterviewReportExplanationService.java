@@ -19,6 +19,9 @@ import com.interview.module.interview.engine.model.InterviewRoundRecord;
 @Service
 public class InterviewReportExplanationService {
 
+	private static final String EVIDENCE_SLOT_PREFIX = "E";
+	private static final String SUGGESTION_SLOT_PREFIX = "S";
+
 	private final AiService aiService;
 
 	public InterviewReportExplanationService() {
@@ -257,18 +260,28 @@ public class InterviewReportExplanationService {
 		if (ruleExplanation == null) {
 			return null;
 		}
+		List<String> taggedRuleEvidencePoints = tagItems(ruleExplanation.evidencePoints(), EVIDENCE_SLOT_PREFIX);
+		List<String> taggedRuleSuggestions = tagItems(ruleExplanation.improvementSuggestions(), SUGGESTION_SLOT_PREFIX);
 		InterviewReportExplanationResult polished = polishExplanation(new InterviewReportExplanationCommand(
 				"OVERALL",
 				report == null ? null : report.title(),
 				report == null ? null : report.overallComment(),
 				ruleExplanation == null ? null : ruleExplanation.level(),
 				ruleExplanation == null ? null : ruleExplanation.summaryText(),
-				ruleExplanation == null ? List.of() : ruleExplanation.evidencePoints(),
-				ruleExplanation == null ? List.of() : ruleExplanation.improvementSuggestions()
+				taggedRuleEvidencePoints,
+				taggedRuleSuggestions
 		));
-		List<String> polishedEvidencePoints = normalizeItems(polished == null ? null : polished.evidencePoints());
-		List<String> polishedSuggestions = normalizeItems(polished == null ? null : polished.improvementSuggestions());
-		if (!isValidOverallPolishResult(ruleExplanation, polished, polishedEvidencePoints, polishedSuggestions)) {
+		List<String> polishedEvidencePoints = stripTaggedItems(
+				polished == null ? null : polished.evidencePoints(),
+				taggedRuleEvidencePoints.size(),
+				EVIDENCE_SLOT_PREFIX
+		);
+		List<String> polishedSuggestions = stripTaggedItems(
+				polished == null ? null : polished.improvementSuggestions(),
+				taggedRuleSuggestions.size(),
+				SUGGESTION_SLOT_PREFIX
+		);
+		if (!hasValidPolishSummary(polished) || polishedEvidencePoints == null || polishedSuggestions == null) {
 			return ruleExplanation;
 		}
 		return new InterviewOverallExplanationView(
@@ -288,18 +301,31 @@ public class InterviewReportExplanationService {
 		if (ruleExplanation == null) {
 			return null;
 		}
+		List<String> taggedRuleEvidencePoints = tagItems(ruleExplanation.evidencePoints(), EVIDENCE_SLOT_PREFIX);
+		List<String> taggedRuleSuggestions = tagItems(suggestionAsList(ruleExplanation.improvementSuggestion()), SUGGESTION_SLOT_PREFIX);
 		InterviewReportExplanationResult polished = polishExplanation(new InterviewReportExplanationCommand(
 				"QUESTION",
 				questionReport == null ? null : questionReport.title(),
 				questionReport == null ? question == null ? null : question.promptSnapshot() : questionReport.prompt(),
 				ruleExplanation == null ? null : ruleExplanation.performanceLevel(),
 				ruleExplanation == null ? null : ruleExplanation.summaryText(),
-				ruleExplanation == null ? List.of() : ruleExplanation.evidencePoints(),
-				ruleExplanation == null ? List.of() : suggestionAsList(ruleExplanation.improvementSuggestion())
+				taggedRuleEvidencePoints,
+				taggedRuleSuggestions
 		));
-		List<String> polishedEvidencePoints = normalizeItems(polished == null ? null : polished.evidencePoints());
-		List<String> polishedSuggestions = normalizeItems(polished == null ? null : polished.improvementSuggestions());
-		if (!isValidQuestionPolishResult(ruleExplanation, polished, polishedEvidencePoints, polishedSuggestions)) {
+		List<String> polishedEvidencePoints = stripTaggedItems(
+				polished == null ? null : polished.evidencePoints(),
+				taggedRuleEvidencePoints.size(),
+				EVIDENCE_SLOT_PREFIX
+		);
+		List<String> polishedSuggestions = stripTaggedItems(
+				polished == null ? null : polished.improvementSuggestions(),
+				taggedRuleSuggestions.size(),
+				SUGGESTION_SLOT_PREFIX
+		);
+		if (!hasValidPolishSummary(polished)
+				|| polishedEvidencePoints == null
+				|| polishedSuggestions == null
+				|| polishedSuggestions.size() != 1) {
 			return ruleExplanation;
 		}
 		return new InterviewQuestionExplanationView(
@@ -367,28 +393,41 @@ public class InterviewReportExplanationService {
 		return List.copyOf(normalized);
 	}
 
-	private boolean isValidOverallPolishResult(
-			InterviewOverallExplanationView ruleExplanation,
-			InterviewReportExplanationResult result,
-			List<String> polishedEvidencePoints,
-			List<String> polishedSuggestions
-	) {
-		return hasValidPolishSummary(result)
-				&& polishedEvidencePoints.size() == normalizeItems(ruleExplanation.evidencePoints()).size()
-				&& polishedSuggestions.size() == normalizeItems(ruleExplanation.improvementSuggestions()).size();
+	private List<String> tagItems(List<String> items, String slotPrefix) {
+		List<String> normalized = normalizeItems(items);
+		List<String> tagged = new ArrayList<>();
+		for (int index = 0; index < normalized.size(); index++) {
+			tagged.add(slotTag(slotPrefix, index + 1) + " " + normalized.get(index));
+		}
+		return List.copyOf(tagged);
 	}
 
-	private boolean isValidQuestionPolishResult(
-			InterviewQuestionExplanationView ruleExplanation,
-			InterviewReportExplanationResult result,
-			List<String> polishedEvidencePoints,
-			List<String> polishedSuggestions
-	) {
-		List<String> ruleSuggestions = suggestionAsList(ruleExplanation.improvementSuggestion());
-		return hasValidPolishSummary(result)
-				&& polishedEvidencePoints.size() == normalizeItems(ruleExplanation.evidencePoints()).size()
-				&& polishedSuggestions.size() == 1
-				&& polishedSuggestions.size() == ruleSuggestions.size();
+	private List<String> stripTaggedItems(List<String> items, int expectedCount, String slotPrefix) {
+		if (items == null || items.size() != expectedCount) {
+			return null;
+		}
+		List<String> stripped = new ArrayList<>();
+		for (int index = 0; index < items.size(); index++) {
+			String item = items.get(index);
+			if (item == null || item.isBlank()) {
+				return null;
+			}
+			String normalized = item.trim();
+			String slotTag = slotTag(slotPrefix, index + 1);
+			if (!normalized.startsWith(slotTag)) {
+				return null;
+			}
+			String content = normalized.substring(slotTag.length()).trim();
+			if (content.isBlank()) {
+				return null;
+			}
+			stripped.add(content);
+		}
+		return List.copyOf(stripped);
+	}
+
+	private String slotTag(String slotPrefix, int slotIndex) {
+		return "[" + slotPrefix + slotIndex + "]";
 	}
 
 	private boolean hasValidPolishSummary(InterviewReportExplanationResult result) {

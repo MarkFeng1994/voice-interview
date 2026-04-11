@@ -22,6 +22,8 @@ import com.interview.module.interview.resume.ResumeQuestionGenerationCommand;
 import com.interview.module.system.service.ProviderMetricsService;
 import com.interview.module.system.service.ProviderMetricsService.ProviderMetricView;
 
+import dev.langchain4j.service.SystemMessage;
+
 class LangChain4jAiServiceTest {
 
 	@Test
@@ -230,14 +232,14 @@ class LangChain4jAiServiceTest {
 				"请说明 Redis 的使用场景和一致性策略。",
 				"MEDIUM",
 				"规则总结",
-				List.of("规则证据"),
-				List.of("规则建议")
+				List.of("[E1] 规则证据"),
+				List.of("[S1] 规则建议")
 		)).thenReturn("""
 				```json
 				{
 				  "summaryText": "润色后的总结",
-				  "evidencePoints": ["润色后的证据"],
-				  "improvementSuggestions": ["润色后的建议"]
+				  "evidencePoints": ["[E1] 润色后的证据"],
+				  "improvementSuggestions": ["[S1] 润色后的建议"]
 				}
 				```""");
 
@@ -257,14 +259,14 @@ class LangChain4jAiServiceTest {
 						"请说明 Redis 的使用场景和一致性策略。",
 						"MEDIUM",
 						"规则总结",
-						List.of("规则证据"),
-						List.of("规则建议")
+						List.of("[E1] 规则证据"),
+						List.of("[S1] 规则建议")
 				)
 		);
 
 		assertThat(result.summaryText()).isEqualTo("润色后的总结");
-		assertThat(result.evidencePoints()).containsExactly("润色后的证据");
-		assertThat(result.improvementSuggestions()).containsExactly("润色后的建议");
+		assertThat(result.evidencePoints()).containsExactly("[E1] 润色后的证据");
+		assertThat(result.improvementSuggestions()).containsExactly("[S1] 润色后的建议");
 		ProviderMetricView metric = findMetric(metricsService, "AI_REPORT_EXPLANATION");
 		assertThat(metric.provider()).isEqualTo("langchain4j");
 		assertThat(metric.totalCalls()).isEqualTo(1);
@@ -276,9 +278,19 @@ class LangChain4jAiServiceTest {
 				"请说明 Redis 的使用场景和一致性策略。",
 				"MEDIUM",
 				"规则总结",
-				List.of("规则证据"),
-				List.of("规则建议")
+				List.of("[E1] 规则证据"),
+				List.of("[S1] 规则建议")
 		);
+	}
+
+	@Test
+	void should_require_slot_markers_in_report_explanation_prompt() throws Exception {
+		SystemMessage systemMessage = InterviewReportExplanationAssistant.class
+				.getMethod("polish", String.class, String.class, String.class, String.class, String.class, List.class, List.class)
+				.getAnnotation(SystemMessage.class);
+
+		assertThat(systemMessage).isNotNull();
+		assertThat(systemMessage.value()[0]).contains("[E1]").contains("[S1]").contains("槽位标记");
 	}
 
 	private LangChain4jAiService createService(

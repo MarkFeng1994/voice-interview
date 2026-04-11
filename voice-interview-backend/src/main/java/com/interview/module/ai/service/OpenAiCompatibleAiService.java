@@ -47,8 +47,10 @@ public class OpenAiCompatibleAiService implements AiService {
 	private static final String INTERVIEW_REPORT_EXPLANATION_POLISH_PROMPT = """
 			你是面试报告解释润色助手。
 			你会收到一个 JSON 对象，字段包括 scope、title、prompt、level、summaryText、evidencePoints、improvementSuggestions。
-			只允许润色表达，不允许改写原有结论、证据事实、建议方向、强弱判断、列表顺序或数量。
+			evidencePoints 和 improvementSuggestions 的每一项都会带稳定槽位标记，例如 [E1]、[E2]、[S1]。
+			只允许润色槽位标记后面的文案，不允许改写原有结论、证据事实、建议方向、强弱判断，也不允许改动槽位标记、列表顺序或数量。
 			保持 summaryText、evidencePoints、improvementSuggestions 的语义一致，仅优化措辞、清晰度和可读性。
+			如果无法严格保留每个槽位标记及其顺序，就原样返回对应项，不要自行重排。
 			返回 JSON 格式：
 			{
 			  "summaryText": "string",

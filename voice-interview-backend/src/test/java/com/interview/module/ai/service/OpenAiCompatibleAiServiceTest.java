@@ -75,7 +75,7 @@ class OpenAiCompatibleAiServiceTest {
 	@Test
 	void should_fallback_to_streaming_responses_for_report_explanation_polish() throws Exception {
 		String responseJson = """
-				{"summaryText":"润色后的总结","evidencePoints":["润色后的证据"],"improvementSuggestions":["润色后的建议"]}
+				{"summaryText":"润色后的总结","evidencePoints":["[E1] 润色后的证据"],"improvementSuggestions":["[S1] 润色后的建议"]}
 				""";
 		try (StubAiGateway gateway = new StubAiGateway(responseJson)) {
 			OpenAiCompatibleAiService service = createService(gateway.baseUrl());
@@ -87,22 +87,25 @@ class OpenAiCompatibleAiServiceTest {
 							"整体基础可用。",
 							"MEDIUM",
 							"规则总结",
-							List.of("规则证据"),
-							List.of("规则建议")
+							List.of("[E1] 规则证据"),
+							List.of("[S1] 规则建议")
 					)
 			);
 
-			String input = new ObjectMapper().readTree(gateway.lastResponsesRequestBody()).path("input").asText();
+			String requestBody = gateway.lastResponsesRequestBody();
+			String input = new ObjectMapper().readTree(requestBody).path("input").asText();
+			String instructions = new ObjectMapper().readTree(requestBody).path("instructions").asText();
 			assertThat(result.summaryText()).isEqualTo("润色后的总结");
-			assertThat(result.evidencePoints()).containsExactly("润色后的证据");
-			assertThat(result.improvementSuggestions()).containsExactly("润色后的建议");
+			assertThat(result.evidencePoints()).containsExactly("[E1] 润色后的证据");
+			assertThat(result.improvementSuggestions()).containsExactly("[S1] 润色后的建议");
 			assertThat(gateway.chatCalls()).isEqualTo(1);
 			assertThat(gateway.responsesCalls()).isEqualTo(1);
-			assertThat(gateway.lastResponsesRequestBody()).contains("\"stream\":true");
+			assertThat(requestBody).contains("\"stream\":true");
+			assertThat(instructions).contains("[E1]").contains("[S1]").contains("槽位标记");
 			assertThat(input).contains("\"scope\":\"OVERALL\"");
 			assertThat(input).contains("\"summaryText\":\"规则总结\"");
-			assertThat(input).contains("\"evidencePoints\":[\"规则证据\"]");
-			assertThat(input).contains("\"improvementSuggestions\":[\"规则建议\"]");
+			assertThat(input).contains("\"evidencePoints\":[\"[E1] 规则证据\"]");
+			assertThat(input).contains("\"improvementSuggestions\":[\"[S1] 规则建议\"]");
 		}
 	}
 
