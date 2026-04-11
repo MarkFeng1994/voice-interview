@@ -447,8 +447,29 @@ class SimpleInterviewEngineIntegrationTest {
 		assertThat(report.questionReports()).hasSize(1);
 		assertThat(report.questionReports().get(0).score()).isNull();
 		assertThat(report.questionReports().get(0).explanation()).isNotNull();
+		assertThat(report.questionReports().get(0).explanation().performanceLevel()).isNull();
 		assertThat(report.questionReports().get(0).explanation().summaryText()).containsAnyOf("未作答", "数据不足", "尚未形成有效评分");
 		assertThat(report.questionReports().get(0).explanation().summaryText()).doesNotContain("基础回答有了");
+	}
+
+	@Test
+	void should_mark_unanswered_session_overall_explanation_as_no_data() {
+		var engine = defaultEngine();
+		var view = engine.startSession(
+				List.of(new InterviewQuestionCard("缓存设计", "请说明 Redis 的使用场景和一致性策略。", "PRESET", null, null, 1)),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		InterviewReportView report = engine.getReport(view.sessionId(), "1");
+
+		assertThat(report.overallExplanation()).isNotNull();
+		assertThat(report.overallExplanation().level()).isNull();
+		assertThat(report.overallExplanation().summaryText()).containsAnyOf("有效答题记录不足", "尚未形成完整诊断", "数据不足");
+		assertThat(report.overallExplanation().summaryText()).doesNotContain("整体基础可用");
 	}
 
 	private SimpleInterviewEngine defaultEngine() {

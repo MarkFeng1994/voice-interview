@@ -59,7 +59,8 @@ public class InterviewReportExplanationService {
 			List<InterviewQuestionReportView> questionReports,
 			List<InterviewRoundRecord> rounds
 	) {
-		String level = levelFromScore(overallScore);
+		boolean noData = overallScore == null;
+		String level = noData ? null : levelFromScore(overallScore);
 		int strongQuestions = 0;
 		int weakQuestions = 0;
 		for (InterviewQuestionReportView questionReport : safeQuestionReports(questionReports)) {
@@ -88,11 +89,13 @@ public class InterviewReportExplanationService {
 			}
 		}
 
-		String summaryText = switch (level) {
-			case "STRONG" -> "整体表现较稳定，多数题目能给出完整回答，追问下也能基本站稳结论。";
-			case "MEDIUM" -> "整体基础可用，但关键点覆盖和追问深度还不够稳定，部分题目仍需要继续补强。";
-			default -> "整体表现偏弱，关键点覆盖、追问深度和答题稳定性都还有明显提升空间。";
-		};
+		String summaryText = noData
+				? "当前有效答题记录不足，尚未形成完整诊断。"
+				: switch (level) {
+					case "STRONG" -> "整体表现较稳定，多数题目能给出完整回答，追问下也能基本站稳结论。";
+					case "MEDIUM" -> "整体基础可用，但关键点覆盖和追问深度还不够稳定，部分题目仍需要继续补强。";
+					default -> "整体表现偏弱，关键点覆盖、追问深度和答题稳定性都还有明显提升空间。";
+				};
 
 		LinkedHashSet<String> evidencePoints = new LinkedHashSet<>();
 		if (strongQuestions > 0) {
@@ -127,6 +130,12 @@ public class InterviewReportExplanationService {
 		if (improvementSuggestions.isEmpty()) {
 			improvementSuggestions.add("继续保持高频复盘，把高分题沉淀成可复用表达模板。");
 		}
+		if (noData) {
+			evidencePoints.clear();
+			evidencePoints.add("当前会话还没有足够的有效答题记录，无法稳定判断整体表现。");
+			improvementSuggestions.clear();
+			improvementSuggestions.add("先完成至少一题有效作答，形成评分后再查看完整诊断。");
+		}
 
 		return new InterviewOverallExplanationView(
 				level,
@@ -142,7 +151,6 @@ public class InterviewReportExplanationService {
 			InterviewQuestionReportView questionReport,
 			List<InterviewRoundRecord> questionRounds
 	) {
-		String performanceLevel = levelFromScore(questionReport == null ? null : questionReport.score());
 		List<InterviewRoundRecord> safeQuestionRounds = safeRounds(questionRounds);
 		LinkedHashSet<String> evidencePoints = new LinkedHashSet<>();
 		LinkedHashSet<String> missingPoints = new LinkedHashSet<>();
@@ -175,13 +183,15 @@ public class InterviewReportExplanationService {
 		String questionTitle = question != null && question.titleSnapshot() != null && !question.titleSnapshot().isBlank()
 				? question.titleSnapshot()
 				: questionReport == null ? "当前题目" : questionReport.title();
+		boolean noData = !hasEffectiveAnswer || questionReport == null || questionReport.score() == null;
+		String performanceLevel = noData ? null : levelFromScore(questionReport.score());
 		String summaryText;
 		String improvementSuggestion;
 		if (hasRiskSignal) {
 			evidencePoints.add("分析中出现了答偏或前后不一致风险信号。");
 			summaryText = questionTitle + " 这题存在答偏风险，说明回答和题目核心的对齐度还不够稳定。";
 			improvementSuggestion = "先拆清题干，再按“结论、依据、方案”顺序作答，避免偏离问题本身。";
-		} else if (!hasEffectiveAnswer || questionReport == null || questionReport.score() == null) {
+		} else if (noData) {
 			evidencePoints.add(hasEffectiveAnswer
 					? "当前题目已有零散记录，但还没有形成可用于判断质量的有效评分。"
 					: "当前题目还没有有效作答记录，暂时无法判断回答质量。");

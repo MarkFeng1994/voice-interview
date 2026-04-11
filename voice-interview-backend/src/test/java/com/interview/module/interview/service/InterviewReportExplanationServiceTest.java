@@ -139,7 +139,7 @@ class InterviewReportExplanationServiceTest {
 				)
 		);
 
-		assertThat(explanation.performanceLevel()).isEqualTo("MEDIUM");
+		assertThat(explanation.performanceLevel()).isNull();
 		assertThat(explanation.summaryText()).containsAnyOf("未作答", "数据不足", "尚未形成有效评分");
 		assertThat(explanation.summaryText()).doesNotContain("基础回答有了");
 		assertThat(explanation.improvementSuggestion()).containsAnyOf("补充作答", "形成有效评分", "重新回答");
