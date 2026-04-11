@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.interview.module.ai.service.AiReply;
 import com.interview.module.ai.service.AiService;
+import com.interview.module.ai.service.InterviewReportExplanationCommand;
+import com.interview.module.ai.service.InterviewReportExplanationResult;
 import com.interview.module.ai.service.InterviewReplyCommand;
 import com.interview.module.interview.resume.GeneratedResumeQuestion;
 import com.interview.module.interview.resume.ResumeKeywordExtractionResult;
@@ -32,6 +34,7 @@ public class LangChain4jAiService implements AiService {
 	private final InterviewReplyAssistant interviewReplyAssistant;
 	private final ResumeKeywordAssistant resumeKeywordAssistant;
 	private final ResumeQuestionAssistant resumeQuestionAssistant;
+	private final InterviewReportExplanationAssistant interviewReportExplanationAssistant;
 	private final ProviderMetricsService providerMetricsService;
 	private final ObjectMapper objectMapper;
 
@@ -43,6 +46,7 @@ public class LangChain4jAiService implements AiService {
 		this.interviewReplyAssistant = assistantFactory.interviewReplyAssistant();
 		this.resumeKeywordAssistant = assistantFactory.resumeKeywordAssistant();
 		this.resumeQuestionAssistant = assistantFactory.resumeQuestionAssistant();
+		this.interviewReportExplanationAssistant = assistantFactory.interviewReportExplanationAssistant();
 		this.providerMetricsService = providerMetricsService;
 		this.objectMapper = objectMapper;
 	}
@@ -101,6 +105,33 @@ public class LangChain4jAiService implements AiService {
 		});
 	}
 
+	@Override
+	public InterviewReportExplanationResult polishInterviewReportExplanation(InterviewReportExplanationCommand command) {
+		return providerMetricsService.record("AI_REPORT_EXPLANATION", PROVIDER, () -> {
+			if (command == null) {
+				return null;
+			}
+			String content = interviewReportExplanationAssistant.polish(
+					defaultString(command.scope()),
+					defaultString(command.title()),
+					defaultString(command.prompt()),
+					defaultString(command.level()),
+					defaultString(command.summaryText()),
+					command.evidencePoints(),
+					command.improvementSuggestions()
+			);
+			InterviewReportExplanationResult output = parseJsonObject(content, InterviewReportExplanationResult.class);
+			if (output == null) {
+				return null;
+			}
+			return new InterviewReportExplanationResult(
+					blankToNull(output.summaryText()),
+					normalizeList(output.evidencePoints()),
+					normalizeList(output.improvementSuggestions())
+			);
+		});
+	}
+
 	private GeneratedResumeQuestion toGeneratedQuestion(ResumeQuestionOutput output) {
 		if (output == null) {
 			return new GeneratedResumeQuestion(DEFAULT_QUESTION_TITLE, DEFAULT_QUESTION_PROMPT, null, DEFAULT_DIFFICULTY);
@@ -129,6 +160,10 @@ public class LangChain4jAiService implements AiService {
 			return null;
 		}
 		return value.trim();
+	}
+
+	private String defaultString(String value) {
+		return value == null ? "" : value;
 	}
 
 	private String firstNonBlank(String value, String fallback) {

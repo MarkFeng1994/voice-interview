@@ -72,6 +72,40 @@ class OpenAiCompatibleAiServiceTest {
 		}
 	}
 
+	@Test
+	void should_fallback_to_streaming_responses_for_report_explanation_polish() throws Exception {
+		String responseJson = """
+				{"summaryText":"润色后的总结","evidencePoints":["润色后的证据"],"improvementSuggestions":["润色后的建议"]}
+				""";
+		try (StubAiGateway gateway = new StubAiGateway(responseJson)) {
+			OpenAiCompatibleAiService service = createService(gateway.baseUrl());
+
+			InterviewReportExplanationResult result = service.polishInterviewReportExplanation(
+					new InterviewReportExplanationCommand(
+							"OVERALL",
+							"Redis",
+							"整体基础可用。",
+							"MEDIUM",
+							"规则总结",
+							List.of("规则证据"),
+							List.of("规则建议")
+					)
+			);
+
+			String input = new ObjectMapper().readTree(gateway.lastResponsesRequestBody()).path("input").asText();
+			assertThat(result.summaryText()).isEqualTo("润色后的总结");
+			assertThat(result.evidencePoints()).containsExactly("润色后的证据");
+			assertThat(result.improvementSuggestions()).containsExactly("润色后的建议");
+			assertThat(gateway.chatCalls()).isEqualTo(1);
+			assertThat(gateway.responsesCalls()).isEqualTo(1);
+			assertThat(gateway.lastResponsesRequestBody()).contains("\"stream\":true");
+			assertThat(input).contains("\"scope\":\"OVERALL\"");
+			assertThat(input).contains("\"summaryText\":\"规则总结\"");
+			assertThat(input).contains("\"evidencePoints\":[\"规则证据\"]");
+			assertThat(input).contains("\"improvementSuggestions\":[\"规则建议\"]");
+		}
+	}
+
 	private OpenAiCompatibleAiService createService(String baseUrl) {
 		OpenAiProperties properties = new OpenAiProperties();
 		properties.getAi().setBaseUrl(baseUrl);

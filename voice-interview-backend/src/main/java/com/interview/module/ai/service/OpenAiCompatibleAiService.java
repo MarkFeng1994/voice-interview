@@ -44,6 +44,18 @@ public class OpenAiCompatibleAiService implements AiService {
 			}
 			Keep spokenText concise and natural for voice playback.
 			""";
+	private static final String INTERVIEW_REPORT_EXPLANATION_POLISH_PROMPT = """
+			你是面试报告解释润色助手。
+			你会收到一个 JSON 对象，字段包括 scope、title、prompt、level、summaryText、evidencePoints、improvementSuggestions。
+			只允许润色表达，不允许改写原有结论、证据事实、建议方向、强弱判断、列表顺序或数量。
+			保持 summaryText、evidencePoints、improvementSuggestions 的语义一致，仅优化措辞、清晰度和可读性。
+			返回 JSON 格式：
+			{
+			  "summaryText": "string",
+			  "evidencePoints": ["string"],
+			  "improvementSuggestions": ["string"]
+			}
+			""";
 
 	private final RestClient restClient;
 	private final HttpClient httpClient;
@@ -182,6 +194,31 @@ public class OpenAiCompatibleAiService implements AiService {
 				}
 			}
 			return questions.stream().limit(command.questionCount()).toList();
+		});
+	}
+
+	@Override
+	public InterviewReportExplanationResult polishInterviewReportExplanation(InterviewReportExplanationCommand command) {
+		return providerMetricsService.record("AI_REPORT_EXPLANATION", "openai", () -> {
+			requireApiKey();
+			if (command == null) {
+				return null;
+			}
+			String content = invokeTextCompletion(
+					INTERVIEW_REPORT_EXPLANATION_POLISH_PROMPT,
+					serializeInterviewReportExplanationCommand(command),
+					true
+			);
+			try {
+				JsonNode result = objectMapper.readTree(content);
+				return new InterviewReportExplanationResult(
+						valueOrNull(result.path("summaryText").asText(null)),
+						jsonArrayToList(result.path("evidencePoints")),
+						jsonArrayToList(result.path("improvementSuggestions"))
+				);
+			} catch (Exception ex) {
+				return null;
+			}
 		});
 	}
 
@@ -333,11 +370,22 @@ public class OpenAiCompatibleAiService implements AiService {
 		return result;
 	}
 
+	private String serializeInterviewReportExplanationCommand(InterviewReportExplanationCommand command) throws Exception {
+		return objectMapper.writeValueAsString(command);
+	}
+
 	private String trimTrailingSlash(String value) {
 		return value == null ? "" : value.replaceAll("/+$", "");
 	}
 
 	private String valueOrEmpty(String value) {
 		return value == null ? "" : value;
+	}
+
+	private String valueOrNull(String value) {
+		if (value == null || value.isBlank()) {
+			return null;
+		}
+		return value.trim();
 	}
 }

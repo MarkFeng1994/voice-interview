@@ -18,6 +18,7 @@ public class LangChain4jAssistantFactory {
 	private final InterviewReplyAssistant interviewReplyAssistant;
 	private final ResumeKeywordAssistant resumeKeywordAssistant;
 	private final ResumeQuestionAssistant resumeQuestionAssistant;
+	private final InterviewReportExplanationAssistant interviewReportExplanationAssistant;
 
 	public LangChain4jAssistantFactory(
 			OpenAiProperties openAiProperties,
@@ -28,6 +29,7 @@ public class LangChain4jAssistantFactory {
 		this.interviewReplyAssistant = AiServices.create(InterviewReplyAssistant.class, chatModel);
 		this.resumeKeywordAssistant = AiServices.create(ResumeKeywordAssistant.class, chatModel);
 		this.resumeQuestionAssistant = AiServices.create(ResumeQuestionAssistant.class, chatModel);
+		this.interviewReportExplanationAssistant = AiServices.create(InterviewReportExplanationAssistant.class, chatModel);
 	}
 
 	public InterviewReplyAssistant interviewReplyAssistant() {
@@ -40,6 +42,10 @@ public class LangChain4jAssistantFactory {
 
 	public ResumeQuestionAssistant resumeQuestionAssistant() {
 		return resumeQuestionAssistant;
+	}
+
+	public InterviewReportExplanationAssistant interviewReportExplanationAssistant() {
+		return interviewReportExplanationAssistant;
 	}
 
 	private OpenAiChatModel createChatModel(

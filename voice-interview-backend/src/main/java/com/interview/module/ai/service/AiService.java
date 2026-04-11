@@ -23,4 +23,8 @@ public interface AiService {
 	) {
 		return InterviewAnswerAnalyzer.heuristic().analyze(question, answer, expectedPoints);
 	}
+
+	default InterviewReportExplanationResult polishInterviewReportExplanation(InterviewReportExplanationCommand command) {
+		return null;
+	}
 }

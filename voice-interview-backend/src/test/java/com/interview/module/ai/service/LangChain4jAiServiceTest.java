@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.interview.module.ai.service.langchain4j.InterviewReportExplanationAssistant;
 import com.interview.module.ai.service.langchain4j.InterviewReplyAssistant;
 import com.interview.module.ai.service.langchain4j.LangChain4jAiService;
 import com.interview.module.ai.service.langchain4j.LangChain4jAssistantFactory;
@@ -43,7 +44,13 @@ class LangChain4jAiServiceTest {
 				```""");
 
 		ProviderMetricsService metricsService = new ProviderMetricsService();
-		LangChain4jAiService service = createService(metricsService, assistant, mock(ResumeKeywordAssistant.class), mock(ResumeQuestionAssistant.class));
+		LangChain4jAiService service = createService(
+				metricsService,
+				assistant,
+				mock(ResumeKeywordAssistant.class),
+				mock(ResumeQuestionAssistant.class),
+				mock(InterviewReportExplanationAssistant.class)
+		);
 
 		AiReply reply = service.generateInterviewReply(new InterviewReplyCommand(
 				"请介绍你在上一家公司最有挑战的一次故障排查。",
@@ -85,7 +92,13 @@ class LangChain4jAiServiceTest {
 		)).thenReturn("这不是 JSON");
 
 		ProviderMetricsService metricsService = new ProviderMetricsService();
-		LangChain4jAiService service = createService(metricsService, assistant, mock(ResumeKeywordAssistant.class), mock(ResumeQuestionAssistant.class));
+		LangChain4jAiService service = createService(
+				metricsService,
+				assistant,
+				mock(ResumeKeywordAssistant.class),
+				mock(ResumeQuestionAssistant.class),
+				mock(InterviewReportExplanationAssistant.class)
+		);
 
 		AiReply reply = service.generateInterviewReply(new InterviewReplyCommand(
 				"请介绍一次线上问题复盘。",
@@ -113,7 +126,13 @@ class LangChain4jAiServiceTest {
 				""");
 
 		ProviderMetricsService metricsService = new ProviderMetricsService();
-		LangChain4jAiService service = createService(metricsService, mock(InterviewReplyAssistant.class), assistant, mock(ResumeQuestionAssistant.class));
+		LangChain4jAiService service = createService(
+				metricsService,
+				mock(InterviewReplyAssistant.class),
+				assistant,
+				mock(ResumeQuestionAssistant.class),
+				mock(InterviewReportExplanationAssistant.class)
+		);
 
 		ResumeKeywordExtractionResult result = service.extractResumeKeywords("简历正文");
 
@@ -163,7 +182,13 @@ class LangChain4jAiServiceTest {
 				""");
 
 		ProviderMetricsService metricsService = new ProviderMetricsService();
-		LangChain4jAiService service = createService(metricsService, mock(InterviewReplyAssistant.class), mock(ResumeKeywordAssistant.class), assistant);
+		LangChain4jAiService service = createService(
+				metricsService,
+				mock(InterviewReplyAssistant.class),
+				mock(ResumeKeywordAssistant.class),
+				assistant,
+				mock(InterviewReportExplanationAssistant.class)
+		);
 
 		List<GeneratedResumeQuestion> questions = service.generateResumeQuestions(new ResumeQuestionGenerationCommand(
 				"5 年 Java 后端",
@@ -196,16 +221,78 @@ class LangChain4jAiServiceTest {
 		);
 	}
 
+	@Test
+	void should_map_report_explanation_json_and_record_metrics() {
+		InterviewReportExplanationAssistant assistant = mock(InterviewReportExplanationAssistant.class);
+		when(assistant.polish(
+				"QUESTION",
+				"Redis",
+				"请说明 Redis 的使用场景和一致性策略。",
+				"MEDIUM",
+				"规则总结",
+				List.of("规则证据"),
+				List.of("规则建议")
+		)).thenReturn("""
+				```json
+				{
+				  "summaryText": "润色后的总结",
+				  "evidencePoints": ["润色后的证据"],
+				  "improvementSuggestions": ["润色后的建议"]
+				}
+				```""");
+
+		ProviderMetricsService metricsService = new ProviderMetricsService();
+		LangChain4jAiService service = createService(
+				metricsService,
+				mock(InterviewReplyAssistant.class),
+				mock(ResumeKeywordAssistant.class),
+				mock(ResumeQuestionAssistant.class),
+				assistant
+		);
+
+		InterviewReportExplanationResult result = service.polishInterviewReportExplanation(
+				new InterviewReportExplanationCommand(
+						"QUESTION",
+						"Redis",
+						"请说明 Redis 的使用场景和一致性策略。",
+						"MEDIUM",
+						"规则总结",
+						List.of("规则证据"),
+						List.of("规则建议")
+				)
+		);
+
+		assertThat(result.summaryText()).isEqualTo("润色后的总结");
+		assertThat(result.evidencePoints()).containsExactly("润色后的证据");
+		assertThat(result.improvementSuggestions()).containsExactly("润色后的建议");
+		ProviderMetricView metric = findMetric(metricsService, "AI_REPORT_EXPLANATION");
+		assertThat(metric.provider()).isEqualTo("langchain4j");
+		assertThat(metric.totalCalls()).isEqualTo(1);
+		assertThat(metric.successCalls()).isEqualTo(1);
+		assertThat(metric.failureCalls()).isEqualTo(0);
+		verify(assistant).polish(
+				"QUESTION",
+				"Redis",
+				"请说明 Redis 的使用场景和一致性策略。",
+				"MEDIUM",
+				"规则总结",
+				List.of("规则证据"),
+				List.of("规则建议")
+		);
+	}
+
 	private LangChain4jAiService createService(
 			ProviderMetricsService metricsService,
 			InterviewReplyAssistant interviewReplyAssistant,
 			ResumeKeywordAssistant resumeKeywordAssistant,
-			ResumeQuestionAssistant resumeQuestionAssistant
+			ResumeQuestionAssistant resumeQuestionAssistant,
+			InterviewReportExplanationAssistant interviewReportExplanationAssistant
 	) {
 		LangChain4jAssistantFactory factory = mock(LangChain4jAssistantFactory.class);
 		when(factory.interviewReplyAssistant()).thenReturn(interviewReplyAssistant);
 		when(factory.resumeKeywordAssistant()).thenReturn(resumeKeywordAssistant);
 		when(factory.resumeQuestionAssistant()).thenReturn(resumeQuestionAssistant);
+		when(factory.interviewReportExplanationAssistant()).thenReturn(interviewReportExplanationAssistant);
 		return new LangChain4jAiService(factory, metricsService, new ObjectMapper());
 	}
 

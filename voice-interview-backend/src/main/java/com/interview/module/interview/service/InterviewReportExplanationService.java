@@ -6,6 +6,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.interview.module.ai.service.AiService;
+import com.interview.module.ai.service.InterviewReportExplanationCommand;
+import com.interview.module.ai.service.InterviewReportExplanationResult;
 import com.interview.module.interview.engine.model.InterviewOverallExplanationView;
 import com.interview.module.interview.engine.model.InterviewQuestionExplanationView;
 import com.interview.module.interview.engine.model.InterviewQuestionReportView;
@@ -15,6 +18,16 @@ import com.interview.module.interview.engine.model.InterviewRoundRecord;
 
 @Service
 public class InterviewReportExplanationService {
+
+	private final AiService aiService;
+
+	public InterviewReportExplanationService() {
+		this(null);
+	}
+
+	public InterviewReportExplanationService(AiService aiService) {
+		this.aiService = aiService;
+	}
 
 	public InterviewReportView enrichReport(
 			InterviewReportView report,
@@ -26,10 +39,16 @@ public class InterviewReportExplanationService {
 		}
 		List<InterviewQuestionReportView> explainedQuestionReports = new ArrayList<>();
 		for (InterviewQuestionReportView questionReport : safeQuestionReports(report.questionReports())) {
-			InterviewQuestionExplanationView explanation = buildQuestionExplanation(
-					findQuestion(questions, questionReport.questionIndex()),
+			InterviewQuestionSnapshot question = findQuestion(questions, questionReport.questionIndex());
+			InterviewQuestionExplanationView ruleExplanation = buildQuestionExplanation(
+					question,
 					questionReport,
 					roundsForQuestion(rounds, questionReport.questionIndex())
+			);
+			InterviewQuestionExplanationView explanation = polishQuestionExplanation(
+					question,
+					questionReport,
+					ruleExplanation
 			);
 			explainedQuestionReports.add(new InterviewQuestionReportView(
 					questionReport.questionIndex(),
@@ -40,6 +59,7 @@ public class InterviewReportExplanationService {
 					explanation
 			));
 		}
+		InterviewOverallExplanationView ruleOverallExplanation = buildOverallExplanation(report.overallScore(), explainedQuestionReports, rounds);
 		return new InterviewReportView(
 				report.sessionId(),
 				report.status(),
@@ -50,7 +70,7 @@ public class InterviewReportExplanationService {
 				report.weaknesses(),
 				report.suggestions(),
 				List.copyOf(explainedQuestionReports),
-				buildOverallExplanation(report.overallScore(), explainedQuestionReports, rounds)
+				polishOverallExplanation(report, ruleOverallExplanation)
 		);
 	}
 
@@ -230,6 +250,69 @@ public class InterviewReportExplanationService {
 		);
 	}
 
+	private InterviewOverallExplanationView polishOverallExplanation(
+			InterviewReportView report,
+			InterviewOverallExplanationView ruleExplanation
+	) {
+		InterviewReportExplanationResult polished = polishExplanation(new InterviewReportExplanationCommand(
+				"OVERALL",
+				report == null ? null : report.title(),
+				report == null ? null : report.overallComment(),
+				ruleExplanation == null ? null : ruleExplanation.level(),
+				ruleExplanation == null ? null : ruleExplanation.summaryText(),
+				ruleExplanation == null ? List.of() : ruleExplanation.evidencePoints(),
+				ruleExplanation == null ? List.of() : ruleExplanation.improvementSuggestions()
+		));
+		if (!isValidPolishResult(polished)) {
+			return ruleExplanation;
+		}
+		return new InterviewOverallExplanationView(
+				ruleExplanation.level(),
+				polished.summaryText().trim(),
+				normalizeItems(polished.evidencePoints()),
+				normalizeItems(polished.improvementSuggestions()),
+				"RULE_PLUS_LLM"
+		);
+	}
+
+	private InterviewQuestionExplanationView polishQuestionExplanation(
+			InterviewQuestionSnapshot question,
+			InterviewQuestionReportView questionReport,
+			InterviewQuestionExplanationView ruleExplanation
+	) {
+		InterviewReportExplanationResult polished = polishExplanation(new InterviewReportExplanationCommand(
+				"QUESTION",
+				questionReport == null ? null : questionReport.title(),
+				questionReport == null ? question == null ? null : question.promptSnapshot() : questionReport.prompt(),
+				ruleExplanation == null ? null : ruleExplanation.performanceLevel(),
+				ruleExplanation == null ? null : ruleExplanation.summaryText(),
+				ruleExplanation == null ? List.of() : ruleExplanation.evidencePoints(),
+				ruleExplanation == null ? List.of() : suggestionAsList(ruleExplanation.improvementSuggestion())
+		));
+		if (!isValidPolishResult(polished)) {
+			return ruleExplanation;
+		}
+		List<String> polishedSuggestions = normalizeItems(polished.improvementSuggestions());
+		return new InterviewQuestionExplanationView(
+				ruleExplanation.performanceLevel(),
+				polished.summaryText().trim(),
+				normalizeItems(polished.evidencePoints()),
+				polishedSuggestions.get(0),
+				"RULE_PLUS_LLM"
+		);
+	}
+
+	private InterviewReportExplanationResult polishExplanation(InterviewReportExplanationCommand command) {
+		if (aiService == null || command == null) {
+			return null;
+		}
+		try {
+			return aiService.polishInterviewReportExplanation(command);
+		} catch (RuntimeException ex) {
+			return null;
+		}
+	}
+
 	private InterviewQuestionSnapshot findQuestion(List<InterviewQuestionSnapshot> questions, int questionIndex) {
 		for (InterviewQuestionSnapshot question : questions == null ? List.<InterviewQuestionSnapshot>of() : questions) {
 			if (question.questionIndex() == questionIndex) {
@@ -255,6 +338,32 @@ public class InterviewReportExplanationService {
 
 	private List<InterviewQuestionReportView> safeQuestionReports(List<InterviewQuestionReportView> questionReports) {
 		return questionReports == null ? List.of() : questionReports;
+	}
+
+	private List<String> suggestionAsList(String suggestion) {
+		if (suggestion == null || suggestion.isBlank()) {
+			return List.of();
+		}
+		return List.of(suggestion.trim());
+	}
+
+	private List<String> normalizeItems(List<String> items) {
+		List<String> normalized = new ArrayList<>();
+		for (String item : items == null ? List.<String>of() : items) {
+			if (item == null || item.isBlank()) {
+				continue;
+			}
+			normalized.add(item.trim());
+		}
+		return List.copyOf(normalized);
+	}
+
+	private boolean isValidPolishResult(InterviewReportExplanationResult result) {
+		return result != null
+				&& result.summaryText() != null
+				&& !result.summaryText().isBlank()
+				&& !normalizeItems(result.evidencePoints()).isEmpty()
+				&& !normalizeItems(result.improvementSuggestions()).isEmpty();
 	}
 
 	private String levelFromScore(Integer score) {

@@ -58,7 +58,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		this.aiService = aiService;
 		this.ttsService = ttsService;
 		this.followUpDecisionEngine = followUpDecisionEngine;
-		this.interviewReportExplanationService = new InterviewReportExplanationService();
+		this.interviewReportExplanationService = new InterviewReportExplanationService(aiService);
 	}
 
 	@Override
