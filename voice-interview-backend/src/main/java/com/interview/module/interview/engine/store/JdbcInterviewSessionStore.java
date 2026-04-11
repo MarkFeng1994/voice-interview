@@ -167,12 +167,23 @@ public class JdbcInterviewSessionStore implements InterviewSessionStore {
 			entity.setCategoryId(0L);
 			entity.setTitleSnapshot(q.titleSnapshot());
 			entity.setContentSnapshot(q.promptSnapshot());
-			entity.setDifficultySnapshot(q.difficultySnapshot());
-			entity.setSourceSnapshot(q.sourceSnapshot());
+			entity.setDifficultySnapshot(normalizeDifficultySnapshot(q.difficultySnapshot()));
+			entity.setSourceSnapshot(normalizeSourceSnapshot(q.sourceSnapshot()));
 			sessionQuestionMapper.insert(entity);
 			questionIdMap.put(q.questionIndex(), entity.getId());
 		}
 		return questionIdMap;
+	}
+
+	private Integer normalizeDifficultySnapshot(Integer difficultySnapshot) {
+		return difficultySnapshot == null ? 1 : difficultySnapshot;
+	}
+
+	private String normalizeSourceSnapshot(String sourceSnapshot) {
+		if (sourceSnapshot == null || sourceSnapshot.isBlank()) {
+			return "MANUAL";
+		}
+		return sourceSnapshot;
 	}
 
 	private void insertRounds(long sessionId, List<InterviewRoundRecord> rounds, Map<Integer, Long> questionIdMap) {

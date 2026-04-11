@@ -72,8 +72,8 @@ public class SimpleInterviewEngine implements InterviewEngine {
 					index + 1,
 					question.title(),
 					question.prompt(),
-					question.sourceType(),
-					question.difficulty()
+					normalizeQuestionSource(question.sourceType()),
+					normalizeQuestionDifficulty(question.difficulty())
 			));
 		}
 		InterviewSessionState sessionState = new InterviewSessionState(
@@ -485,6 +485,17 @@ public class SimpleInterviewEngine implements InterviewEngine {
 			return "候选人未提供有效回答。";
 		}
 		return text.trim();
+	}
+
+	private String normalizeQuestionSource(String sourceType) {
+		if (sourceType == null || sourceType.isBlank()) {
+			return "PRESET";
+		}
+		return sourceType;
+	}
+
+	private Integer normalizeQuestionDifficulty(Integer difficulty) {
+		return difficulty == null ? 1 : difficulty;
 	}
 
 	private String buildClosingText(Integer scoreSuggestion) {

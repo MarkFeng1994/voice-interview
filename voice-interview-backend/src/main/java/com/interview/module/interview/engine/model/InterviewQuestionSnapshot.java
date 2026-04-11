@@ -8,6 +8,6 @@ public record InterviewQuestionSnapshot(
 		Integer difficultySnapshot
 ) {
 	public InterviewQuestionSnapshot(int questionIndex, String titleSnapshot, String promptSnapshot) {
-		this(questionIndex, titleSnapshot, promptSnapshot, null, null);
+		this(questionIndex, titleSnapshot, promptSnapshot, "PRESET", 1);
 	}
 }
