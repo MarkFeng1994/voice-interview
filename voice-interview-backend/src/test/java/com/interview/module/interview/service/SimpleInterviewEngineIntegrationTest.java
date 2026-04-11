@@ -1,6 +1,11 @@
 package com.interview.module.interview.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,19 +14,27 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
+import org.mockito.ArgumentCaptor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.interview.module.ai.service.AiReply;
 import com.interview.module.ai.service.AiService;
 import com.interview.module.ai.service.InterviewReplyCommand;
+import com.interview.module.interview.entity.SessionEntity;
+import com.interview.module.interview.entity.SessionQuestionEntity;
 import com.interview.module.interview.engine.SimpleInterviewEngine;
 import com.interview.module.interview.engine.model.InterviewQuestionCard;
+import com.interview.module.interview.engine.model.InterviewQuestionSnapshot;
 import com.interview.module.interview.engine.model.InterviewReportView;
 import com.interview.module.interview.engine.model.InterviewSessionOwner;
 import com.interview.module.interview.engine.store.InterviewReportStore;
 import com.interview.module.interview.engine.store.InterviewSessionState;
 import com.interview.module.interview.engine.store.InterviewSessionStore;
+import com.interview.module.interview.engine.store.JdbcInterviewSessionStore;
 import com.interview.module.interview.engine.store.NoopInterviewReportStore;
-import com.interview.module.interview.service.InterviewAnswerAnalyzer.Analysis;
+import com.interview.module.interview.mapper.RoundMapper;
+import com.interview.module.interview.mapper.SessionMapper;
+import com.interview.module.interview.mapper.SessionQuestionMapper;
 import com.interview.module.interview.resume.GeneratedResumeQuestion;
 import com.interview.module.interview.resume.ResumeKeywordExtractionResult;
 import com.interview.module.interview.resume.ResumeQuestionGenerationCommand;
@@ -39,6 +52,166 @@ class SimpleInterviewEngineIntegrationTest {
 		assertThat(view.stage()).isEqualTo("OPENING");
 		assertThat(view.durationMinutes()).isEqualTo(120);
 		assertThat(view.maxFollowUpPerQuestion()).isEqualTo(3);
+	}
+
+	@Test
+	void should_keep_question_source_and_difficulty_in_snapshot() {
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
+				Map.of("reportStore", new NoopInterviewReportStore())
+		);
+		SimpleInterviewEngine engine = new SimpleInterviewEngine(
+				sessionStore,
+				beanFactory.getBeanProvider(InterviewReportStore.class),
+				new StubAiService(),
+				new StubTtsService(),
+				defaultDecisionEngine()
+		);
+
+		InterviewQuestionCard question = new InterviewQuestionCard(
+				"Strategy question",
+				"Explain how you would handle scaling.",
+				"IMPORT",
+				"Q-123",
+				"CAT-456",
+				5
+		);
+
+		var view = engine.startSession(
+				List.of(question),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+		InterviewQuestionSnapshot viewQuestion = view.questions().get(0);
+		InterviewSessionState storedSession = sessionStore.findById(view.sessionId()).orElseThrow();
+		InterviewQuestionSnapshot storedQuestion = storedSession.getQuestions().get(0);
+
+		assertThat(viewQuestion.sourceSnapshot()).isEqualTo("IMPORT");
+		assertThat(viewQuestion.difficultySnapshot()).isEqualTo(5);
+		assertThat(storedQuestion.sourceSnapshot()).isEqualTo("IMPORT");
+		assertThat(storedQuestion.difficultySnapshot()).isEqualTo(5);
+	}
+
+	@Test
+	void should_normalize_snapshot_defaults_in_constructor_and_start_session_view() {
+		InterviewQuestionSnapshot directSnapshot = new InterviewQuestionSnapshot(
+				1,
+				"Strategy question",
+				"Explain how you would handle scaling."
+		);
+
+		assertThat(directSnapshot.sourceSnapshot()).isEqualTo("PRESET");
+		assertThat(directSnapshot.difficultySnapshot()).isEqualTo(1);
+
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
+				Map.of("reportStore", new NoopInterviewReportStore())
+		);
+		SimpleInterviewEngine engine = new SimpleInterviewEngine(
+				sessionStore,
+				beanFactory.getBeanProvider(InterviewReportStore.class),
+				new StubAiService(),
+				new StubTtsService(),
+				defaultDecisionEngine()
+		);
+
+		var view = engine.startSession(
+				List.of(
+						new InterviewQuestionCard(
+								"Normalized question",
+								"Explain eventual consistency.",
+								"   ",
+								"Q-100",
+								"CAT-100",
+								null
+						),
+						new InterviewQuestionCard(
+								"Null-source question",
+								"Explain idempotency.",
+								null,
+								"Q-101",
+								"CAT-101",
+								null
+						)
+				),
+				30,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		List<InterviewQuestionSnapshot> viewQuestions = view.questions();
+		List<InterviewQuestionSnapshot> storedQuestions = sessionStore.findById(view.sessionId()).orElseThrow().getQuestions();
+
+		assertThat(viewQuestions).extracting(InterviewQuestionSnapshot::sourceSnapshot)
+				.containsExactly("PRESET", "PRESET");
+		assertThat(viewQuestions).extracting(InterviewQuestionSnapshot::difficultySnapshot)
+				.containsExactly(1, 1);
+		assertThat(storedQuestions).extracting(InterviewQuestionSnapshot::sourceSnapshot)
+				.containsExactly("PRESET", "PRESET");
+		assertThat(storedQuestions).extracting(InterviewQuestionSnapshot::difficultySnapshot)
+				.containsExactly(1, 1);
+	}
+
+	@Test
+	void should_default_missing_question_metadata_to_preset_when_persisting_jdbc_snapshots() {
+		SessionMapper sessionMapper = mock(SessionMapper.class);
+		SessionQuestionMapper sessionQuestionMapper = mock(SessionQuestionMapper.class);
+		RoundMapper roundMapper = mock(RoundMapper.class);
+		SessionEntity sessionEntity = new SessionEntity();
+		sessionEntity.setId(42L);
+
+		when(sessionMapper.selectOne(any())).thenReturn(sessionEntity);
+		when(sessionMapper.selectById(42L)).thenReturn(sessionEntity);
+
+		JdbcInterviewSessionStore store = new JdbcInterviewSessionStore(
+				sessionMapper,
+				sessionQuestionMapper,
+				roundMapper,
+				new ObjectMapper(),
+				60
+		);
+		InterviewSessionState sessionState = new InterviewSessionState(
+				"session-1",
+				"1",
+				"tester",
+				List.of(
+						new InterviewQuestionSnapshot(
+								1,
+								"Strategy question",
+								"Explain how you would handle scaling.",
+								"  ",
+								null
+						),
+						new InterviewQuestionSnapshot(
+								2,
+								"Null source question",
+								"Explain idempotency.",
+								null,
+								null
+						)
+				),
+				"OPENING",
+				60,
+				2,
+				null,
+				1.0
+		);
+
+		store.save(sessionState);
+
+		ArgumentCaptor<SessionQuestionEntity> questionCaptor = ArgumentCaptor.forClass(SessionQuestionEntity.class);
+		verify(sessionQuestionMapper, times(2)).insert(questionCaptor.capture());
+		List<SessionQuestionEntity> storedQuestions = questionCaptor.getAllValues();
+
+		assertThat(storedQuestions).extracting(SessionQuestionEntity::getSourceSnapshot)
+				.containsExactly("MANUAL", "MANUAL");
+		assertThat(storedQuestions).extracting(SessionQuestionEntity::getDifficultySnapshot)
+				.containsExactly(1, 1);
 	}
 
 	@Test
@@ -60,6 +233,96 @@ class SimpleInterviewEngineIntegrationTest {
 	}
 
 	@Test
+	void should_follow_up_when_missing_key_points_and_record_decision_metadata() {
+		var engine = defaultEngine();
+		var view = engine.startSession(
+				List.of(new InterviewQuestionCard("Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", null, null, 1)),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		var answered = engine.answer(view.sessionId(), "1", "TEXT", "我们主要用 Redis 做缓存。", null);
+
+		assertThat(answered.status()).isEqualTo("IN_PROGRESS");
+		assertThat(answered.followUpIndex()).isEqualTo(1);
+		assertThat(answered.rounds().get(0).followUpDecision()).isEqualTo("FOLLOW_UP");
+		assertThat(answered.rounds().get(0).followUpDecisionReason()).contains("缺少关键点");
+		assertThat(answered.rounds().get(0).missingPointsSnapshot()).contains("一致性策略");
+	}
+
+	@Test
+	void should_stop_following_up_after_policy_limit_for_normal_questions() {
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
+				Map.of("reportStore", new NoopInterviewReportStore())
+		);
+		SimpleInterviewEngine engine = new SimpleInterviewEngine(
+				sessionStore,
+				beanFactory.getBeanProvider(InterviewReportStore.class),
+				new StubAiService(),
+				new StubTtsService(),
+				new FollowUpDecisionEngine(new InterviewFlowPolicy(60, 120, 1, 2, 1, 0))
+		);
+		var view = engine.startSession(
+				List.of(new InterviewQuestionCard("Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", null, null, 1)),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		engine.answer(view.sessionId(), "1", "TEXT", "我们用 Redis 做缓存。", null);
+		var second = engine.answer(view.sessionId(), "1", "TEXT", "还是主要做缓存。", null);
+
+		assertThat(second.followUpIndex()).isZero();
+		assertThat(second.currentQuestionIndex()).isGreaterThanOrEqualTo(1);
+	}
+
+	@Test
+	void should_allow_follow_up_on_last_question_when_answer_is_incomplete() {
+		var engine = defaultEngine();
+		var view = engine.startSession(
+				List.of(
+						new InterviewQuestionCard("自我介绍", "请做一个简短的自我介绍。"),
+						new InterviewQuestionCard("Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", null, null, 1)
+				),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		var first = engine.answer(view.sessionId(), "1", "TEXT", "我有五年 Java 后端开发经验。", null);
+		var second = engine.answer(first.sessionId(), "1", "TEXT", "我们主要用 Redis 做缓存。", null);
+
+		assertThat(second.status()).isEqualTo("IN_PROGRESS");
+		assertThat(second.followUpIndex()).isEqualTo(1);
+		assertThat(second.rounds().get(2).roundType()).isEqualTo("FOLLOW_UP");
+	}
+
+	@Test
+	void should_use_off_topic_follow_up_text_for_clearly_wrong_answer() {
+		var engine = defaultEngine();
+		var view = engine.startSession(
+				List.of(new InterviewQuestionCard("消息队列", "请说明你们系统是否用了消息队列。", "PRESET", null, null, 1)),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		var answered = engine.answer(view.sessionId(), "1", "TEXT", "我们主要通过乐观锁解决并发更新。", null);
+
+		assertThat(answered.rounds().get(1).aiMessageText()).contains("回到题目本身");
+	}
+
+	@Test
 	void should_pass_question_context_into_ai_service_command() {
 		InterviewSessionStore sessionStore = new InMemorySessionStore();
 		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
@@ -70,7 +333,8 @@ class SimpleInterviewEngineIntegrationTest {
 				sessionStore,
 				beanFactory.getBeanProvider(InterviewReportStore.class),
 				aiService,
-				new StubTtsService()
+				new StubTtsService(),
+				defaultDecisionEngine()
 		);
 
 		var view = engine.startSession(
@@ -92,6 +356,37 @@ class SimpleInterviewEngineIntegrationTest {
 		assertThat(aiService.lastCommand.expectedPoints()).contains("并发控制");
 	}
 
+	@Test
+	void should_pass_blank_answer_to_analyzer_as_unanswered() {
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
+				Map.of("reportStore", new NoopInterviewReportStore())
+		);
+		RecordingAiService aiService = new RecordingAiService();
+		SimpleInterviewEngine engine = new SimpleInterviewEngine(
+				sessionStore,
+				beanFactory.getBeanProvider(InterviewReportStore.class),
+				aiService,
+				new StubTtsService(),
+				defaultDecisionEngine()
+		);
+
+		var view = engine.startSession(
+				List.of(new InterviewQuestionCard("缓存设计", "请说明 Redis 的使用场景和一致性策略。")),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		engine.answer(view.sessionId(), "1", "TEXT", "   ", null);
+
+		assertThat(aiService.lastAnalysis).isNotNull();
+		assertThat(aiService.lastAnalysis.answered()).isFalse();
+		assertThat(aiService.lastAnalysis.reasonCodes()).contains("ANSWER_EMPTY");
+	}
+
 	private SimpleInterviewEngine defaultEngine() {
 		InterviewSessionStore sessionStore = new InMemorySessionStore();
 		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
@@ -101,8 +396,13 @@ class SimpleInterviewEngineIntegrationTest {
 				sessionStore,
 				beanFactory.getBeanProvider(InterviewReportStore.class),
 				new StubAiService(),
-				new StubTtsService()
+				new StubTtsService(),
+				defaultDecisionEngine()
 		);
+	}
+
+	private static FollowUpDecisionEngine defaultDecisionEngine() {
+		return new FollowUpDecisionEngine(new InterviewFlowPolicy(60, 120, 1, 2, 1, 0));
 	}
 
 	private static final class InMemorySessionStore implements InterviewSessionStore {
@@ -141,13 +441,14 @@ class SimpleInterviewEngineIntegrationTest {
 		}
 
 		@Override
-		public Analysis analyzeInterviewAnswer(String question, String answer, List<String> expectedPoints) {
+		public AnswerEvidence analyzeInterviewAnswer(String question, String answer, List<String> expectedPoints) {
 			return InterviewAnswerAnalyzer.heuristic().analyze(question, answer, expectedPoints);
 		}
 	}
 
 	private static final class RecordingAiService implements AiService {
 		private InterviewReplyCommand lastCommand;
+		private AnswerEvidence lastAnalysis;
 
 		@Override
 		public AiReply generateInterviewReply(InterviewReplyCommand command) {
@@ -166,8 +467,9 @@ class SimpleInterviewEngineIntegrationTest {
 		}
 
 		@Override
-		public Analysis analyzeInterviewAnswer(String question, String answer, List<String> expectedPoints) {
-			return InterviewAnswerAnalyzer.heuristic().analyze(question, answer, expectedPoints);
+		public AnswerEvidence analyzeInterviewAnswer(String question, String answer, List<String> expectedPoints) {
+			this.lastAnalysis = InterviewAnswerAnalyzer.heuristic().analyze(question, answer, expectedPoints);
+			return this.lastAnalysis;
 		}
 	}
 

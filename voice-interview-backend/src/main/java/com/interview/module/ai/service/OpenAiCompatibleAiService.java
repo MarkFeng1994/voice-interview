@@ -20,6 +20,7 @@ import org.springframework.web.client.RestClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.interview.common.config.OpenAiProperties;
+import com.interview.module.interview.service.AnswerEvidence;
 import com.interview.module.interview.service.InterviewAnswerAnalyzer;
 import com.interview.module.interview.resume.GeneratedResumeQuestion;
 import com.interview.module.interview.resume.ResumeKeywordExtractionResult;
@@ -185,7 +186,7 @@ public class OpenAiCompatibleAiService implements AiService {
 	}
 
 	@Override
-	public InterviewAnswerAnalyzer.Analysis analyzeInterviewAnswer(
+	public AnswerEvidence analyzeInterviewAnswer(
 			String question,
 			String answer,
 			List<String> expectedPoints

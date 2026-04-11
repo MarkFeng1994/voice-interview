@@ -1,5 +1,7 @@
 package com.interview.module.interview.engine.model;
 
+import java.util.List;
+
 public record InterviewRoundRecord(
 		String roundId,
 		int questionIndex,
@@ -14,16 +16,14 @@ public record InterviewRoundRecord(
 		String userAnswerMode,
 		String createdAt,
 		String answeredAt,
-		String analysisReason
+		String analysisReason,
+		String followUpDecision,
+		String followUpDecisionReason,
+		List<String> missingPointsSnapshot
 ) {
 
-	public InterviewRoundRecord withUserAnswer(
-			String userAnswerText,
-			String userAudioUrl,
-			String userAnswerMode,
-			String answeredAt
-	) {
-		return withUserAnswer(userAnswerText, userAudioUrl, userAnswerMode, answeredAt, analysisReason);
+	public InterviewRoundRecord {
+		missingPointsSnapshot = missingPointsSnapshot == null ? List.of() : List.copyOf(missingPointsSnapshot);
 	}
 
 	public InterviewRoundRecord withUserAnswer(
@@ -31,7 +31,10 @@ public record InterviewRoundRecord(
 			String userAudioUrl,
 			String userAnswerMode,
 			String answeredAt,
-			String analysisReason
+			String analysisReason,
+			String followUpDecision,
+			String followUpDecisionReason,
+			List<String> missingPointsSnapshot
 	) {
 		return new InterviewRoundRecord(
 				roundId,
@@ -47,7 +50,10 @@ public record InterviewRoundRecord(
 				userAnswerMode,
 				createdAt,
 				answeredAt,
-				analysisReason
+				analysisReason,
+				followUpDecision,
+				followUpDecisionReason,
+				missingPointsSnapshot
 		);
 	}
 }
