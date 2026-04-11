@@ -15,6 +15,7 @@ import com.interview.module.ai.service.AiService;
 import com.interview.module.ai.service.InterviewReplyCommand;
 import com.interview.module.interview.engine.SimpleInterviewEngine;
 import com.interview.module.interview.engine.model.InterviewQuestionCard;
+import com.interview.module.interview.engine.model.InterviewQuestionSnapshot;
 import com.interview.module.interview.engine.model.InterviewReportView;
 import com.interview.module.interview.engine.model.InterviewSessionOwner;
 import com.interview.module.interview.engine.store.InterviewReportStore;
@@ -39,6 +40,43 @@ class SimpleInterviewEngineIntegrationTest {
 		assertThat(view.stage()).isEqualTo("OPENING");
 		assertThat(view.durationMinutes()).isEqualTo(120);
 		assertThat(view.maxFollowUpPerQuestion()).isEqualTo(3);
+	}
+
+	@Test
+	void should_keep_question_source_and_difficulty_in_snapshot() {
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
+				Map.of("reportStore", new NoopInterviewReportStore())
+		);
+		SimpleInterviewEngine engine = new SimpleInterviewEngine(
+				sessionStore,
+				beanFactory.getBeanProvider(InterviewReportStore.class),
+				new StubAiService(),
+				new StubTtsService()
+		);
+
+		InterviewQuestionCard question = new InterviewQuestionCard(
+				"Strategy question",
+				"Explain how you would handle scaling.",
+				"IMPORT",
+				"Q-123",
+				"CAT-456",
+				5
+		);
+
+		var view = engine.startSession(
+				List.of(question),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+		InterviewSessionState storedSession = sessionStore.findById(view.sessionId()).orElseThrow();
+		InterviewQuestionSnapshot storedQuestion = storedSession.getQuestions().get(0);
+
+		assertThat(storedQuestion.sourceSnapshot()).isEqualTo("IMPORT");
+		assertThat(storedQuestion.difficultySnapshot()).isEqualTo(5);
 	}
 
 	@Test

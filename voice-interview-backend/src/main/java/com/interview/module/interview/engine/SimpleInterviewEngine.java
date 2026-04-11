@@ -68,7 +68,13 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		List<InterviewQuestionSnapshot> questionSnapshots = new ArrayList<>();
 		for (int index = 0; index < effectiveQuestions.size(); index++) {
 			InterviewQuestionCard question = effectiveQuestions.get(index);
-			questionSnapshots.add(new InterviewQuestionSnapshot(index + 1, question.title(), question.prompt()));
+			questionSnapshots.add(new InterviewQuestionSnapshot(
+					index + 1,
+					question.title(),
+					question.prompt(),
+					question.sourceType(),
+					question.difficulty()
+			));
 		}
 		InterviewSessionState sessionState = new InterviewSessionState(
 				"demo-" + UUID.randomUUID().toString().replace("-", ""),

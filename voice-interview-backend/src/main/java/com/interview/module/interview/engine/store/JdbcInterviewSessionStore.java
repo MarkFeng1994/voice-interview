@@ -93,7 +93,13 @@ public class JdbcInterviewSessionStore implements InterviewSessionStore {
 						.orderByAsc(RoundEntity::getId));
 
 		List<InterviewQuestionSnapshot> questions = questionEntities.stream()
-				.map(e -> new InterviewQuestionSnapshot(e.getQuestionIndex(), e.getTitleSnapshot(), e.getContentSnapshot()))
+				.map(e -> new InterviewQuestionSnapshot(
+						e.getQuestionIndex(),
+						e.getTitleSnapshot(),
+						e.getContentSnapshot(),
+						e.getSourceSnapshot(),
+						e.getDifficultySnapshot()
+				))
 				.toList();
 
 		List<InterviewRoundRecord> rounds = roundEntities.stream().map(this::toRoundRecord).toList();
@@ -161,8 +167,8 @@ public class JdbcInterviewSessionStore implements InterviewSessionStore {
 			entity.setCategoryId(0L);
 			entity.setTitleSnapshot(q.titleSnapshot());
 			entity.setContentSnapshot(q.promptSnapshot());
-			entity.setDifficultySnapshot(1);
-			entity.setSourceSnapshot("MANUAL");
+			entity.setDifficultySnapshot(q.difficultySnapshot());
+			entity.setSourceSnapshot(q.sourceSnapshot());
 			sessionQuestionMapper.insert(entity);
 			questionIdMap.put(q.questionIndex(), entity.getId());
 		}
