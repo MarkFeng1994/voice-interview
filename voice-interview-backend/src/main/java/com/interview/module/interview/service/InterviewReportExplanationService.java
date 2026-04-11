@@ -147,6 +147,7 @@ public class InterviewReportExplanationService {
 		LinkedHashSet<String> missingPoints = new LinkedHashSet<>();
 		int followUpCount = 0;
 		boolean hasRiskSignal = false;
+		boolean hasDepthGapSignal = false;
 
 		for (InterviewRoundRecord round : safeRounds(questionRounds)) {
 			if ("FOLLOW_UP".equals(round.followUpDecision())) {
@@ -161,6 +162,9 @@ public class InterviewReportExplanationService {
 			if (containsRiskSignal(round.analysisReason()) || containsRiskSignal(round.followUpDecisionReason())) {
 				hasRiskSignal = true;
 			}
+			if (containsDepthGapSignal(round.analysisReason()) || containsDepthGapSignal(round.followUpDecisionReason())) {
+				hasDepthGapSignal = true;
+			}
 		}
 
 		String questionTitle = question != null && question.titleSnapshot() != null && !question.titleSnapshot().isBlank()
@@ -173,14 +177,15 @@ public class InterviewReportExplanationService {
 			evidencePoints.add("缺少关键点：" + missingPointsText);
 			summaryText = questionTitle + " 这题还缺少对 " + missingPointsText + " 的说明，核心覆盖不够完整。";
 			improvementSuggestion = "补充 " + missingPointsText + "，并明确你的方案、取舍和落地方式。";
-		} else if (followUpCount >= 2 && (questionReport == null || questionReport.score() == null || questionReport.score() < 80)) {
-			evidencePoints.add("同一题触发了 " + followUpCount + " 次继续追问，说明细节展开还不够稳定。");
-			summaryText = questionTitle + " 这题基础结论已经给出，但面对连续追问时深度和细节还不够扎实。";
-			improvementSuggestion = "围绕这题补一版完整案例，重点准备过程、权衡和结果。";
 		} else if (hasRiskSignal) {
 			evidencePoints.add("分析中出现了答偏或前后不一致风险信号。");
 			summaryText = questionTitle + " 这题存在答偏风险，说明回答和题目核心的对齐度还不够稳定。";
 			improvementSuggestion = "先拆清题干，再按“结论、依据、方案”顺序作答，避免偏离问题本身。";
+		} else if ((hasDepthGapSignal || followUpCount >= 2)
+				&& (questionReport == null || questionReport.score() == null || questionReport.score() < 80)) {
+			evidencePoints.add("同一题触发了 " + followUpCount + " 次继续追问，说明细节展开还不够稳定。");
+			summaryText = questionTitle + " 这题基础结论已经给出，但面对连续追问时深度和细节还不够扎实。";
+			improvementSuggestion = "围绕这题补一版完整案例，重点准备过程、权衡和结果。";
 		} else if (questionReport != null && questionReport.score() != null && questionReport.score() >= 80) {
 			evidencePoints.add("得分较高且额外追问较少，说明回答完整度和稳定性都不错。");
 			summaryText = questionTitle + " 这题回答较完整，核心点覆盖和表达稳定性都达到了较好水平。";
@@ -242,10 +247,26 @@ public class InterviewReportExplanationService {
 			return false;
 		}
 		return text.contains("不一致")
-				|| text.contains("答偏")
+				|| text.contains("答偏风险")
 				|| text.contains("偏题")
+				|| text.contains("偏离题目")
+				|| text.contains("回到题目本身")
 				|| text.contains("不太一致")
 				|| text.contains("风险");
+	}
+
+	private boolean containsDepthGapSignal(String text) {
+		if (text == null || text.isBlank()) {
+			return false;
+		}
+		return text.contains("细节不足")
+				|| text.contains("过程不足")
+				|| text.contains("缺少案例")
+				|| text.contains("深度不足")
+				|| text.contains("结论化")
+				|| text.contains("案例支撑")
+				|| text.contains("补充实际处理过程")
+				|| text.contains("展开不足");
 	}
 
 	private List<String> limit(LinkedHashSet<String> items, int maxSize) {

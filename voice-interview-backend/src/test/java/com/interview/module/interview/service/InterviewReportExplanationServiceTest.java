@@ -55,4 +55,58 @@ class InterviewReportExplanationServiceTest {
 		assertThat(explanation.improvementSuggestion()).contains("一致性策略");
 		assertThat(explanation.generatedBy()).isEqualTo("RULE");
 	}
+
+	@Test
+	void should_build_question_explanation_for_depth_gap_from_analysis_reason() {
+		InterviewReportExplanationService service = new InterviewReportExplanationService();
+
+		InterviewQuestionExplanationView explanation = service.buildQuestionExplanation(
+				new InterviewQuestionSnapshot(1, "分布式事务", "请说明你们系统里分布式事务的处理方案。", "PRESET", 1),
+				new InterviewQuestionReportView(1, "分布式事务", "请说明你们系统里分布式事务的处理方案。", 66, "回答到了主线，但细节不足。", null),
+				List.of(
+						new InterviewRoundRecord("r1", 1, 0, "QUESTION", "题目", null, 0L, 66, "我们用了最终一致性。", null, "TEXT", "2026-04-11T00:00:00Z", "2026-04-11T00:00:10Z", "回答偏结论化，缺少过程细节和案例支撑", "FOLLOW_UP", "细节不足，需要补充实际处理过程", List.of())
+				)
+		);
+
+		assertThat(explanation.performanceLevel()).isEqualTo("MEDIUM");
+		assertThat(explanation.summaryText()).contains("深度").contains("细节");
+		assertThat(explanation.evidencePoints()).contains("回答偏结论化，缺少过程细节和案例支撑");
+		assertThat(explanation.improvementSuggestion()).contains("案例");
+	}
+
+	@Test
+	void should_build_question_explanation_for_risk_signal() {
+		InterviewReportExplanationService service = new InterviewReportExplanationService();
+
+		InterviewQuestionExplanationView explanation = service.buildQuestionExplanation(
+				new InterviewQuestionSnapshot(1, "消息队列", "请说明消息队列削峰和解耦的区别。", "PRESET", 1),
+				new InterviewQuestionReportView(1, "消息队列", "请说明消息队列削峰和解耦的区别。", 58, "回答有明显偏差。", null),
+				List.of(
+						new InterviewRoundRecord("r1", 1, 0, "QUESTION", "题目", null, 0L, 58, "我们主要讲了数据库分库分表。", null, "TEXT", "2026-04-11T00:00:00Z", "2026-04-11T00:00:10Z", "回答有答偏风险，和题目核心不一致", "FOLLOW_UP", "需要回到题目本身重新回答", List.of())
+				)
+		);
+
+		assertThat(explanation.performanceLevel()).isEqualTo("WEAK");
+		assertThat(explanation.summaryText()).contains("答偏风险");
+		assertThat(explanation.evidencePoints()).contains("分析中出现了答偏或前后不一致风险信号。");
+		assertThat(explanation.improvementSuggestion()).contains("题干").contains("结论");
+	}
+
+	@Test
+	void should_build_question_explanation_for_strong_answer() {
+		InterviewReportExplanationService service = new InterviewReportExplanationService();
+
+		InterviewQuestionExplanationView explanation = service.buildQuestionExplanation(
+				new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 缓存击穿和穿透的处理方式。", "PRESET", 1),
+				new InterviewQuestionReportView(1, "Redis", "请说明 Redis 缓存击穿和穿透的处理方式。", 88, "回答较完整。", null),
+				List.of(
+						new InterviewRoundRecord("r1", 1, 0, "QUESTION", "题目", null, 0L, 88, "我们会分别用互斥锁、布隆过滤器和空值缓存处理。", null, "TEXT", "2026-04-11T00:00:00Z", "2026-04-11T00:00:10Z", "回答较完整，核心点覆盖到位", "NEXT_QUESTION", "当前回答已达到继续下一题的标准", List.of())
+				)
+		);
+
+		assertThat(explanation.performanceLevel()).isEqualTo("STRONG");
+		assertThat(explanation.summaryText()).contains("回答较完整");
+		assertThat(explanation.evidencePoints()).contains("得分较高且额外追问较少，说明回答完整度和稳定性都不错。");
+		assertThat(explanation.improvementSuggestion()).contains("表达结构");
+	}
 }
