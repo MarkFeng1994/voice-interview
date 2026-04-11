@@ -149,7 +149,7 @@ class SimpleInterviewEngineIntegrationTest {
 		assertThat(viewQuestions).extracting(InterviewQuestionSnapshot::sourceSnapshot)
 				.containsExactly("PRESET", "PRESET");
 		assertThat(viewQuestions).extracting(InterviewQuestionSnapshot::difficultySnapshot)
-				containsExactly(1, 1);
+				.containsExactly(1, 1);
 		assertThat(storedQuestions).extracting(InterviewQuestionSnapshot::sourceSnapshot)
 				.containsExactly("PRESET", "PRESET");
 		assertThat(storedQuestions).extracting(InterviewQuestionSnapshot::difficultySnapshot)
