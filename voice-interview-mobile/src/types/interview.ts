@@ -160,12 +160,33 @@ export interface StartInterviewRequest {
 
 export type InterviewPresetListResponse = ApiEnvelope<InterviewPreset[]>
 
+export type ExplanationGeneratedBy = 'RULE' | 'RULE_PLUS_LLM'
+
+export type InterviewExplanationLevel = 'STRONG' | 'MEDIUM' | 'WEAK'
+
+export interface InterviewOverallExplanation {
+  level: InterviewExplanationLevel | null
+  summaryText: string
+  evidencePoints: string[]
+  improvementSuggestions: string[]
+  generatedBy: ExplanationGeneratedBy
+}
+
+export interface InterviewQuestionExplanation {
+  performanceLevel: InterviewExplanationLevel | null
+  summaryText: string
+  evidencePoints: string[]
+  improvementSuggestion: string | null
+  generatedBy: ExplanationGeneratedBy
+}
+
 export interface InterviewQuestionReport {
   questionIndex: number
   title: string
   prompt: string
   score: number | null
   summary: string
+  explanation?: InterviewQuestionExplanation | null
 }
 
 export interface InterviewReport {
@@ -178,6 +199,7 @@ export interface InterviewReport {
   weaknesses: string[]
   suggestions: string[]
   questionReports: InterviewQuestionReport[]
+  overallExplanation?: InterviewOverallExplanation | null
 }
 
 export type InterviewReportResponse = ApiEnvelope<InterviewReport>

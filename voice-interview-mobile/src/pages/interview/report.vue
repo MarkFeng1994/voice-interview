@@ -17,6 +17,43 @@
       <text class="score-copy">状态：{{ report?.status || '暂无' }} · {{ report?.questionReports.length || 0 }} 题回顾</text>
     </view>
 
+    <view v-if="report?.overallExplanation" class="section-card explanation-card">
+      <view class="section-head">
+        <text class="section-title">为什么是这个结论</text>
+        <view class="chip-row">
+          <text :class="['diagnosis-level', `tone-${getLevelMeta(report.overallExplanation.level).tone}`]">
+            {{ getLevelMeta(report.overallExplanation.level).label }}
+          </text>
+          <text class="explanation-chip">{{ getGeneratedByLabel(report.overallExplanation.generatedBy) }}</text>
+        </view>
+      </view>
+      <text class="bullet-copy">{{ report.overallExplanation.summaryText }}</text>
+
+      <view v-if="report.overallExplanation.evidencePoints.length" class="compact-card">
+        <text class="bullet-title">证据点</text>
+        <view
+          v-for="point in report.overallExplanation.evidencePoints"
+          :key="point"
+          class="evidence-item"
+        >
+          <text class="evidence-dot">•</text>
+          <text class="bullet-copy">{{ point }}</text>
+        </view>
+      </view>
+
+      <view v-if="report.overallExplanation.improvementSuggestions.length" class="compact-card">
+        <text class="bullet-title">下一步建议</text>
+        <view
+          v-for="suggestion in report.overallExplanation.improvementSuggestions"
+          :key="suggestion"
+          class="evidence-item"
+        >
+          <text class="evidence-dot">•</text>
+          <text class="bullet-copy">{{ suggestion }}</text>
+        </view>
+      </view>
+    </view>
+
     <view v-if="missingSession" class="section-card">
       <text class="section-title">无法加载报告</text>
       <text class="bullet-copy">当前没有可用的 `sessionId`。请先开始一场练习，或从历史页进入报告。</text>
@@ -51,10 +88,41 @@
 
     <view class="section-card">
       <text class="section-title">题目明细</text>
-      <view v-for="item in report?.questionReports || []" :key="item.questionIndex" class="bullet-card">
+      <view v-for="item in report?.questionReports || []" :key="item.questionIndex" class="bullet-card question-card">
         <text class="bullet-title">第 {{ item.questionIndex }} 题 · {{ item.title }}</text>
         <text class="bullet-copy">得分：{{ item.score ?? '--' }}</text>
         <text class="bullet-copy">{{ item.summary }}</text>
+        <text class="question-prompt">{{ item.prompt }}</text>
+
+        <view v-if="item.explanation" class="compact-card explanation-card">
+          <view class="section-head">
+            <text class="bullet-title">诊断解释</text>
+            <view class="chip-row">
+              <text :class="['diagnosis-level', `tone-${getLevelMeta(item.explanation.performanceLevel).tone}`]">
+                {{ getLevelMeta(item.explanation.performanceLevel).label }}
+              </text>
+              <text class="explanation-chip">{{ getGeneratedByLabel(item.explanation.generatedBy) }}</text>
+            </view>
+          </view>
+          <text class="bullet-copy">{{ item.explanation.summaryText }}</text>
+
+          <view v-if="item.explanation.evidencePoints.length" class="compact-card">
+            <text class="bullet-title">证据点</text>
+            <view
+              v-for="point in item.explanation.evidencePoints"
+              :key="`${item.questionIndex}-${point}`"
+              class="evidence-item"
+            >
+              <text class="evidence-dot">•</text>
+              <text class="bullet-copy">{{ point }}</text>
+            </view>
+          </view>
+
+          <view v-if="item.explanation.improvementSuggestion" class="compact-card">
+            <text class="bullet-title">改进建议</text>
+            <text class="bullet-copy">{{ item.explanation.improvementSuggestion }}</text>
+          </view>
+        </view>
       </view>
     </view>
 
@@ -72,12 +140,43 @@ import { onLoad } from '@dcloudio/uni-app'
 import { API_BASE_URL } from '@/config/api'
 import { getInterviewReport } from '@/services/interviewApi'
 import { useUserStore } from '@/stores/user'
-import type { InterviewReport } from '@/types/interview'
+import type { ExplanationGeneratedBy, InterviewExplanationLevel, InterviewReport } from '@/types/interview'
 import { ensureAuthenticated } from '@/utils/auth'
 
 const report = ref<InterviewReport | null>(null)
 const missingSession = ref(false)
 const userStore = useUserStore()
+
+type DiagnosisTone = 'strong' | 'medium' | 'weak' | 'neutral'
+
+const getLevelMeta = (level: InterviewExplanationLevel | null | undefined): { label: string; tone: DiagnosisTone } => {
+  switch (level) {
+    case 'STRONG':
+      return {
+        label: '表现扎实',
+        tone: 'strong',
+      }
+    case 'MEDIUM':
+      return {
+        label: '基础可用',
+        tone: 'medium',
+      }
+    case 'WEAK':
+      return {
+        label: '需要加强',
+        tone: 'weak',
+      }
+    default:
+      return {
+        label: '数据不足',
+        tone: 'neutral',
+      }
+  }
+}
+
+const getGeneratedByLabel = (generatedBy: ExplanationGeneratedBy): string => {
+  return generatedBy === 'RULE_PLUS_LLM' ? 'AI 润色' : '规则生成'
+}
 
 onLoad(async (query) => {
   if (!ensureAuthenticated(userStore, typeof query?.sessionId === 'string' ? `/pages/interview/report?sessionId=${query.sessionId}` : '/pages/interview/report')) {
@@ -151,9 +250,95 @@ const goHome = () => {
 .score-value { display: block; margin-top: 10rpx; font-family: var(--studio-font-display); font-size: 72rpx; font-weight: 700; line-height: 1; color: var(--studio-text); }
 .score-copy { display: block; margin-top: 8rpx; font-size: 24rpx; color: var(--studio-signal); }
 
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16rpx;
+  margin-bottom: 14rpx;
+}
+
+.section-head .section-title,
+.section-head .bullet-title {
+  margin-bottom: 0;
+}
+
 .bullet-card { padding: 18rpx; border-radius: var(--studio-radius); background: rgba(255, 255, 255, 0.03); border: 1rpx solid rgba(255, 255, 255, 0.06); margin-bottom: 10rpx; }
 .bullet-title { display: block; font-size: 24rpx; font-weight: 600; color: var(--studio-text); margin-bottom: 6rpx; }
 .bullet-copy { display: block; font-size: 25rpx; line-height: 1.6; color: var(--studio-text-muted); }
+.question-prompt { display: block; margin-top: 10rpx; font-size: 23rpx; line-height: 1.6; color: var(--studio-text-soft); }
+
+.compact-card {
+  margin-top: 16rpx;
+  padding: 18rpx;
+  border-radius: var(--studio-radius);
+  background: rgba(255, 255, 255, 0.025);
+  border: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+
+.explanation-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.02));
+}
+
+.question-card {
+  margin-bottom: 14rpx;
+}
+
+.explanation-chip,
+.diagnosis-level {
+  display: inline-block;
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  line-height: 1.4;
+  border: 1rpx solid rgba(129, 140, 248, 0.18);
+}
+
+.explanation-chip {
+  color: var(--studio-signal-soft);
+  background: rgba(129, 140, 248, 0.08);
+}
+
+.diagnosis-level {
+  font-weight: 600;
+}
+
+.tone-strong {
+  color: #9ae6b4;
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.24);
+}
+
+.tone-medium {
+  color: #fde68a;
+  background: rgba(250, 204, 21, 0.12);
+  border-color: rgba(250, 204, 21, 0.24);
+}
+
+.tone-weak {
+  color: #fca5a5;
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.24);
+}
+
+.tone-neutral {
+  color: var(--studio-text-soft);
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.evidence-item {
+  display: flex;
+  gap: 10rpx;
+  align-items: flex-start;
+  margin-top: 10rpx;
+}
+
+.evidence-dot {
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: var(--studio-signal-soft);
+}
 
 .action-panel.compact { margin-top: 16rpx; }
 
