@@ -5,6 +5,7 @@ public record InterviewQuestionReportView(
 		String title,
 		String prompt,
 		Integer score,
-		String summary
+		String summary,
+		InterviewQuestionExplanationView explanation
 ) {
 }

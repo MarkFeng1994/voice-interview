@@ -31,6 +31,7 @@ import com.interview.module.interview.engine.store.NoopInterviewReportStore;
 import com.interview.module.interview.service.AnswerEvidence;
 import com.interview.module.interview.service.FollowUpDecision;
 import com.interview.module.interview.service.FollowUpDecisionEngine;
+import com.interview.module.interview.service.InterviewReportExplanationService;
 import com.interview.module.tts.service.TtsAudioResult;
 import com.interview.module.tts.service.TtsRenderOptions;
 import com.interview.module.tts.service.TtsService;
@@ -43,6 +44,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 	private final AiService aiService;
 	private final TtsService ttsService;
 	private final FollowUpDecisionEngine followUpDecisionEngine;
+	private final InterviewReportExplanationService interviewReportExplanationService;
 
 	public SimpleInterviewEngine(
 			InterviewSessionStore sessionStore,
@@ -56,6 +58,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		this.aiService = aiService;
 		this.ttsService = ttsService;
 		this.followUpDecisionEngine = followUpDecisionEngine;
+		this.interviewReportExplanationService = new InterviewReportExplanationService();
 	}
 
 	@Override
@@ -465,7 +468,8 @@ public class SimpleInterviewEngine implements InterviewEngine {
 					question.titleSnapshot(),
 					question.promptSnapshot(),
 					score,
-					summary
+					summary,
+					null
 			));
 		}
 
@@ -509,7 +513,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		}
 
 		String title = sessionState.getQuestions().isEmpty() ? "模拟面试报告" : sessionState.getQuestions().get(0).titleSnapshot();
-		return new InterviewReportView(
+		InterviewReportView report = new InterviewReportView(
 				sessionState.getSessionId(),
 				sessionState.getStatus(),
 				title,
@@ -518,7 +522,13 @@ public class SimpleInterviewEngine implements InterviewEngine {
 				List.copyOf(strengths),
 				List.copyOf(weaknesses),
 				List.copyOf(suggestions),
-				List.copyOf(questionReports)
+				List.copyOf(questionReports),
+				null
+		);
+		return interviewReportExplanationService.enrichReport(
+				report,
+				sessionState.getQuestions(),
+				sessionState.getRounds()
 		);
 	}
 

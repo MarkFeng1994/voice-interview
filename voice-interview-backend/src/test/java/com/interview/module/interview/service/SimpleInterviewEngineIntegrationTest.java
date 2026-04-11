@@ -387,6 +387,28 @@ class SimpleInterviewEngineIntegrationTest {
 		assertThat(aiService.lastAnalysis.reasonCodes()).contains("ANSWER_EMPTY");
 	}
 
+	@Test
+	void should_include_rule_explanations_in_report_view() {
+		var engine = defaultEngine();
+		var view = engine.startSession(
+				List.of(new InterviewQuestionCard("Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", null, null, 1)),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+
+		engine.answer(view.sessionId(), "1", "TEXT", "我们主要用 Redis 做缓存。", null);
+		InterviewReportView report = engine.getReport(view.sessionId(), "1");
+
+		assertThat(report.overallExplanation()).isNotNull();
+		assertThat(report.overallExplanation().generatedBy()).isEqualTo("RULE");
+		assertThat(report.questionReports()).hasSize(1);
+		assertThat(report.questionReports().get(0).explanation()).isNotNull();
+		assertThat(report.questionReports().get(0).explanation().generatedBy()).isEqualTo("RULE");
+	}
+
 	private SimpleInterviewEngine defaultEngine() {
 		InterviewSessionStore sessionStore = new InMemorySessionStore();
 		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
