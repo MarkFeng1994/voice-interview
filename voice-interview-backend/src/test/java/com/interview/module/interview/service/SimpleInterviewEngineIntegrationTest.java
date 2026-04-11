@@ -157,7 +157,7 @@ class SimpleInterviewEngineIntegrationTest {
 	}
 
 	@Test
-	void should_normalize_missing_question_metadata_when_persisting_jdbc_snapshots() {
+	void should_default_missing_question_metadata_to_preset_when_persisting_jdbc_snapshots() {
 		SessionMapper sessionMapper = mock(SessionMapper.class);
 		SessionQuestionMapper sessionQuestionMapper = mock(SessionQuestionMapper.class);
 		RoundMapper roundMapper = mock(RoundMapper.class);
@@ -208,7 +208,7 @@ class SimpleInterviewEngineIntegrationTest {
 		List<SessionQuestionEntity> storedQuestions = questionCaptor.getAllValues();
 
 		assertThat(storedQuestions).extracting(SessionQuestionEntity::getSourceSnapshot)
-				.containsExactly("MANUAL", "MANUAL");
+				.containsExactly("PRESET", "PRESET");
 		assertThat(storedQuestions).extracting(SessionQuestionEntity::getDifficultySnapshot)
 				.containsExactly(1, 1);
 	}

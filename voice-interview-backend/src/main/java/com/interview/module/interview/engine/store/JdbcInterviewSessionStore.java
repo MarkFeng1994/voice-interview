@@ -181,7 +181,7 @@ public class JdbcInterviewSessionStore implements InterviewSessionStore {
 
 	private String normalizeSourceSnapshot(String sourceSnapshot) {
 		if (sourceSnapshot == null || sourceSnapshot.isBlank()) {
-			return "MANUAL";
+			return "PRESET";
 		}
 		return sourceSnapshot;
 	}
