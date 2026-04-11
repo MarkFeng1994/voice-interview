@@ -457,12 +457,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 	}
 
 	private InterviewReportView toReportView(InterviewSessionState sessionState) {
-		Map<Integer, InterviewRoundRecord> latestAnsweredRoundByQuestion = new LinkedHashMap<>();
-		for (InterviewRoundRecord round : sessionState.getRounds()) {
-			if (round.userAnswerText() != null) {
-				latestAnsweredRoundByQuestion.put(round.questionIndex(), round);
-			}
-		}
+		Map<Integer, InterviewRoundRecord> latestAnsweredRoundByQuestion = latestAnsweredRoundByQuestion(sessionState.getRounds());
 
 		List<InterviewQuestionReportView> questionReports = new ArrayList<>();
 		for (InterviewQuestionSnapshot question : sessionState.getQuestions()) {
@@ -545,7 +540,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 	}
 
 	private Integer computeOverallScore(List<InterviewRoundRecord> rounds) {
-		List<Integer> scores = rounds.stream()
+		List<Integer> scores = latestAnsweredRoundByQuestion(rounds).values().stream()
 				.map(InterviewRoundRecord::scoreSuggestion)
 				.filter(score -> score != null)
 				.toList();
@@ -553,6 +548,16 @@ public class SimpleInterviewEngine implements InterviewEngine {
 			return null;
 		}
 		return (int) Math.round(scores.stream().mapToInt(Integer::intValue).average().orElse(0));
+	}
+
+	private Map<Integer, InterviewRoundRecord> latestAnsweredRoundByQuestion(List<InterviewRoundRecord> rounds) {
+		Map<Integer, InterviewRoundRecord> latestAnsweredRoundByQuestion = new LinkedHashMap<>();
+		for (InterviewRoundRecord round : rounds) {
+			if (round.userAnswerText() != null) {
+				latestAnsweredRoundByQuestion.put(round.questionIndex(), round);
+			}
+		}
+		return latestAnsweredRoundByQuestion;
 	}
 
 	private String normalize(String text) {

@@ -662,6 +662,46 @@ class SimpleInterviewEngineIntegrationTest {
 				.noneMatch(item -> item.contains("缺少关键点"));
 	}
 
+	@Test
+	void should_align_overall_score_with_final_question_score_after_follow_up_recovery() {
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
+				Map.of("reportStore", new NoopInterviewReportStore())
+		);
+		SimpleInterviewEngine engine = new SimpleInterviewEngine(
+				sessionStore,
+				beanFactory.getBeanProvider(InterviewReportStore.class),
+				new SequencedAiService(List.of(60, 88)),
+				new StubTtsService(),
+				defaultDecisionEngine()
+		);
+
+		var view = engine.startSession(
+				List.of(new InterviewQuestionCard("Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", null, null, 1)),
+				60,
+				2,
+				new InterviewSessionOwner("1", "tester"),
+				null,
+				null
+		);
+		var followUp = engine.answer(view.sessionId(), "1", "TEXT", "我们主要用 Redis 做缓存。", null);
+		engine.answer(
+				followUp.sessionId(),
+				"1",
+				"TEXT",
+				"Redis 的使用场景主要是热点缓存，一致性时我会先更新数据库再删除缓存，并用 binlog 异步校正。",
+				null
+		);
+
+		InterviewReportView report = engine.getReport(view.sessionId(), "1");
+
+		assertThat(report.questionReports()).hasSize(1);
+		assertThat(report.questionReports().get(0).score()).isEqualTo(88);
+		assertThat(report.overallScore()).isEqualTo(88);
+		assertThat(report.overallExplanation()).isNotNull();
+		assertThat(report.overallExplanation().level()).isEqualTo("STRONG");
+	}
+
 	private SimpleInterviewEngine defaultEngine() {
 		InterviewSessionStore sessionStore = new InMemorySessionStore();
 		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
