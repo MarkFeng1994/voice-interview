@@ -35,7 +35,6 @@ import com.interview.module.interview.engine.store.NoopInterviewReportStore;
 import com.interview.module.interview.mapper.RoundMapper;
 import com.interview.module.interview.mapper.SessionMapper;
 import com.interview.module.interview.mapper.SessionQuestionMapper;
-import com.interview.module.interview.service.InterviewAnswerAnalyzer.Analysis;
 import com.interview.module.interview.resume.GeneratedResumeQuestion;
 import com.interview.module.interview.resume.ResumeKeywordExtractionResult;
 import com.interview.module.interview.resume.ResumeQuestionGenerationCommand;
@@ -313,7 +312,7 @@ class SimpleInterviewEngineIntegrationTest {
 		}
 
 		@Override
-		public Analysis analyzeInterviewAnswer(String question, String answer, List<String> expectedPoints) {
+		public AnswerEvidence analyzeInterviewAnswer(String question, String answer, List<String> expectedPoints) {
 			return InterviewAnswerAnalyzer.heuristic().analyze(question, answer, expectedPoints);
 		}
 	}
@@ -338,7 +337,7 @@ class SimpleInterviewEngineIntegrationTest {
 		}
 
 		@Override
-		public Analysis analyzeInterviewAnswer(String question, String answer, List<String> expectedPoints) {
+		public AnswerEvidence analyzeInterviewAnswer(String question, String answer, List<String> expectedPoints) {
 			return InterviewAnswerAnalyzer.heuristic().analyze(question, answer, expectedPoints);
 		}
 	}

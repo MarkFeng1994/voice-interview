@@ -28,6 +28,7 @@ import com.interview.module.interview.engine.store.InterviewReportStore;
 import com.interview.module.interview.engine.store.InterviewSessionState;
 import com.interview.module.interview.engine.store.InterviewSessionStore;
 import com.interview.module.interview.engine.store.NoopInterviewReportStore;
+import com.interview.module.interview.service.AnswerEvidence;
 import com.interview.module.interview.service.InterviewAnswerAnalyzer;
 import com.interview.module.tts.service.TtsAudioResult;
 import com.interview.module.tts.service.TtsRenderOptions;
@@ -111,7 +112,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 			String normalizedText = normalize(userText);
 			InterviewQuestionSnapshot currentQuestion = currentQuestion(sessionState);
 			List<String> expectedPoints = expectedPoints(currentQuestion);
-			InterviewAnswerAnalyzer.Analysis analysis = aiService.analyzeInterviewAnswer(
+			AnswerEvidence analysis = aiService.analyzeInterviewAnswer(
 					currentQuestion.promptSnapshot(),
 					normalizedText,
 					expectedPoints
@@ -255,7 +256,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 	private boolean shouldFollowUp(
 			InterviewSessionState sessionState,
 			AiReply aiReply,
-			InterviewAnswerAnalyzer.Analysis analysis
+			AnswerEvidence analysis
 	) {
 		return (analysis.followUpNeeded() || "FOLLOW_UP".equalsIgnoreCase(aiReply.decisionSuggestion()))
 				&& sessionState.getFollowUpIndex() < sessionState.getMaxFollowUpPerQuestion();
@@ -533,7 +534,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		return points.stream().distinct().toList();
 	}
 
-	private String buildFollowUpPrompt(AiReply aiReply, InterviewAnswerAnalyzer.Analysis analysis) {
+	private String buildFollowUpPrompt(AiReply aiReply, AnswerEvidence analysis) {
 		if (analysis.followUpNeeded() && !analysis.missingPoints().isEmpty()) {
 			return "你刚才的回答还缺少这些点：" + String.join("、", analysis.missingPoints()) + "。请补充说明。";
 		}
