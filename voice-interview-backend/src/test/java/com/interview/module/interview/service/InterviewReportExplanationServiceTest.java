@@ -462,7 +462,124 @@ class InterviewReportExplanationServiceTest {
 		assertThat(backfilledReport.questionReports().get(0).explanation()).isEqualTo(existingQuestionExplanation);
 		assertThat(backfilledReport.questionReports().get(1).explanation()).isNotNull();
 		assertThat(backfilledReport.questionReports().get(1).explanation().generatedBy()).isEqualTo("RULE");
+		assertThat(backfilledReport.sessionId()).isEqualTo("session-2");
+		assertThat(backfilledReport.status()).isEqualTo("COMPLETED");
+		assertThat(backfilledReport.title()).isEqualTo("架构面试");
+		assertThat(backfilledReport.overallScore()).isEqualTo(68);
+		assertThat(backfilledReport.overallComment()).isEqualTo("整体基础可用。");
+		assertThat(backfilledReport.strengths()).containsExactly("优点");
+		assertThat(backfilledReport.weaknesses()).containsExactly("短板");
+		assertThat(backfilledReport.suggestions()).containsExactly("建议");
+		assertThat(backfilledReport.questionReports().get(0).title()).isEqualTo("Redis");
+		assertThat(backfilledReport.questionReports().get(0).prompt()).isEqualTo("请说明 Redis 的使用场景和一致性策略。");
+		assertThat(backfilledReport.questionReports().get(0).score()).isEqualTo(60);
+		assertThat(backfilledReport.questionReports().get(0).summary()).isEqualTo("回答还需补充。");
 		verify(aiService, times(0)).polishInterviewReportExplanation(any());
+	}
+
+	@Test
+	void should_polish_from_canonical_rule_explanations_when_input_contains_existing_explanations() {
+		AiService aiService = mock(AiService.class);
+		when(aiService.polishInterviewReportExplanation(any()))
+				.thenAnswer(invocation -> {
+					InterviewReportExplanationCommand command = invocation.getArgument(0, InterviewReportExplanationCommand.class);
+					if ("OVERALL".equals(command.scope())) {
+						return new InterviewReportExplanationResult(
+								"[SUMMARY:OVERALL:MEDIUM] LLM 润色后的整体总结",
+								List.of("[E1] LLM 润色后的整体证据 1", "[E2] LLM 润色后的整体证据 2"),
+								List.of("[S1] LLM 润色后的整体建议 1", "[S2] LLM 润色后的整体建议 2")
+						);
+					}
+					return new InterviewReportExplanationResult(
+							"[SUMMARY:QUESTION:MEDIUM] LLM 润色后的分题总结",
+							List.of("[E1] LLM 润色后的分题证据"),
+							List.of("[S1] LLM 润色后的分题建议")
+					);
+				});
+		InterviewReportExplanationService service = new InterviewReportExplanationService(aiService);
+		InterviewQuestionExplanationView existingQuestionExplanation = new InterviewQuestionExplanationView(
+				"MEDIUM",
+				"已有分题解释",
+				List.of("已有分题证据"),
+				"已有分题建议",
+				"MANUAL"
+		);
+		InterviewOverallExplanationView existingOverallExplanation = new InterviewOverallExplanationView(
+				"MEDIUM",
+				"已有整体解释",
+				List.of("已有整体证据"),
+				List.of("已有整体建议"),
+				"MANUAL"
+		);
+
+		InterviewReportView enrichedReport = service.enrichReport(
+				new InterviewReportView(
+						"session-1",
+						"COMPLETED",
+						"Redis",
+						68,
+						"整体基础可用。",
+						List.of("优点"),
+						List.of("短板"),
+						List.of("建议"),
+						List.of(new InterviewQuestionReportView(
+								1,
+								"Redis",
+								"请说明 Redis 的使用场景和一致性策略。",
+								60,
+								"核心点回答到了，但细节与例子还可以更深入。",
+								existingQuestionExplanation
+						)),
+						existingOverallExplanation
+				),
+				List.of(new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
+				List.of(new InterviewRoundRecord(
+						"r1",
+						1,
+						0,
+						"QUESTION",
+						"题目",
+						null,
+						0L,
+						60,
+						"我们主要用 Redis 做缓存。",
+						null,
+						"TEXT",
+						"2026-04-11T00:00:00Z",
+						"2026-04-11T00:00:10Z",
+						"缺少关键点：一致性策略",
+						"FOLLOW_UP",
+						"缺少关键点：一致性策略",
+						List.of("一致性策略")
+				))
+		);
+
+		assertThat(enrichedReport.overallExplanation().generatedBy()).isEqualTo("RULE_PLUS_LLM");
+		assertThat(enrichedReport.questionReports().get(0).explanation().generatedBy()).isEqualTo("RULE_PLUS_LLM");
+
+		ArgumentCaptor<InterviewReportExplanationCommand> commandCaptor = ArgumentCaptor.forClass(InterviewReportExplanationCommand.class);
+		verify(aiService, times(2)).polishInterviewReportExplanation(commandCaptor.capture());
+		assertThat(commandCaptor.getAllValues())
+				.anySatisfy(command -> {
+					assertThat(command.scope()).isEqualTo("OVERALL");
+					assertThat(command.summaryText()).isEqualTo("[SUMMARY:OVERALL:MEDIUM] 整体基础可用，但关键点覆盖和追问深度还不够稳定，部分题目仍需要继续补强。");
+					assertThat(command.summaryText()).doesNotContain("已有整体解释");
+					assertThat(command.evidencePoints()).containsExactly(
+							"[E1] 共有 1 个答题轮次暴露出关键点缺失，回答覆盖度还不够稳定。",
+							"[E2] 本轮触发了 1 次继续追问，说明部分题目需要靠补充说明才能站稳。"
+					);
+					assertThat(command.improvementSuggestions()).containsExactly(
+							"[S1] 按题型整理每题必须覆盖的关键点，先保证回答完整度。",
+							"[S2] 高频题准备“背景、方案、取舍、结果”的固定表达，提升追问稳定性。"
+					);
+				})
+				.anySatisfy(command -> {
+					assertThat(command.scope()).isEqualTo("QUESTION");
+					assertThat(command.summaryText()).isEqualTo("[SUMMARY:QUESTION:MEDIUM] Redis 这题还缺少对 一致性策略 的说明，核心覆盖不够完整。");
+					assertThat(command.summaryText()).doesNotContain("已有分题解释");
+					assertThat(command.evidencePoints()).containsExactly("[E1] 缺少关键点：一致性策略");
+					assertThat(command.improvementSuggestions()).containsExactly("[S1] 补充 一致性策略，并明确你的方案、取舍和落地方式。");
+				});
 	}
 
 	@Test
