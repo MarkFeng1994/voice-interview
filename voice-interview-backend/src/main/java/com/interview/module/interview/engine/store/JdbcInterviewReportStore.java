@@ -18,8 +18,6 @@ import com.interview.module.interview.engine.model.InterviewReportView;
 @ConditionalOnProperty(prefix = "app.interview", name = "session-store", havingValue = "jdbc")
 public class JdbcInterviewReportStore implements InterviewReportStore {
 
-	private static final String LATEST_REPORT_VERSION = "v2";
-
 	private final SessionMapper sessionMapper;
 	private final ReportMapper reportMapper;
 	private final ObjectMapper objectMapper;
@@ -70,11 +68,6 @@ public class JdbcInterviewReportStore implements InterviewReportStore {
 		}
 	}
 
-	@Override
-	public void save(InterviewReportView report) {
-		save(report, LATEST_REPORT_VERSION);
-	}
-
 	private Optional<Long> findInternalSessionId(String sessionKey) {
 		SessionEntity entity = sessionMapper.selectOne(
 				new LambdaQueryWrapper<SessionEntity>().eq(SessionEntity::getSessionKey, sessionKey));
@@ -99,7 +92,7 @@ public class JdbcInterviewReportStore implements InterviewReportStore {
 
 	private String normalizeReportVersion(String reportVersion) {
 		if (reportVersion == null || reportVersion.isBlank()) {
-			return LATEST_REPORT_VERSION;
+			return InterviewReportStore.LATEST_REPORT_VERSION;
 		}
 		return reportVersion;
 	}

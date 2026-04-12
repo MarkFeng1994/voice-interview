@@ -6,6 +6,8 @@ import com.interview.module.interview.engine.model.InterviewReportView;
 
 public interface InterviewReportStore {
 
+	String LATEST_REPORT_VERSION = "v2";
+
 	Optional<PersistedInterviewReport> findPersistedReportBySessionId(String sessionId);
 
 	default Optional<InterviewReportView> findBySessionId(String sessionId) {
@@ -13,7 +15,7 @@ public interface InterviewReportStore {
 	}
 
 	default void save(InterviewReportView report) {
-		save(report, "v2");
+		save(report, LATEST_REPORT_VERSION);
 	}
 
 	void save(InterviewReportView report, String reportVersion);
