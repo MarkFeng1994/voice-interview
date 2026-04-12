@@ -714,11 +714,29 @@ class SimpleInterviewEngineIntegrationTest {
 		InterviewSessionStore sessionStore = new InMemorySessionStore();
 		sessionStore.save(completedRedisSession(sessionId));
 		RecordingPersistedReportStore reportStore = new RecordingPersistedReportStore();
-		reportStore.seed(new PersistedInterviewReport(legacyPersistedReport(sessionId), "v1"));
+		InterviewReportView legacyReport = legacyPersistedReport(sessionId);
+		reportStore.seed(new PersistedInterviewReport(legacyReport, "v1"));
 		SimpleInterviewEngine engine = engineWithStores(sessionStore, reportStore, new StubAiService());
 
 		InterviewReportView report = engine.getReport(sessionId, "1");
 
+		assertThat(report.sessionId()).isEqualTo(legacyReport.sessionId());
+		assertThat(report.status()).isEqualTo(legacyReport.status());
+		assertThat(report.title()).isEqualTo(legacyReport.title());
+		assertThat(report.overallScore()).isEqualTo(legacyReport.overallScore());
+		assertThat(report.overallComment()).isEqualTo(legacyReport.overallComment());
+		assertThat(report.strengths()).containsExactlyElementsOf(legacyReport.strengths());
+		assertThat(report.weaknesses()).containsExactlyElementsOf(legacyReport.weaknesses());
+		assertThat(report.suggestions()).containsExactlyElementsOf(legacyReport.suggestions());
+		assertThat(report.questionReports()).hasSize(legacyReport.questionReports().size());
+		assertThat(report.questionReports()).extracting(InterviewQuestionReportView::title)
+				.containsExactlyElementsOf(legacyReport.questionReports().stream().map(InterviewQuestionReportView::title).toList());
+		assertThat(report.questionReports()).extracting(InterviewQuestionReportView::prompt)
+				.containsExactlyElementsOf(legacyReport.questionReports().stream().map(InterviewQuestionReportView::prompt).toList());
+		assertThat(report.questionReports()).extracting(InterviewQuestionReportView::score)
+				.containsExactlyElementsOf(legacyReport.questionReports().stream().map(InterviewQuestionReportView::score).toList());
+		assertThat(report.questionReports()).extracting(InterviewQuestionReportView::summary)
+				.containsExactlyElementsOf(legacyReport.questionReports().stream().map(InterviewQuestionReportView::summary).toList());
 		assertThat(report.overallExplanation()).isNotNull();
 		assertThat(report.questionReports().get(0).explanation()).isNotNull();
 		assertThat(reportStore.saveAttempts()).isEqualTo(1);
@@ -748,12 +766,15 @@ class SimpleInterviewEngineIntegrationTest {
 		InterviewSessionStore sessionStore = new InMemorySessionStore();
 		sessionStore.save(completedRedisSession(sessionId));
 		RecordingPersistedReportStore reportStore = new RecordingPersistedReportStore();
-		reportStore.seed(new PersistedInterviewReport(backfilledPersistedReport(sessionId), "v2"));
+		InterviewReportView reportWithExplanation = backfilledPersistedReport(sessionId);
+		reportStore.seed(new PersistedInterviewReport(reportWithExplanation, "v2"));
 		SimpleInterviewEngine engine = engineWithStores(sessionStore, reportStore, new StubAiService());
 
 		InterviewReportView report = engine.getReport(sessionId, "1");
 
-		assertThat(report).isEqualTo(backfilledPersistedReport(sessionId));
+		assertThat(report).isSameAs(reportWithExplanation);
+		assertThat(report.overallExplanation()).isNotNull();
+		assertThat(report.questionReports().get(0).explanation()).isNotNull();
 		assertThat(reportStore.saveAttempts()).isZero();
 	}
 
@@ -816,6 +837,26 @@ class SimpleInterviewEngineIntegrationTest {
 		assertThat(report.overallExplanation()).isNotNull();
 		assertThat(report.questionReports().get(0).explanation()).isNotNull();
 		assertThat(reportStore.saveAttempts()).isEqualTo(1);
+	}
+
+	@Test
+	void should_rebuild_report_when_persisted_report_payload_is_null() {
+		String sessionId = "session-null-persisted-payload";
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		sessionStore.save(completedRedisSession(sessionId));
+		RecordingPersistedReportStore reportStore = new RecordingPersistedReportStore();
+		reportStore.seedForSession(sessionId, new PersistedInterviewReport(null, "v1"));
+		SimpleInterviewEngine engine = engineWithStores(sessionStore, reportStore, new StubAiService());
+
+		InterviewReportView report = engine.getReport(sessionId, "1");
+
+		assertThat(report).isNotNull();
+		assertThat(report.sessionId()).isEqualTo(sessionId);
+		assertThat(report.overallExplanation()).isNotNull();
+		assertThat(report.questionReports()).isNotEmpty();
+		assertThat(report.questionReports().get(0).explanation()).isNotNull();
+		assertThat(reportStore.saveAttempts()).isEqualTo(1);
+		assertThat(reportStore.lastSavedVersion()).isEqualTo("v2");
 	}
 
 	private SimpleInterviewEngine defaultEngine() {
@@ -1086,6 +1127,10 @@ class SimpleInterviewEngineIntegrationTest {
 
 		private void seed(PersistedInterviewReport persistedReport) {
 			store.put(persistedReport.report().sessionId(), persistedReport);
+		}
+
+		private void seedForSession(String sessionId, PersistedInterviewReport persistedReport) {
+			store.put(sessionId, persistedReport);
 		}
 
 		private void setThrowOnSave(boolean throwOnSave) {

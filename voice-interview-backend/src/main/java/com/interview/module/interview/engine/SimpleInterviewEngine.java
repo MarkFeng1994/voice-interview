@@ -291,12 +291,28 @@ public class SimpleInterviewEngine implements InterviewEngine {
 			InterviewSessionState sessionState,
 			PersistedInterviewReport persistedInterviewReport
 	) {
+		if (persistedInterviewReport == null) {
+			log.warn("Persisted report record is null, rebuild report from session snapshot, sessionId={}",
+					sessionState.getSessionId());
+			return persistReport(sessionState);
+		}
 		InterviewReportView persistedReport = persistedInterviewReport.report();
+		if (persistedReport == null) {
+			log.warn(
+					"Persisted report payload is null, rebuild report from session snapshot, sessionId={}, reportVersion={}",
+					sessionState.getSessionId(),
+					persistedInterviewReport.reportVersion()
+			);
+			return persistReport(sessionState);
+		}
 		if (!hasMissingExplanation(persistedReport)) {
 			return persistedReport;
 		}
 		if (!hasBackfillContext(sessionState)) {
-			log.info("Skip report explanation backfill due to incomplete context, sessionId={}", sessionState.getSessionId());
+			log.debug(
+					"Skip explanation backfill because session context is incomplete, keep persisted report as-is, sessionId={}",
+					sessionState.getSessionId()
+			);
 			return persistedReport;
 		}
 		try {
@@ -305,6 +321,13 @@ public class SimpleInterviewEngine implements InterviewEngine {
 					sessionState.getQuestions(),
 					sessionState.getRounds()
 			);
+			if (backfilledReport == null) {
+				log.warn(
+						"Backfill returned null report, keep existing persisted report, sessionId={}",
+						sessionState.getSessionId()
+				);
+				return persistedReport;
+			}
 			interviewReportStore.save(backfilledReport, LATEST_REPORT_VERSION);
 			return backfilledReport;
 		} catch (Exception ex) {
@@ -314,7 +337,7 @@ public class SimpleInterviewEngine implements InterviewEngine {
 	}
 
 	private boolean hasMissingExplanation(InterviewReportView persistedReport) {
-		if (persistedReport == null || persistedReport.overallExplanation() == null) {
+		if (persistedReport.overallExplanation() == null) {
 			return true;
 		}
 		if (persistedReport.questionReports() == null) {
