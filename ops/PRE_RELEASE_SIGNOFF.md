@@ -25,7 +25,9 @@
 - [ ] AI audio playback
 - [ ] Skip / end
 - [ ] History
+- [ ] History filter and session restore
 - [ ] Report
+- [ ] Cancelled-session report hint
 - [ ] Profile update
 
 ## Admin Functional

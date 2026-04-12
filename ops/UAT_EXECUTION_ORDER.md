@@ -9,7 +9,6 @@ Run UAT in a fixed order so failures are easier to isolate.
 Verify first:
 
 - backend service is running
-- sherpa `/healthz` is `ok`
 - `/actuator/health` is `UP`
 - `/api/system/providers` matches the expected provider mix
 
@@ -57,7 +56,6 @@ If session updates do not appear in real time, check:
 
 If this step fails, inspect:
 
-- sherpa `/healthz`
 - `/api/system/providers`
 - `t_media_file`
 - `/api/system/media/cleanup`
@@ -68,6 +66,7 @@ If this step fails, inspect:
 2. Resume in-progress session
 3. Open report page
 4. Verify strengths / weaknesses / suggestions
+5. Verify history filter and cancelled-session report hint
 
 ## Step 7. Profile and Admin
 

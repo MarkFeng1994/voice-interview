@@ -16,6 +16,8 @@
 - setup page loads presets
 - start interview works
 - submit text answer works
+- manual end shows confirm dialog
+- history filter works
 - report page opens
 
 ## Admin

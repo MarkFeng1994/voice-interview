@@ -53,7 +53,7 @@ If available, also test:
 | `C-02` | Submit text answer | Messages update and next AI turn arrives |
 | `C-03` | Click play AI audio | Audio plays successfully |
 | `C-04` | Use skip | Session advances or ends correctly |
-| `C-05` | End session manually | Session becomes ended and report opens |
+| `C-05` | End session manually | Confirmation dialog appears, then session ends and report opens |
 | `C-06` | Reopen an in-progress session from history | Session restores correctly |
 
 ### D. Voice Flow
@@ -72,7 +72,7 @@ If available, also test:
 | `E-01` | Start session | WebSocket connects automatically |
 | `E-02` | Submit answer | Session updates arrive without manual refresh |
 | `E-03` | Restore session page | WebSocket reconnects successfully |
-| `E-04` | Disconnect network briefly and recover | Manual refresh still works; no permanent page lock |
+| `E-04` | Disconnect network briefly and recover | Manual refresh and reconnect still work; no permanent page lock |
 
 ### F. Report and History
 
@@ -82,6 +82,8 @@ If available, also test:
 | `F-02` | Open report page | Score, strengths, weaknesses, suggestions render |
 | `F-03` | Open report without sessionId | Friendly error shown |
 | `F-04` | Resume session from history | Correct session opens |
+| `F-05` | Filter history by status | In-progress / completed / cancelled sessions can be filtered |
+| `F-06` | Open cancelled report | Cancelled-session hint and context banner render |
 
 ### G. Profile
 
