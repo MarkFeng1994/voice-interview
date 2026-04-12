@@ -3,10 +3,10 @@
 **日期**: 2026-04-12
 
 **对应设计**:
-- [2026-04-12-historical-report-explanation-backfill-design.md](E:/developSoft/ideaworkspace/voice-interview/docs/superpowers/specs/2026-04-12-historical-report-explanation-backfill-design.md)
+- [2026-04-12-historical-report-explanation-backfill-design.md](E:/developSoft/ideaworkspace/voice-interview/docs/archive/superpowers/specs/2026-04-12-historical-report-explanation-backfill-design.md)
 
 **对应实施计划**:
-- [2026-04-12-historical-report-explanation-backfill-implementation.md](E:/developSoft/ideaworkspace/voice-interview/docs/superpowers/plans/2026-04-12-historical-report-explanation-backfill-implementation.md)
+- [2026-04-12-historical-report-explanation-backfill-implementation.md](E:/developSoft/ideaworkspace/voice-interview/docs/archive/superpowers/plans/2026-04-12-historical-report-explanation-backfill-implementation.md)
 
 ## 1. 本次实现了什么
 

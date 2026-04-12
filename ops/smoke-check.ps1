@@ -68,7 +68,7 @@ Write-Host "Login ok as $($login.data.profile.username)"
 
 $resumePath = $ResumePdfPath
 if (-not $resumePath) {
-  $defaultResume = Join-Path (Split-Path $PSScriptRoot -Parent) '项目架构技术明细.pdf'
+  $defaultResume = Join-Path (Split-Path $PSScriptRoot -Parent) 'docs\architecture\项目架构技术明细.pdf'
   if (Test-Path $defaultResume) {
     $resumePath = $defaultResume
   }

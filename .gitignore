@@ -12,6 +12,7 @@ target/
 *.class
 *.log
 ops/runtime.local.ps1
+.codex_tmp/
 
 # IDE
 .idea/
