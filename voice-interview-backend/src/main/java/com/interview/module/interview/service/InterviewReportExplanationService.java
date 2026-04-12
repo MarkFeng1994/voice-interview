@@ -41,14 +41,11 @@ public class InterviewReportExplanationService {
 		if (report == null) {
 			return null;
 		}
+		InterviewReportView ruleBackfilledReport = backfillMissingExplanations(report, questions, rounds);
 		List<InterviewQuestionReportView> explainedQuestionReports = new ArrayList<>();
-		for (InterviewQuestionReportView questionReport : safeQuestionReports(report.questionReports())) {
+		for (InterviewQuestionReportView questionReport : safeQuestionReports(ruleBackfilledReport.questionReports())) {
 			InterviewQuestionSnapshot question = findQuestion(questions, questionReport.questionIndex());
-			InterviewQuestionExplanationView ruleExplanation = buildQuestionExplanation(
-					question,
-					questionReport,
-					roundsForQuestion(rounds, questionReport.questionIndex())
-			);
+			InterviewQuestionExplanationView ruleExplanation = questionReport.explanation();
 			InterviewQuestionExplanationView explanation = polishQuestionExplanation(
 					question,
 					questionReport,
@@ -63,7 +60,56 @@ public class InterviewReportExplanationService {
 					explanation
 			));
 		}
-		InterviewOverallExplanationView ruleOverallExplanation = buildOverallExplanation(report.overallScore(), explainedQuestionReports, rounds);
+		InterviewOverallExplanationView ruleOverallExplanation = ruleBackfilledReport.overallExplanation();
+		return new InterviewReportView(
+				ruleBackfilledReport.sessionId(),
+				ruleBackfilledReport.status(),
+				ruleBackfilledReport.title(),
+				ruleBackfilledReport.overallScore(),
+				ruleBackfilledReport.overallComment(),
+				ruleBackfilledReport.strengths(),
+				ruleBackfilledReport.weaknesses(),
+				ruleBackfilledReport.suggestions(),
+				List.copyOf(explainedQuestionReports),
+				polishOverallExplanation(ruleBackfilledReport, ruleOverallExplanation)
+		);
+	}
+
+	public InterviewReportView backfillMissingExplanations(
+			InterviewReportView report,
+			List<InterviewQuestionSnapshot> questions,
+			List<InterviewRoundRecord> rounds
+	) {
+		if (report == null) {
+			return null;
+		}
+
+		List<InterviewQuestionReportView> backfilledQuestionReports = new ArrayList<>();
+		for (InterviewQuestionReportView questionReport : safeQuestionReports(report.questionReports())) {
+			InterviewQuestionExplanationView explanation = questionReport.explanation();
+			if (explanation == null) {
+				InterviewQuestionSnapshot question = findQuestion(questions, questionReport.questionIndex());
+				explanation = buildQuestionExplanation(
+						question,
+						questionReport,
+						roundsForQuestion(rounds, questionReport.questionIndex())
+				);
+			}
+			backfilledQuestionReports.add(new InterviewQuestionReportView(
+					questionReport.questionIndex(),
+					questionReport.title(),
+					questionReport.prompt(),
+					questionReport.score(),
+					questionReport.summary(),
+					explanation
+			));
+		}
+
+		InterviewOverallExplanationView overallExplanation = report.overallExplanation();
+		if (overallExplanation == null) {
+			overallExplanation = buildOverallExplanation(report.overallScore(), backfilledQuestionReports, rounds);
+		}
+
 		return new InterviewReportView(
 				report.sessionId(),
 				report.status(),
@@ -73,8 +119,8 @@ public class InterviewReportExplanationService {
 				report.strengths(),
 				report.weaknesses(),
 				report.suggestions(),
-				List.copyOf(explainedQuestionReports),
-				polishOverallExplanation(report, ruleOverallExplanation)
+				List.copyOf(backfilledQuestionReports),
+				overallExplanation
 		);
 	}
 

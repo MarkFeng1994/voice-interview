@@ -308,6 +308,164 @@ class InterviewReportExplanationServiceTest {
 	}
 
 	@Test
+	void should_backfill_missing_explanations_with_rule_only_without_calling_llm() {
+		AiService aiService = mock(AiService.class);
+		InterviewReportExplanationService service = new InterviewReportExplanationService(aiService);
+
+		InterviewReportView backfilledReport = service.backfillMissingExplanations(
+				new InterviewReportView(
+						"session-1",
+						"COMPLETED",
+						"Redis",
+						68,
+						"整体基础可用。",
+						List.of("优点"),
+						List.of("短板"),
+						List.of("建议"),
+						List.of(new InterviewQuestionReportView(
+								1,
+								"Redis",
+								"请说明 Redis 的使用场景和一致性策略。",
+								60,
+								"核心点回答到了，但细节与例子还可以更深入。",
+								null
+						)),
+						null
+				),
+				List.of(new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
+				List.of(new InterviewRoundRecord(
+						"r1",
+						1,
+						0,
+						"QUESTION",
+						"题目",
+						null,
+						0L,
+						60,
+						"我们主要用 Redis 做缓存。",
+						null,
+						"TEXT",
+						"2026-04-11T00:00:00Z",
+						"2026-04-11T00:00:10Z",
+						"缺少关键点：一致性策略",
+						"FOLLOW_UP",
+						"缺少关键点：一致性策略",
+						List.of("一致性策略")
+				))
+		);
+
+		assertThat(backfilledReport.overallExplanation()).isNotNull();
+		assertThat(backfilledReport.overallExplanation().generatedBy()).isEqualTo("RULE");
+		assertThat(backfilledReport.overallExplanation().summaryText()).contains("整体");
+		assertThat(backfilledReport.questionReports().get(0).explanation()).isNotNull();
+		assertThat(backfilledReport.questionReports().get(0).explanation().generatedBy()).isEqualTo("RULE");
+		assertThat(backfilledReport.questionReports().get(0).explanation().summaryText()).contains("一致性策略");
+		verify(aiService, times(0)).polishInterviewReportExplanation(any());
+	}
+
+	@Test
+	void should_preserve_existing_explanations_and_only_backfill_missing_parts_without_calling_llm() {
+		AiService aiService = mock(AiService.class);
+		InterviewReportExplanationService service = new InterviewReportExplanationService(aiService);
+		InterviewOverallExplanationView existingOverallExplanation = new InterviewOverallExplanationView(
+				"MEDIUM",
+				"已有整体解释",
+				List.of("已有整体证据"),
+				List.of("已有整体建议"),
+				"MANUAL"
+		);
+		InterviewQuestionExplanationView existingQuestionExplanation = new InterviewQuestionExplanationView(
+				"MEDIUM",
+				"已有分题解释",
+				List.of("已有分题证据"),
+				"已有分题建议",
+				"MANUAL"
+		);
+
+		InterviewReportView backfilledReport = service.backfillMissingExplanations(
+				new InterviewReportView(
+						"session-2",
+						"COMPLETED",
+						"架构面试",
+						68,
+						"整体基础可用。",
+						List.of("优点"),
+						List.of("短板"),
+						List.of("建议"),
+						List.of(
+								new InterviewQuestionReportView(
+										1,
+										"Redis",
+										"请说明 Redis 的使用场景和一致性策略。",
+										60,
+										"回答还需补充。",
+										existingQuestionExplanation
+								),
+								new InterviewQuestionReportView(
+										2,
+										"消息队列",
+										"请说明消息可靠性方案。",
+										72,
+										"回答较完整。",
+										null
+								)
+						),
+						existingOverallExplanation
+				),
+				List.of(
+						new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1),
+						new InterviewQuestionSnapshot(2, "消息队列", "请说明消息可靠性方案。", "PRESET", 2)
+				),
+				List.of(
+						new InterviewRoundRecord(
+								"r1",
+								1,
+								0,
+								"QUESTION",
+								"题目",
+								null,
+								0L,
+								60,
+								"我们主要用 Redis 做缓存。",
+								null,
+								"TEXT",
+								"2026-04-11T00:00:00Z",
+								"2026-04-11T00:00:10Z",
+								"缺少关键点：一致性策略",
+								"FOLLOW_UP",
+								"缺少关键点：一致性策略",
+								List.of("一致性策略")
+						),
+						new InterviewRoundRecord(
+								"r2",
+								2,
+								0,
+								"QUESTION",
+								"题目",
+								null,
+								0L,
+								72,
+								"我们通过重试和死信队列保证消息可靠性。",
+								null,
+								"TEXT",
+								"2026-04-11T00:01:00Z",
+								"2026-04-11T00:01:10Z",
+								"回答较完整",
+								"NEXT_QUESTION",
+								"当前回答已达到继续下一题的标准",
+								List.of()
+						)
+				)
+		);
+
+		assertThat(backfilledReport.overallExplanation()).isEqualTo(existingOverallExplanation);
+		assertThat(backfilledReport.questionReports().get(0).explanation()).isEqualTo(existingQuestionExplanation);
+		assertThat(backfilledReport.questionReports().get(1).explanation()).isNotNull();
+		assertThat(backfilledReport.questionReports().get(1).explanation().generatedBy()).isEqualTo("RULE");
+		verify(aiService, times(0)).polishInterviewReportExplanation(any());
+	}
+
+	@Test
 	void should_mark_explanations_as_rule_plus_llm_when_ai_polish_succeeds() {
 		AiService aiService = mock(AiService.class);
 		when(aiService.polishInterviewReportExplanation(any()))
