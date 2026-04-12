@@ -35,7 +35,7 @@
         <view class="card-head">
           <view>
             <text class="card-title">{{ item.title }}</text>
-            <text class="card-meta">{{ item.startedAt || '尚未开始' }}</text>
+            <text class="card-meta">{{ formatStartedAt(item.startedAt) }}</text>
           </view>
           <text class="score-pill" :class="statusClass(item.status)">{{ scoreLabel(item) }}</text>
         </view>
@@ -43,7 +43,7 @@
         <view class="card-tags">
           <text class="tag">已答 {{ item.answeredRounds }} 轮</text>
           <text class="tag" :class="statusClass(item.status)">{{ statusLabel(item.status) }}</text>
-          <text v-if="item.lastUpdatedAt" class="tag subtle">最近更新 {{ item.lastUpdatedAt }}</text>
+          <text v-if="item.lastUpdatedAt" class="tag subtle">最近更新 {{ formatRelativeDateTime(item.lastUpdatedAt) }}</text>
         </view>
         <view class="card-actions">
           <button class="mini-btn" @click="() => handlePrimaryAction(item)">{{ primaryActionLabel(item.status) }}</button>
@@ -78,6 +78,7 @@ import { listInterviewSessions } from '@/services/interviewApi'
 import { useUserStore } from '@/stores/user'
 import type { InterviewSessionSummary } from '@/types/interview'
 import { ensureAuthenticated } from '@/utils/auth'
+import { formatDateTime, formatRelativeDateTime } from '@/utils/time'
 
 const historyItems = ref<InterviewSessionSummary[]>([])
 const activeFilter = ref<'ALL' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'>('ALL')
@@ -174,6 +175,8 @@ const scoreLabel = (item: InterviewSessionSummary) => {
   }
   return item.overallScore == null ? '-- 分' : `${item.overallScore} 分`
 }
+
+const formatStartedAt = (value?: string | null) => value ? formatDateTime(value) : '尚未开始'
 
 const summaryLabel = (item: InterviewSessionSummary) => {
   if (item.status === 'CANCELLED') {

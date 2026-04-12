@@ -14,7 +14,7 @@
     <view class="score-card">
       <text class="score-label">总体评分</text>
       <text class="score-value">{{ report?.overallScore ?? '--' }}</text>
-      <text class="score-copy">状态：{{ report?.status || '暂无' }} · {{ report?.questionReports.length || 0 }} 题回顾</text>
+      <text class="score-copy">状态：{{ reportStatusLabel(report?.status) }} · {{ report?.questionReports.length || 0 }} 题回顾</text>
     </view>
 
     <view v-if="report && contextBanner" class="section-card context-card">
@@ -199,6 +199,19 @@ const getLevelMeta = (level: InterviewExplanationLevel | null | undefined): { la
 
 const getGeneratedByLabel = (generatedBy: ExplanationGeneratedBy): string => {
   return generatedBy === 'RULE_PLUS_LLM' ? 'AI 润色' : '规则生成'
+}
+
+const reportStatusLabel = (status?: string | null) => {
+  switch (status) {
+    case 'IN_PROGRESS':
+      return '进行中'
+    case 'COMPLETED':
+      return '已完成'
+    case 'CANCELLED':
+      return '已结束'
+    default:
+      return '暂无'
+  }
 }
 
 const contextBanner = computed(() => {

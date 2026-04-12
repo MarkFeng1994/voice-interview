@@ -564,12 +564,12 @@ const restoreInterviewSession = async (sessionId: string) => {
   setUiStatus('恢复中', '正在恢复你上一次的面试会话。')
 
   try {
-    const restored = await restoreSessionRequest(sessionId)
-    if (restored.status === 'COMPLETED' || restored.status === 'CANCELLED') {
-      setUiStatus('面试已结束', '当前会话已经结束，正在为你打开原报告。')
-      goToReport(restored.sessionId)
-      return
-    }
+      const restored = await restoreSessionRequest(sessionId)
+      if (restored.status === 'COMPLETED' || restored.status === 'CANCELLED') {
+        setUiStatus('会话已收口', '当前会话已经结束，正在为你打开原报告。')
+        goToReport(restored.sessionId)
+        return
+      }
     setUiStatus('已恢复会话', '当前题目和历史消息已恢复，正在重连实时链路。')
     await connectInterviewSocket(sessionId)
     setUiStatus('已恢复练习', '你可以继续回答、跳过当前题，或直接结束本轮面试。')
@@ -668,7 +668,7 @@ const submitLatestAnswer = async () => {
       return
     }
 
-    setUiStatus('本轮已结束', '报告已经生成，你可以直接查看本轮总结。')
+    setUiStatus('本轮已完成', '报告已经生成，你可以直接查看本轮总结。')
     goToReport(session.sessionId)
   } catch (error) {
     setUiStatus(
@@ -732,7 +732,7 @@ const skipInterviewQuestion = async () => {
       return
     }
 
-    setUiStatus('面试已结束', '最后一题跳过后，本轮练习已经结束。')
+    setUiStatus('本轮已完成', '最后一题跳过后，本轮练习已经结束。')
     goToReport(session.sessionId)
   } catch (error) {
     setUiStatus(
@@ -782,7 +782,7 @@ const endInterviewSession = async () => {
   try {
     const session = await endSessionRequest()
     resetMediaState()
-    setUiStatus('面试已结束', '当前会话已结束，可以查看本轮报告。')
+    setUiStatus('会话已结束', '当前会话已结束，可以查看本轮报告。')
     goToReport(session.sessionId)
   } catch (error) {
     setUiStatus(
