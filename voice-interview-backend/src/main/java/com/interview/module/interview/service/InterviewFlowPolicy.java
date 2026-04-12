@@ -1,5 +1,6 @@
 package com.interview.module.interview.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ public class InterviewFlowPolicy {
 	private final int openingFollowUpLimit;
 	private final int wrapUpFollowUpLimit;
 
+	@Autowired
 	public InterviewFlowPolicy(
 			@Value("${app.interview.default-duration-minutes:60}") int defaultDurationMinutes,
 			@Value("${app.interview.max-duration-minutes:120}") int maxDurationMinutes,
