@@ -64,7 +64,12 @@
       </view>
     </view>
 
-    <scroll-view class="dialogue-stream" scroll-y>
+    <scroll-view
+      class="dialogue-stream"
+      scroll-y
+      scroll-with-animation
+      :scroll-into-view="scrollAnchorId"
+    >
       <view class="stream-status-card">
         <view class="stream-status-head">
           <text class="stream-status-label">Current State</text>
@@ -72,11 +77,45 @@
         </view>
         <text class="stream-status-copy">{{ hintText }}</text>
         <text v-if="mediaDraftLabel" class="draft-pill">{{ mediaDraftLabel }}</text>
+        <view v-if="showStatusActions" class="status-actions">
+          <button
+            v-if="showRetryRestoreAction"
+            class="inline-action-btn"
+            :disabled="isRestoring"
+            @click="retryRestoreSession"
+          >
+            {{ isRestoring ? '恢复中...' : '重试恢复' }}
+          </button>
+          <button
+            v-if="showRealtimeRecoveryActions"
+            class="inline-action-btn"
+            :disabled="isReconnecting"
+            @click="reconnectRealtime"
+          >
+            {{ isReconnecting ? '重连中...' : '重连实时' }}
+          </button>
+          <button
+            v-if="showRealtimeRecoveryActions"
+            class="inline-action-btn secondary"
+            :disabled="isRefreshing"
+            @click="refreshInterviewState"
+          >
+            {{ isRefreshing ? '同步中...' : '手动同步' }}
+          </button>
+          <button
+            v-if="showRetryRestoreAction"
+            class="inline-action-btn secondary"
+            @click="goToHistory"
+          >
+            返回历史
+          </button>
+        </view>
       </view>
 
       <view
         v-for="message in messages"
         :key="message.id"
+        :id="`message-${message.id}`"
         class="message-row"
         :class="message.role"
       >
@@ -104,6 +143,7 @@
           </view>
         </view>
       </view>
+      <view id="stream-anchor-bottom" class="stream-anchor" />
     </scroll-view>
 
     <view class="dock-card">
@@ -118,27 +158,31 @@
       <textarea
         v-model="textPrompt"
         class="composer-input"
+        :class="{ disabled: isComposerDisabled }"
         maxlength="400"
         auto-height
+        :disabled="isComposerDisabled"
         :placeholder="composerPlaceholder"
       />
 
       <view class="dock-primary">
         <button
-          v-if="sessionStatus === 'PREVIEW'"
+          v-if="canStartFromPreview"
           class="primary-btn"
+          :disabled="isPrimaryButtonDisabled"
           @click="startInterviewSession"
         >
-          开始面试
+          {{ startButtonLabel }}
         </button>
         <button
-          v-else
+          v-else-if="!isRestoreFailed"
           class="primary-btn"
+          :disabled="isPrimaryButtonDisabled"
           @click="submitLatestAnswer"
         >
-          发送回答
+          {{ submitButtonLabel }}
         </button>
-        <button class="secondary-btn" @click="playLastAiAudio">
+        <button class="secondary-btn" :disabled="isSecondaryButtonDisabled" @click="playLastAiAudio">
           {{ lastAiAudioUrl ? '播放题目音频' : '暂无题目音频' }}
         </button>
       </view>
@@ -150,35 +194,36 @@
         />
         <button
           class="record-btn"
+          :disabled="isRecordButtonDisabled"
           @touchstart.prevent="startRecording"
           @touchend.prevent="stopRecording"
           @touchcancel.prevent="stopRecording"
           @mousedown.prevent="startRecording"
           @mouseup.prevent="stopRecording"
         >
-          <text class="record-btn-top">{{ isRecording ? 'Recording' : 'Push To Talk' }}</text>
-          <text class="record-btn-main">{{ isRecording ? '松开录音并识别' : '按住说话' }}</text>
+          <text class="record-btn-top">{{ recordButtonTopLabel }}</text>
+          <text class="record-btn-main">{{ recordButtonMainLabel }}</text>
         </button>
         <view class="voice-tools">
-          <button class="tool-btn" @click="pickAudioFile">选择音频</button>
-          <button class="tool-btn" @click="transcribeLastAudio">重新识别</button>
-          <button class="tool-btn" @click="clearDraft">清空草稿</button>
+          <button class="tool-btn" :disabled="areVoiceToolsDisabled" @click="pickAudioFile">选择音频</button>
+          <button class="tool-btn" :disabled="areVoiceToolsDisabled" @click="transcribeLastAudio">重新识别</button>
+          <button class="tool-btn" :disabled="areVoiceToolsDisabled" @click="clearDraft">清空草稿</button>
         </view>
       </view>
 
-      <view v-if="sessionStatus !== 'PREVIEW'" class="aux-actions">
-        <button class="ghost-btn" @click="refreshInterviewState">同步</button>
-        <button class="ghost-btn" @click="reconnectRealtime">重连</button>
-        <button class="ghost-btn" @click="skipInterviewQuestion">跳过</button>
-        <button class="ghost-btn" @click="goToReport">报告</button>
-        <button class="ghost-btn danger" @click="endInterviewSession">结束</button>
+      <view v-if="showAuxActions" class="aux-actions">
+        <button class="ghost-btn" :disabled="isRefreshing" @click="refreshInterviewState">{{ isRefreshing ? '同步中' : '同步' }}</button>
+        <button class="ghost-btn" :disabled="isReconnecting" @click="reconnectRealtime">{{ isReconnecting ? '重连中' : '重连' }}</button>
+        <button class="ghost-btn" :disabled="isSkipping || isSessionBusy" @click="skipInterviewQuestion">{{ isSkipping ? '跳过中' : '跳过' }}</button>
+        <button class="ghost-btn" :disabled="isSessionBusy" @click="goToReport">报告</button>
+        <button class="ghost-btn danger" :disabled="isEnding || isSessionBusy" @click="endInterviewSession">{{ isEnding ? '结束中' : '结束' }}</button>
       </view>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 
 import { API_BASE_URL, toAbsoluteUrl } from '@/config/api'
@@ -248,6 +293,15 @@ const resumeFileId = ref('')
 const resumeQuestionCount = ref(0)
 const plannedDurationMinutes = ref(60)
 const restoredSessionId = ref('')
+const scrollAnchorId = ref('stream-anchor-bottom')
+const isRestoring = ref(false)
+const isRestoreFailed = ref(false)
+const isStarting = ref(false)
+const isSubmitting = ref(false)
+const isRefreshing = ref(false)
+const isReconnecting = ref(false)
+const isSkipping = ref(false)
+const isEnding = ref(false)
 
 const voiceToneMap: Record<number, string> = {
   33: 'Cherry',
@@ -330,9 +384,80 @@ const composerPlaceholder = computed(() =>
     : '语音识别结果会自动填到这里，你也可以手动修改后再发送。',
 )
 
+const canStartFromPreview = computed(() =>
+  sessionStatus.value === 'PREVIEW' && !restoredSessionId.value,
+)
+
+const isSessionBusy = computed(() =>
+  isRestoring.value || isStarting.value || isSubmitting.value || isSkipping.value || isEnding.value,
+)
+
+const isComposerDisabled = computed(() =>
+  isRestoring.value || isStarting.value || isEnding.value,
+)
+
+const hasDraftAnswer = computed(() => Boolean(lastUploadedFileId.value || textPrompt.value.trim()))
+
+const isPrimaryButtonDisabled = computed(() => {
+  if (canStartFromPreview.value) {
+    return isStarting.value || isRestoring.value
+  }
+  return isSubmitting.value || isUploading.value || isEnding.value || isSkipping.value || !hasDraftAnswer.value
+})
+
+const isSecondaryButtonDisabled = computed(() =>
+  !lastAiAudioUrl.value || isStarting.value || isEnding.value,
+)
+
+const isRecordButtonDisabled = computed(() =>
+  isComposerDisabled.value || isUploading.value || isSubmitting.value || isReconnecting.value,
+)
+
+const areVoiceToolsDisabled = computed(() =>
+  isRecordButtonDisabled.value || isSkipping.value || isEnding.value,
+)
+
+const startButtonLabel = computed(() => (isStarting.value ? '启动中...' : '开始面试'))
+
+const submitButtonLabel = computed(() => (isSubmitting.value ? '发送中...' : '发送回答'))
+
+const recordButtonTopLabel = computed(() => {
+  if (isUploading.value) {
+    return 'Uploading'
+  }
+  return isRecording.value ? 'Recording' : 'Push To Talk'
+})
+
+const recordButtonMainLabel = computed(() => {
+  if (isUploading.value) {
+    return '语音上传中'
+  }
+  return isRecording.value ? '松开录音并识别' : '按住说话'
+})
+
+const showRetryRestoreAction = computed(() => isRestoreFailed.value)
+
+const showRealtimeRecoveryActions = computed(() =>
+  (socketStatus.value === 'ERROR' || socketStatus.value === 'CLOSED') && sessionStatus.value !== 'PREVIEW',
+)
+
+const showStatusActions = computed(() =>
+  showRetryRestoreAction.value || showRealtimeRecoveryActions.value,
+)
+
+const showAuxActions = computed(() =>
+  sessionStatus.value !== 'PREVIEW' && !isRestoreFailed.value,
+)
+
 const setUiStatus = (status: string, hint: string) => {
   statusText.value = status
   hintText.value = hint
+}
+
+const scrollToLatestMessage = async () => {
+  scrollAnchorId.value = ''
+  await nextTick()
+  scrollAnchorId.value = 'stream-anchor-bottom'
 }
 
 const handleVoiceFailure = () => {
@@ -382,6 +507,7 @@ const {
 
 const {
   isRecording,
+  isUploading,
   lastUploadedFileId,
   lastTranscript,
   lastAudioUrl,
@@ -415,6 +541,13 @@ watch(isRecording, (recording) => {
   }
 })
 
+watch(
+  () => messages.value.length,
+  () => {
+    void scrollToLatestMessage()
+  },
+)
+
 const mediaDraftLabel = computed(() => {
   if (lastUploadedFileId.value && lastTranscript.value) {
     return '语音已自动转写到发送框，可手动修改后再发送。'
@@ -424,6 +557,32 @@ const mediaDraftLabel = computed(() => {
   }
   return ''
 })
+
+const restoreInterviewSession = async (sessionId: string) => {
+  isRestoring.value = true
+  isRestoreFailed.value = false
+  setUiStatus('恢复中', '正在恢复你上一次的面试会话。')
+
+  try {
+    const restored = await restoreSessionRequest(sessionId)
+    if (restored.status === 'COMPLETED' || restored.status === 'CANCELLED') {
+      setUiStatus('面试已结束', '当前会话已经结束，正在为你打开原报告。')
+      goToReport(restored.sessionId)
+      return
+    }
+    setUiStatus('已恢复会话', '当前题目和历史消息已恢复，正在重连实时链路。')
+    await connectInterviewSocket(sessionId)
+    setUiStatus('已恢复练习', '你可以继续回答、跳过当前题，或直接结束本轮面试。')
+  } catch (error) {
+    isRestoreFailed.value = true
+    setUiStatus(
+      '恢复失败',
+      error instanceof Error ? `${error.message}，可返回历史页重新选择。` : '无法恢复上一次练习，请重新开始。',
+    )
+  } finally {
+    isRestoring.value = false
+  }
+}
 
 onLoad(async (query) => {
   const redirect = typeof query?.sessionId === 'string'
@@ -435,23 +594,7 @@ onLoad(async (query) => {
 
   if (typeof query?.sessionId === 'string' && query.sessionId) {
     restoredSessionId.value = query.sessionId
-    setUiStatus('恢复中', '正在恢复你上一次的面试会话。')
-    try {
-      const restored = await restoreSessionRequest(query.sessionId)
-      if (restored.status === 'COMPLETED' || restored.status === 'CANCELLED') {
-        setUiStatus('面试已结束', '当前会话已经结束，正在为你打开原报告。')
-        goToReport(restored.sessionId)
-        return
-      }
-      setUiStatus('已恢复会话', '当前题目和历史消息已恢复，正在重连实时链路。')
-      await connectInterviewSocket(query.sessionId)
-      setUiStatus('已恢复练习', '你可以继续回答、跳过当前题，或直接结束本轮面试。')
-    } catch (error) {
-      setUiStatus(
-        '恢复失败',
-        error instanceof Error ? `${error.message}，可返回历史页重新选择。` : '无法恢复上一次练习，请重新开始。',
-      )
-    }
+    await restoreInterviewSession(query.sessionId)
     return
   }
 
@@ -470,6 +613,7 @@ onLoad(async (query) => {
 })
 
 const startInterviewSession = async () => {
+  isStarting.value = true
   stopAudio()
   setUiStatus('启动中', '正在生成首题和音频。')
 
@@ -490,6 +634,8 @@ const startInterviewSession = async () => {
       '启动失败',
       error instanceof Error ? error.message : '请检查后端服务和网络连接。',
     )
+  } finally {
+    isStarting.value = false
   }
 }
 
@@ -499,6 +645,7 @@ const submitLatestAnswer = async () => {
     return
   }
 
+  isSubmitting.value = true
   setUiStatus('发送中', '正在提交回答并等待 AI 继续追问。')
 
   try {
@@ -528,10 +675,13 @@ const submitLatestAnswer = async () => {
       '发送失败',
       error instanceof Error ? error.message : '请检查后端服务和网络连接。',
     )
+  } finally {
+    isSubmitting.value = false
   }
 }
 
 const refreshInterviewState = async () => {
+  isRefreshing.value = true
   setUiStatus('同步中', '正在从后端拉取最新会话状态。')
 
   try {
@@ -542,6 +692,8 @@ const refreshInterviewState = async () => {
       '同步失败',
       error instanceof Error ? error.message : '请检查后端服务和网络连接。',
     )
+  } finally {
+    isRefreshing.value = false
   }
 }
 
@@ -552,6 +704,7 @@ const reconnectRealtime = async () => {
     return
   }
 
+  isReconnecting.value = true
   setUiStatus('重连中', '正在重新建立实时链路。')
 
   try {
@@ -562,10 +715,13 @@ const reconnectRealtime = async () => {
       '重连失败',
       error instanceof Error ? `${error.message}，你也可以直接文本作答。` : '实时链路连接失败，可继续文本作答。',
     )
+  } finally {
+    isReconnecting.value = false
   }
 }
 
 const skipInterviewQuestion = async () => {
+  isSkipping.value = true
   setUiStatus('跳过中', '正在请求跳过当前题目。')
 
   try {
@@ -583,6 +739,8 @@ const skipInterviewQuestion = async () => {
       '跳过失败',
       error instanceof Error ? error.message : '请检查后端服务和网络连接。',
     )
+  } finally {
+    isSkipping.value = false
   }
 }
 
@@ -618,6 +776,7 @@ const endInterviewSession = async () => {
     return
   }
 
+  isEnding.value = true
   setUiStatus('结束中', '正在结束当前面试并生成结果。')
 
   try {
@@ -630,6 +789,8 @@ const endInterviewSession = async () => {
       '结束失败',
       error instanceof Error ? error.message : '请检查后端服务和网络连接。',
     )
+  } finally {
+    isEnding.value = false
   }
 }
 
@@ -660,6 +821,20 @@ const goToReport = (sessionId?: string | Event) => {
   disconnectInterviewSocket()
   uni.navigateTo({
     url: `/pages/interview/report?sessionId=${finalSessionId}`,
+  })
+}
+
+const retryRestoreSession = async () => {
+  if (!restoredSessionId.value) {
+    return
+  }
+  await restoreInterviewSession(restoredSessionId.value)
+}
+
+const goToHistory = () => {
+  disconnectInterviewSocket()
+  uni.navigateTo({
+    url: '/pages/history/list',
   })
 }
 </script>
@@ -1007,6 +1182,30 @@ page {
   color: var(--studio-text-muted);
 }
 
+.status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 18rpx;
+}
+
+.inline-action-btn {
+  flex: 1 1 calc(50% - 6rpx);
+  min-width: 180rpx;
+  border: none;
+  border-radius: 22rpx;
+  padding: 14rpx 18rpx;
+  font-size: 24rpx;
+  background: rgba(245, 171, 76, 0.18);
+  color: var(--studio-text);
+  border: 1rpx solid rgba(245, 171, 76, 0.2);
+}
+
+.inline-action-btn.secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
 .draft-pill {
   display: inline-block;
   margin-top: 16rpx;
@@ -1167,6 +1366,10 @@ page {
   border: 2rpx solid rgba(255, 255, 255, 0.08);
 }
 
+.composer-input.disabled {
+  opacity: 0.72;
+}
+
 .dock-primary,
 .aux-actions {
   display: flex;
@@ -1220,7 +1423,8 @@ page {
 .tool-btn,
 .secondary-btn,
 .ghost-btn,
-.primary-btn {
+.primary-btn,
+.inline-action-btn {
   border: none;
   border-radius: 24rpx;
   font-size: 26rpx;
@@ -1254,6 +1458,19 @@ page {
 
 .ghost-btn.danger {
   color: var(--studio-danger);
+}
+
+.primary-btn[disabled],
+.secondary-btn[disabled],
+.ghost-btn[disabled],
+.tool-btn[disabled],
+.record-btn[disabled],
+.inline-action-btn[disabled] {
+  opacity: 0.55;
+}
+
+.stream-anchor {
+  height: 2rpx;
 }
 
 @media (max-width: 720rpx) {
