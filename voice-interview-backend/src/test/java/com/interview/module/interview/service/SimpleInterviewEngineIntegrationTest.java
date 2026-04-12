@@ -19,16 +19,22 @@ import org.mockito.ArgumentCaptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.interview.module.ai.service.AiReply;
 import com.interview.module.ai.service.AiService;
+import com.interview.module.ai.service.InterviewReportExplanationCommand;
+import com.interview.module.ai.service.InterviewReportExplanationResult;
 import com.interview.module.ai.service.InterviewReplyCommand;
+import com.interview.module.interview.engine.model.InterviewOverallExplanationView;
 import com.interview.module.interview.entity.SessionEntity;
 import com.interview.module.interview.entity.SessionQuestionEntity;
 import com.interview.module.interview.engine.SimpleInterviewEngine;
 import com.interview.module.interview.engine.model.InterviewQuestionCard;
+import com.interview.module.interview.engine.model.InterviewQuestionExplanationView;
 import com.interview.module.interview.engine.model.InterviewQuestionReportView;
 import com.interview.module.interview.engine.model.InterviewQuestionSnapshot;
 import com.interview.module.interview.engine.model.InterviewReportView;
 import com.interview.module.interview.engine.model.InterviewSessionOwner;
+import com.interview.module.interview.engine.model.InterviewRoundRecord;
 import com.interview.module.interview.engine.store.InterviewReportStore;
+import com.interview.module.interview.engine.store.PersistedInterviewReport;
 import com.interview.module.interview.engine.store.InterviewSessionState;
 import com.interview.module.interview.engine.store.InterviewSessionStore;
 import com.interview.module.interview.engine.store.JdbcInterviewSessionStore;
@@ -702,6 +708,116 @@ class SimpleInterviewEngineIntegrationTest {
 		assertThat(report.overallExplanation().level()).isEqualTo("STRONG");
 	}
 
+	@Test
+	void should_backfill_legacy_persisted_report_and_upgrade_to_v2() {
+		String sessionId = "session-legacy-backfill";
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		sessionStore.save(completedRedisSession(sessionId));
+		RecordingPersistedReportStore reportStore = new RecordingPersistedReportStore();
+		reportStore.seed(new PersistedInterviewReport(legacyPersistedReport(sessionId), "v1"));
+		SimpleInterviewEngine engine = engineWithStores(sessionStore, reportStore, new StubAiService());
+
+		InterviewReportView report = engine.getReport(sessionId, "1");
+
+		assertThat(report.overallExplanation()).isNotNull();
+		assertThat(report.questionReports().get(0).explanation()).isNotNull();
+		assertThat(reportStore.saveAttempts()).isEqualTo(1);
+		assertThat(reportStore.lastSavedVersion()).isEqualTo("v2");
+	}
+
+	@Test
+	void should_backfill_missing_explanations_even_when_persisted_report_is_v2() {
+		String sessionId = "session-v2-missing-explanations";
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		sessionStore.save(completedRedisSession(sessionId));
+		RecordingPersistedReportStore reportStore = new RecordingPersistedReportStore();
+		reportStore.seed(new PersistedInterviewReport(legacyPersistedReport(sessionId), "v2"));
+		SimpleInterviewEngine engine = engineWithStores(sessionStore, reportStore, new StubAiService());
+
+		InterviewReportView report = engine.getReport(sessionId, "1");
+
+		assertThat(report.overallExplanation()).isNotNull();
+		assertThat(report.questionReports().get(0).explanation()).isNotNull();
+		assertThat(reportStore.saveAttempts()).isEqualTo(1);
+		assertThat(reportStore.lastSavedVersion()).isEqualTo("v2");
+	}
+
+	@Test
+	void should_skip_backfill_when_persisted_report_already_has_explanations() {
+		String sessionId = "session-already-backfilled";
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		sessionStore.save(completedRedisSession(sessionId));
+		RecordingPersistedReportStore reportStore = new RecordingPersistedReportStore();
+		reportStore.seed(new PersistedInterviewReport(backfilledPersistedReport(sessionId), "v2"));
+		SimpleInterviewEngine engine = engineWithStores(sessionStore, reportStore, new StubAiService());
+
+		InterviewReportView report = engine.getReport(sessionId, "1");
+
+		assertThat(report).isEqualTo(backfilledPersistedReport(sessionId));
+		assertThat(reportStore.saveAttempts()).isZero();
+	}
+
+	@Test
+	void should_return_old_persisted_report_when_backfill_save_fails() {
+		String sessionId = "session-save-fail";
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		sessionStore.save(completedRedisSession(sessionId));
+		RecordingPersistedReportStore reportStore = new RecordingPersistedReportStore();
+		InterviewReportView legacyReport = legacyPersistedReport(sessionId);
+		reportStore.seed(new PersistedInterviewReport(legacyReport, "v1"));
+		reportStore.setThrowOnSave(true);
+		SimpleInterviewEngine engine = engineWithStores(sessionStore, reportStore, new StubAiService());
+
+		InterviewReportView report = engine.getReport(sessionId, "1");
+
+		assertThat(report).isEqualTo(legacyReport);
+		assertThat(reportStore.saveAttempts()).isEqualTo(1);
+	}
+
+	@Test
+	void should_return_old_persisted_report_when_session_context_is_incomplete() {
+		String sessionId = "session-context-incomplete";
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		InterviewSessionState incompleteSession = new InterviewSessionState(
+				sessionId,
+				"1",
+				"tester",
+				List.of(),
+				"WRAP_UP",
+				60,
+				2,
+				null,
+				1.0
+		);
+		incompleteSession.setStatus("COMPLETED");
+		sessionStore.save(incompleteSession);
+		RecordingPersistedReportStore reportStore = new RecordingPersistedReportStore();
+		InterviewReportView legacyReport = legacyPersistedReport(sessionId);
+		reportStore.seed(new PersistedInterviewReport(legacyReport, "v1"));
+		SimpleInterviewEngine engine = engineWithStores(sessionStore, reportStore, new StubAiService());
+
+		InterviewReportView report = engine.getReport(sessionId, "1");
+
+		assertThat(report).isEqualTo(legacyReport);
+		assertThat(reportStore.saveAttempts()).isZero();
+	}
+
+	@Test
+	void should_not_call_polish_interview_report_explanation_for_historical_backfill() {
+		String sessionId = "session-no-polish-during-backfill";
+		InterviewSessionStore sessionStore = new InMemorySessionStore();
+		sessionStore.save(completedRedisSession(sessionId));
+		RecordingPersistedReportStore reportStore = new RecordingPersistedReportStore();
+		reportStore.seed(new PersistedInterviewReport(legacyPersistedReport(sessionId), "v1"));
+		SimpleInterviewEngine engine = engineWithStores(sessionStore, reportStore, new ThrowingPolishAiService());
+
+		InterviewReportView report = engine.getReport(sessionId, "1");
+
+		assertThat(report.overallExplanation()).isNotNull();
+		assertThat(report.questionReports().get(0).explanation()).isNotNull();
+		assertThat(reportStore.saveAttempts()).isEqualTo(1);
+	}
+
 	private SimpleInterviewEngine defaultEngine() {
 		InterviewSessionStore sessionStore = new InMemorySessionStore();
 		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(
@@ -713,6 +829,112 @@ class SimpleInterviewEngineIntegrationTest {
 				new StubAiService(),
 				new StubTtsService(),
 				defaultDecisionEngine()
+		);
+	}
+
+	private SimpleInterviewEngine engineWithStores(
+			InterviewSessionStore sessionStore,
+			InterviewReportStore reportStore,
+			AiService aiService
+	) {
+		StaticListableBeanFactory beanFactory = new StaticListableBeanFactory(Map.of("reportStore", reportStore));
+		return new SimpleInterviewEngine(
+				sessionStore,
+				beanFactory.getBeanProvider(InterviewReportStore.class),
+				aiService,
+				new StubTtsService(),
+				defaultDecisionEngine()
+		);
+	}
+
+	private static InterviewSessionState completedRedisSession(String sessionId) {
+		InterviewSessionState session = new InterviewSessionState(
+				sessionId,
+				"1",
+				"tester",
+				List.of(new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。")),
+				"WRAP_UP",
+				60,
+				2,
+				null,
+				1.0
+		);
+		session.setStatus("COMPLETED");
+		session.getRounds().add(new InterviewRoundRecord(
+				"round-1",
+				1,
+				0,
+				"QUESTION",
+				"请说明 Redis 的使用场景和一致性策略。",
+				"/audio/tts-round-1",
+				1000L,
+				70,
+				"Redis 可以做缓存。",
+				null,
+				"TEXT",
+				"2026-01-01T10:00:00Z",
+				"2026-01-01T10:00:15Z",
+				"缺少关键点：一致性策略",
+				"FOLLOW_UP",
+				"缺少关键点",
+				List.of("一致性策略")
+		));
+		return session;
+	}
+
+	private static InterviewReportView legacyPersistedReport(String sessionId) {
+		return new InterviewReportView(
+				sessionId,
+				"COMPLETED",
+				"Redis",
+				70,
+				"基础可用，但关键细节仍需补强。",
+				List.of("有基础回答结构"),
+				List.of("一致性策略说明不足"),
+				List.of("补充数据库与缓存一致性方案"),
+				List.of(new InterviewQuestionReportView(
+						1,
+						"Redis",
+						"请说明 Redis 的使用场景和一致性策略。",
+						70,
+						"核心点覆盖不完整。",
+						null
+				)),
+				null
+		);
+	}
+
+	private static InterviewReportView backfilledPersistedReport(String sessionId) {
+		return new InterviewReportView(
+				sessionId,
+				"COMPLETED",
+				"Redis",
+				70,
+				"基础可用，但关键细节仍需补强。",
+				List.of("有基础回答结构"),
+				List.of("一致性策略说明不足"),
+				List.of("补充数据库与缓存一致性方案"),
+				List.of(new InterviewQuestionReportView(
+						1,
+						"Redis",
+						"请说明 Redis 的使用场景和一致性策略。",
+						70,
+						"核心点覆盖不完整。",
+						new InterviewQuestionExplanationView(
+								"MEDIUM",
+								"Redis 这题基础回答有了，但细节深度和案例支撑还不够充分。",
+								List.of("缺少关键点：一致性策略"),
+								"补充更具体的案例和取舍说明，让回答从结论走到可落地方案。",
+								"RULE"
+						)
+				)),
+				new InterviewOverallExplanationView(
+						"MEDIUM",
+						"整体基础可用，但关键点覆盖和追问深度还不够稳定，部分题目仍需要继续补强。",
+						List.of("共有 1 个答题轮次暴露出关键点缺失，回答覆盖度还不够稳定。"),
+						List.of("按题型整理每题必须覆盖的关键点，先保证回答完整度。"),
+						"RULE"
+				)
 		);
 	}
 
@@ -816,6 +1038,66 @@ class SimpleInterviewEngineIntegrationTest {
 		@Override
 		public AnswerEvidence analyzeInterviewAnswer(String question, String answer, List<String> expectedPoints) {
 			return InterviewAnswerAnalyzer.heuristic().analyze(question, answer, expectedPoints);
+		}
+	}
+
+	private static final class ThrowingPolishAiService implements AiService {
+		@Override
+		public AiReply generateInterviewReply(InterviewReplyCommand command) {
+			return new AiReply("继续", "NEXT_QUESTION", 80);
+		}
+
+		@Override
+		public ResumeKeywordExtractionResult extractResumeKeywords(String resumeText) {
+			return new ResumeKeywordExtractionResult("summary", List.of(), List.of());
+		}
+
+		@Override
+		public List<GeneratedResumeQuestion> generateResumeQuestions(ResumeQuestionGenerationCommand command) {
+			return List.of();
+		}
+
+		@Override
+		public InterviewReportExplanationResult polishInterviewReportExplanation(InterviewReportExplanationCommand command) {
+			throw new AssertionError("polishInterviewReportExplanation should not be called for historical backfill");
+		}
+	}
+
+	private static final class RecordingPersistedReportStore implements InterviewReportStore {
+		private final Map<String, PersistedInterviewReport> store = new HashMap<>();
+		private int saveAttempts;
+		private String lastSavedVersion;
+		private boolean throwOnSave;
+
+		@Override
+		public Optional<PersistedInterviewReport> findPersistedReportBySessionId(String sessionId) {
+			return Optional.ofNullable(store.get(sessionId));
+		}
+
+		@Override
+		public void save(InterviewReportView report, String reportVersion) {
+			saveAttempts++;
+			lastSavedVersion = reportVersion;
+			if (throwOnSave) {
+				throw new IllegalStateException("save failed");
+			}
+			store.put(report.sessionId(), new PersistedInterviewReport(report, reportVersion));
+		}
+
+		private void seed(PersistedInterviewReport persistedReport) {
+			store.put(persistedReport.report().sessionId(), persistedReport);
+		}
+
+		private void setThrowOnSave(boolean throwOnSave) {
+			this.throwOnSave = throwOnSave;
+		}
+
+		private int saveAttempts() {
+			return saveAttempts;
+		}
+
+		private String lastSavedVersion() {
+			return lastSavedVersion;
 		}
 	}
 

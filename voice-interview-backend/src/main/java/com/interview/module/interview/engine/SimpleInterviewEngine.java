@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,7 @@ import com.interview.module.interview.engine.model.InterviewSessionOwner;
 import com.interview.module.interview.engine.model.InterviewSessionSummaryView;
 import com.interview.module.interview.engine.model.InterviewSessionView;
 import com.interview.module.interview.engine.store.InterviewReportStore;
+import com.interview.module.interview.engine.store.PersistedInterviewReport;
 import com.interview.module.interview.engine.store.InterviewSessionState;
 import com.interview.module.interview.engine.store.InterviewSessionStore;
 import com.interview.module.interview.engine.store.NoopInterviewReportStore;
@@ -38,6 +41,9 @@ import com.interview.module.tts.service.TtsService;
 
 @Service
 public class SimpleInterviewEngine implements InterviewEngine {
+
+	private static final Logger log = LoggerFactory.getLogger(SimpleInterviewEngine.class);
+	private static final String LATEST_REPORT_VERSION = "v2";
 
 	private final InterviewSessionStore sessionStore;
 	private final InterviewReportStore interviewReportStore;
@@ -270,14 +276,63 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		if ("IN_PROGRESS".equals(sessionState.getStatus())) {
 			return toReportView(sessionState);
 		}
-		return interviewReportStore.findBySessionId(sessionId)
+		return interviewReportStore.findPersistedReportBySessionId(sessionId)
+				.map(persistedReport -> maybeBackfillPersistedReport(sessionState, persistedReport))
 				.orElseGet(() -> persistReport(sessionState));
 	}
 
 	private InterviewReportView persistReport(InterviewSessionState sessionState) {
 		InterviewReportView report = toReportView(sessionState);
-		interviewReportStore.save(report);
+		interviewReportStore.save(report, LATEST_REPORT_VERSION);
 		return report;
+	}
+
+	private InterviewReportView maybeBackfillPersistedReport(
+			InterviewSessionState sessionState,
+			PersistedInterviewReport persistedInterviewReport
+	) {
+		InterviewReportView persistedReport = persistedInterviewReport.report();
+		if (!hasMissingExplanation(persistedReport)) {
+			return persistedReport;
+		}
+		if (!hasBackfillContext(sessionState)) {
+			log.info("Skip report explanation backfill due to incomplete context, sessionId={}", sessionState.getSessionId());
+			return persistedReport;
+		}
+		try {
+			InterviewReportView backfilledReport = interviewReportExplanationService.backfillMissingExplanations(
+					persistedReport,
+					sessionState.getQuestions(),
+					sessionState.getRounds()
+			);
+			interviewReportStore.save(backfilledReport, LATEST_REPORT_VERSION);
+			return backfilledReport;
+		} catch (Exception ex) {
+			log.warn("Failed to backfill persisted report explanations, sessionId={}", sessionState.getSessionId(), ex);
+			return persistedReport;
+		}
+	}
+
+	private boolean hasMissingExplanation(InterviewReportView persistedReport) {
+		if (persistedReport == null || persistedReport.overallExplanation() == null) {
+			return true;
+		}
+		if (persistedReport.questionReports() == null) {
+			return true;
+		}
+		for (InterviewQuestionReportView questionReport : persistedReport.questionReports()) {
+			if (questionReport == null || questionReport.explanation() == null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean hasBackfillContext(InterviewSessionState sessionState) {
+		return sessionState.getQuestions() != null
+				&& !sessionState.getQuestions().isEmpty()
+				&& sessionState.getRounds() != null
+				&& !sessionState.getRounds().isEmpty();
 	}
 
 	private InterviewSessionState requireSession(String sessionId, String requesterUserId) {
