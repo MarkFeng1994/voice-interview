@@ -238,10 +238,25 @@ const resumeParseStatusLabel = computed(() => {
 
 const resumeParseStatusClass = computed(() => resumeProfile.value?.parseStatus.toLowerCase() || 'uploaded')
 
-onLoad(async () => {
-  if (!ensureAuthenticated(userStore, '/pages/interview/setup')) {
+onLoad(async (query) => {
+  const redirect = typeof query?.durationMinutes === 'string' || typeof query?.presetKey === 'string'
+    ? `/pages/interview/setup?durationMinutes=${query?.durationMinutes || ''}&presetKey=${query?.presetKey || ''}`
+    : '/pages/interview/setup'
+  if (!ensureAuthenticated(userStore, redirect)) {
     return
   }
+
+  if (query?.answerMode === 'TEXT' || query?.answerMode === 'VOICE') {
+    answerModePreference.value = query.answerMode
+  }
+  if (typeof query?.durationMinutes === 'string') {
+    durationMinutes.value = parseInt(query.durationMinutes, 10) || 60
+  }
+  if (typeof query?.presetKey === 'string' && query.presetKey) {
+    selectedPresetKey.value = decodeURIComponent(query.presetKey)
+    activeTab.value = 'preset'
+  }
+
   try {
     const payload = await listInterviewPresets(API_BASE_URL)
     if (!payload.success) {

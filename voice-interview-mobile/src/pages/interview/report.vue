@@ -162,6 +162,12 @@ import { ensureAuthenticated } from '@/utils/auth'
 const report = ref<InterviewReport | null>(null)
 const missingSession = ref(false)
 const source = ref<'history' | 'session-end' | 'direct'>('direct')
+const preservedPresetKey = ref('')
+const preservedPresetTitle = ref('')
+const preservedAnswerMode = ref<'VOICE' | 'TEXT'>('VOICE')
+const preservedDurationMinutes = ref(60)
+const preservedResumeFileId = ref('')
+const preservedQuestionCount = ref(0)
 const userStore = useUserStore()
 
 type DiagnosisTone = 'strong' | 'medium' | 'weak' | 'neutral'
@@ -221,6 +227,16 @@ onLoad(async (query) => {
   if (query?.source === 'history' || query?.source === 'session-end') {
     source.value = query.source
   }
+  preservedPresetKey.value = typeof query?.presetKey === 'string' ? decodeURIComponent(query.presetKey) : ''
+  preservedPresetTitle.value = typeof query?.presetTitle === 'string' ? decodeURIComponent(query.presetTitle) : ''
+  preservedAnswerMode.value = query?.answerMode === 'TEXT' ? 'TEXT' : 'VOICE'
+  preservedDurationMinutes.value = typeof query?.durationMinutes === 'string'
+    ? parseInt(query.durationMinutes, 10) || 60
+    : 60
+  preservedResumeFileId.value = typeof query?.resumeFileId === 'string' ? query.resumeFileId : ''
+  preservedQuestionCount.value = typeof query?.questionCount === 'string'
+    ? parseInt(query.questionCount, 10) || 0
+    : 0
   const sessionId = typeof query?.sessionId === 'string' ? query.sessionId : ''
   if (!sessionId) {
     missingSession.value = true
@@ -248,8 +264,46 @@ onLoad(async (query) => {
 })
 
 const goToSession = () => {
+  const canResumeDirectly = Boolean(
+    preservedPresetKey.value || preservedResumeFileId.value || preservedPresetTitle.value,
+  )
+  if (canResumeDirectly) {
+    const params = new URLSearchParams()
+    if (preservedPresetKey.value) {
+      params.set('presetKey', preservedPresetKey.value)
+    }
+    if (preservedPresetTitle.value) {
+      params.set('presetTitle', preservedPresetTitle.value)
+    } else if (report.value?.title) {
+      params.set('presetTitle', report.value.title)
+    }
+    if (preservedResumeFileId.value) {
+      params.set('resumeFileId', preservedResumeFileId.value)
+    }
+    if (preservedQuestionCount.value) {
+      params.set('questionCount', String(preservedQuestionCount.value))
+    }
+    if (preservedDurationMinutes.value) {
+      params.set('durationMinutes', String(preservedDurationMinutes.value))
+    }
+    params.set('answerMode', preservedAnswerMode.value)
+    uni.navigateTo({
+      url: `/pages/interview/session?${params.toString()}`,
+    })
+    return
+  }
+
+  const setupParams = new URLSearchParams()
+  setupParams.set('durationMinutes', String(preservedDurationMinutes.value))
+  setupParams.set('answerMode', preservedAnswerMode.value)
+  if (preservedPresetKey.value) {
+    setupParams.set('presetKey', preservedPresetKey.value)
+  }
+  if (preservedPresetTitle.value || report.value?.title) {
+    setupParams.set('presetTitle', preservedPresetTitle.value || report.value?.title || '模拟面试')
+  }
   uni.navigateTo({
-    url: '/pages/interview/setup',
+    url: `/pages/interview/setup?${setupParams.toString()}`,
   })
 }
 

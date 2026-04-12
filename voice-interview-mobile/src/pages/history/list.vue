@@ -141,9 +141,21 @@ const goToSession = (sessionId?: string) => {
   })
 }
 
-const goToReport = (sessionId: string) => {
+const goToReportWithContext = (item: InterviewSessionSummary) => {
+  const params = new URLSearchParams()
+  params.set('sessionId', item.sessionId)
+  params.set('source', 'history')
+  if (item.durationMinutes) {
+    params.set('durationMinutes', String(item.durationMinutes))
+  }
+  if (item.title) {
+    params.set('presetTitle', item.title)
+  }
+  if (item.stage) {
+    params.set('stage', item.stage)
+  }
   uni.navigateTo({
-    url: `/pages/interview/report?sessionId=${sessionId}&source=history`,
+    url: `/pages/interview/report?${params.toString()}`,
   })
 }
 
@@ -152,12 +164,12 @@ const handlePrimaryAction = (item: InterviewSessionSummary) => {
     goToSession(item.sessionId)
     return
   }
-  goToReport(item.sessionId)
+  goToReportWithContext(item)
 }
 
 const handleSecondaryAction = (item: InterviewSessionSummary) => {
   if (item.status === 'IN_PROGRESS') {
-    goToReport(item.sessionId)
+    goToReportWithContext(item)
     return
   }
   goToSession()

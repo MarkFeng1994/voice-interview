@@ -818,9 +818,31 @@ const goToReport = (sessionId?: string | Event) => {
     return
   }
 
+  const params = new URLSearchParams()
+  params.set('sessionId', finalSessionId)
+  params.set('source', 'session-end')
+  if (selectedPresetKey.value) {
+    params.set('presetKey', selectedPresetKey.value)
+  }
+  if (selectedPresetTitle.value) {
+    params.set('presetTitle', selectedPresetTitle.value)
+  }
+  if (preferredAnswerMode.value) {
+    params.set('answerMode', preferredAnswerMode.value)
+  }
+  if (plannedDurationMinutes.value) {
+    params.set('durationMinutes', String(plannedDurationMinutes.value))
+  }
+  if (resumeFileId.value) {
+    params.set('resumeFileId', resumeFileId.value)
+  }
+  if (resumeQuestionCount.value) {
+    params.set('questionCount', String(resumeQuestionCount.value))
+  }
+
   disconnectInterviewSocket()
   uni.navigateTo({
-    url: `/pages/interview/report?sessionId=${finalSessionId}&source=session-end`,
+    url: `/pages/interview/report?${params.toString()}`,
   })
 }
 

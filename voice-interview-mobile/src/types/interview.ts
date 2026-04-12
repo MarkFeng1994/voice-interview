@@ -137,6 +137,8 @@ export interface InterviewSessionSummary {
   answeredRounds: number
   overallScore: number | null
   summary: string
+  stage?: string | null
+  durationMinutes?: number | null
 }
 
 export type InterviewSessionSummaryListResponse = ApiEnvelope<InterviewSessionSummary[]>
