@@ -168,6 +168,7 @@
 
       <view v-if="sessionStatus !== 'PREVIEW'" class="aux-actions">
         <button class="ghost-btn" @click="refreshInterviewState">同步</button>
+        <button class="ghost-btn" @click="reconnectRealtime">重连</button>
         <button class="ghost-btn" @click="skipInterviewQuestion">跳过</button>
         <button class="ghost-btn" @click="goToReport">报告</button>
         <button class="ghost-btn danger" @click="endInterviewSession">结束</button>
@@ -246,6 +247,7 @@ const voiceSettings = readInterviewVoiceSettings()
 const resumeFileId = ref('')
 const resumeQuestionCount = ref(0)
 const plannedDurationMinutes = ref(60)
+const restoredSessionId = ref('')
 
 const voiceToneMap: Record<number, string> = {
   33: 'Cherry',
@@ -362,10 +364,15 @@ const {
   socketStatus,
   connect: connectInterviewSocket,
   disconnect: disconnectInterviewSocket,
+  reconnect: reconnectInterviewSocket,
 } = useInterviewSocket({
   apiBaseUrl: API_BASE_URL,
   onSessionMessage: (session, eventType) => {
     applyIncomingSessionState(session)
+    if (session.status === 'COMPLETED' || session.status === 'CANCELLED') {
+      goToReport(session.sessionId)
+      return
+    }
     if (eventType === 'SESSION_UPDATED') {
       setUiStatus('实时已更新', '当前会话已通过 WebSocket 自动同步。')
     }
@@ -427,15 +434,22 @@ onLoad(async (query) => {
   }
 
   if (typeof query?.sessionId === 'string' && query.sessionId) {
+    restoredSessionId.value = query.sessionId
     setUiStatus('恢复中', '正在恢复你上一次的面试会话。')
     try {
-      await restoreSessionRequest(query.sessionId)
+      const restored = await restoreSessionRequest(query.sessionId)
+      if (restored.status === 'COMPLETED' || restored.status === 'CANCELLED') {
+        setUiStatus('面试已结束', '当前会话已经结束，正在为你打开原报告。')
+        goToReport(restored.sessionId)
+        return
+      }
+      setUiStatus('已恢复会话', '当前题目和历史消息已恢复，正在重连实时链路。')
       await connectInterviewSocket(query.sessionId)
       setUiStatus('已恢复练习', '你可以继续回答、跳过当前题，或直接结束本轮面试。')
     } catch (error) {
       setUiStatus(
         '恢复失败',
-        error instanceof Error ? error.message : '无法恢复上一次练习，请重新开始。',
+        error instanceof Error ? `${error.message}，可返回历史页重新选择。` : '无法恢复上一次练习，请重新开始。',
       )
     }
     return
@@ -531,6 +545,26 @@ const refreshInterviewState = async () => {
   }
 }
 
+const reconnectRealtime = async () => {
+  const sessionId = lastSessionId.value || restoredSessionId.value
+  if (!sessionId) {
+    setUiStatus('没有活动会话', '先开始或恢复一轮面试，再重连实时链路。')
+    return
+  }
+
+  setUiStatus('重连中', '正在重新建立实时链路。')
+
+  try {
+    await reconnectInterviewSocket(sessionId)
+    setUiStatus('实时链路已恢复', '会话更新会继续自动推送到当前页面。')
+  } catch (error) {
+    setUiStatus(
+      '重连失败',
+      error instanceof Error ? `${error.message}，你也可以直接文本作答。` : '实时链路连接失败，可继续文本作答。',
+    )
+  }
+}
+
 const skipInterviewQuestion = async () => {
   setUiStatus('跳过中', '正在请求跳过当前题目。')
 
@@ -573,6 +607,17 @@ const endInterviewSession = async () => {
     return
   }
 
+  const confirmResult = await uni.showModal({
+    title: '确认结束本轮面试？',
+    content: '结束后将生成并跳转到本轮报告，当前会话不会继续追问。',
+    confirmText: '确认结束',
+    cancelText: '继续作答',
+  })
+  if (!confirmResult.confirm) {
+    setUiStatus('继续作答', '当前面试未结束，你可以继续回答或稍后再结束。')
+    return
+  }
+
   setUiStatus('结束中', '正在结束当前面试并生成结果。')
 
   try {
@@ -602,7 +647,7 @@ const clearDraft = () => {
 
 const goToReport = (sessionId?: string | Event) => {
   const normalizedSessionId = typeof sessionId === 'string' ? sessionId : ''
-  const finalSessionId = normalizedSessionId || lastSessionId.value
+  const finalSessionId = normalizedSessionId || lastSessionId.value || restoredSessionId.value
   if (!finalSessionId) {
     uni.showToast({
       title: '当前还没有可查看的报告',

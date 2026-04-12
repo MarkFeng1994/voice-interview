@@ -14,6 +14,9 @@ export const useInterviewSocket = (options: UseInterviewSocketOptions) => {
   const socketStatus = ref<'IDLE' | 'CONNECTING' | 'OPEN' | 'CLOSED' | 'ERROR'>('IDLE')
   let socketTask: UniApp.SocketTask | WebSocket | null = null
   let activeSessionId = ''
+  let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+  let reconnectAttempts = 0
+  const maxReconnectAttempts = 2
 
   const isNativeWebSocket = (value: unknown): value is WebSocket =>
     typeof WebSocket !== 'undefined' && value instanceof WebSocket
@@ -27,7 +30,32 @@ export const useInterviewSocket = (options: UseInterviewSocketOptions) => {
     socketTask?.send({ data: payload })
   }
 
+  const clearReconnectTimer = () => {
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer)
+      reconnectTimer = null
+    }
+  }
+
+  const scheduleReconnect = () => {
+    if (!activeSessionId || reconnectAttempts >= maxReconnectAttempts) {
+      options.onStatusChange('实时通道异常', 'WebSocket 连接失败，可手动重试或直接文本作答。')
+      return
+    }
+
+    const nextAttempt = reconnectAttempts + 1
+    const delay = nextAttempt === 1 ? 0 : 1500
+    reconnectAttempts = nextAttempt
+    clearReconnectTimer()
+    reconnectTimer = setTimeout(() => {
+      connect(activeSessionId, true).catch(() => {
+        options.onStatusChange('实时通道异常', 'WebSocket 连接失败，可手动重试或直接文本作答。')
+      })
+    }, delay)
+  }
+
   const disconnect = () => {
+    clearReconnectTimer()
     if (socketTask) {
       if (isNativeWebSocket(socketTask)) {
         socketTask.close()
@@ -40,7 +68,7 @@ export const useInterviewSocket = (options: UseInterviewSocketOptions) => {
     socketStatus.value = 'CLOSED'
   }
 
-  const connect = async (sessionId: string) => {
+  const connect = async (sessionId: string, isReconnect = false) => {
     if (!sessionId) {
       return
     }
@@ -53,11 +81,19 @@ export const useInterviewSocket = (options: UseInterviewSocketOptions) => {
       disconnect()
     }
 
+    if (!isReconnect) {
+      reconnectAttempts = 0
+    }
+
     socketStatus.value = 'CONNECTING'
-    options.onStatusChange('连接实时通道', '正在建立面试 WebSocket 通道。')
+    options.onStatusChange(
+      isReconnect ? '重连实时通道' : '连接实时通道',
+      isReconnect ? '正在尝试重新连接面试 WebSocket 通道。' : '正在建立面试 WebSocket 通道。',
+    )
 
     const ticketPayload = await issueInterviewWsTicket(options.apiBaseUrl, sessionId)
     if (!ticketPayload.success) {
+      scheduleReconnect()
       throw new Error(ticketPayload.message || '获取实时通道 ticket 失败')
     }
 
@@ -80,6 +116,8 @@ export const useInterviewSocket = (options: UseInterviewSocketOptions) => {
       socketTask = nativeSocket
       nativeSocket.onopen = () => {
         socketStatus.value = 'OPEN'
+        reconnectAttempts = 0
+        clearReconnectTimer()
         options.onStatusChange('实时通道已连接', '会话更新会自动推送到当前页面。')
         sendSyncRequest()
       }
@@ -88,10 +126,11 @@ export const useInterviewSocket = (options: UseInterviewSocketOptions) => {
       }
       nativeSocket.onclose = () => {
         socketStatus.value = 'CLOSED'
+        scheduleReconnect()
       }
       nativeSocket.onerror = () => {
         socketStatus.value = 'ERROR'
-        options.onStatusChange('实时通道异常', 'WebSocket 连接失败，可继续使用手动同步。')
+        scheduleReconnect()
       }
       return
     }
@@ -101,6 +140,8 @@ export const useInterviewSocket = (options: UseInterviewSocketOptions) => {
 
     connectedSocketTask.onOpen(() => {
       socketStatus.value = 'OPEN'
+      reconnectAttempts = 0
+      clearReconnectTimer()
       options.onStatusChange('实时通道已连接', '会话更新会自动推送到当前页面。')
       sendSyncRequest()
     })
@@ -111,11 +152,12 @@ export const useInterviewSocket = (options: UseInterviewSocketOptions) => {
 
     connectedSocketTask.onClose(() => {
       socketStatus.value = 'CLOSED'
+      scheduleReconnect()
     })
 
     connectedSocketTask.onError(() => {
       socketStatus.value = 'ERROR'
-      options.onStatusChange('实时通道异常', 'WebSocket 连接失败，可继续使用手动同步。')
+      scheduleReconnect()
     })
   }
 
@@ -127,5 +169,6 @@ export const useInterviewSocket = (options: UseInterviewSocketOptions) => {
     socketStatus,
     connect,
     disconnect,
+    reconnect: (sessionId?: string) => connect(sessionId || activeSessionId),
   }
 }

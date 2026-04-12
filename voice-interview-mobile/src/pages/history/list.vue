@@ -23,12 +23,12 @@
         <text class="card-copy">{{ item.summary }}</text>
         <view class="card-tags">
           <text class="tag">已答 {{ item.answeredRounds }} 轮</text>
-          <text class="tag">{{ item.status }}</text>
+          <text class="tag" :class="statusClass(item.status)">{{ statusLabel(item.status) }}</text>
         </view>
         <view class="card-actions">
-          <button class="mini-btn" @click="() => goToReport(item.sessionId)">查看报告</button>
-          <button class="mini-btn secondary" @click="() => goToSession(item.sessionId, item.status)">
-            {{ item.status === 'IN_PROGRESS' ? '继续会话' : '再练一轮' }}
+          <button class="mini-btn" @click="() => handlePrimaryAction(item)">{{ primaryActionLabel(item.status) }}</button>
+          <button class="mini-btn secondary" @click="() => handleSecondaryAction(item)">
+            {{ secondaryActionLabel(item.status) }}
           </button>
         </view>
       </view>
@@ -73,9 +73,48 @@ onLoad(async () => {
   }
 })
 
-const goToSession = (sessionId?: string, status?: string) => {
+const statusLabel = (status: string) => {
+  switch (status) {
+    case 'IN_PROGRESS':
+      return '进行中'
+    case 'COMPLETED':
+      return '已完成'
+    case 'CANCELLED':
+      return '已结束'
+    default:
+      return status
+  }
+}
+
+const statusClass = (status: string) => status.toLowerCase()
+
+const secondaryActionLabel = (status: string) => {
+  switch (status) {
+    case 'IN_PROGRESS':
+      return '查看报告'
+    case 'COMPLETED':
+    case 'CANCELLED':
+      return '再来一轮'
+    default:
+      return '再来一轮'
+  }
+}
+
+const primaryActionLabel = (status: string) => {
+  switch (status) {
+    case 'IN_PROGRESS':
+      return '继续会话'
+    case 'COMPLETED':
+    case 'CANCELLED':
+      return '查看报告'
+    default:
+      return '查看报告'
+  }
+}
+
+const goToSession = (sessionId?: string) => {
   uni.navigateTo({
-    url: status === 'IN_PROGRESS' && sessionId
+    url: sessionId
       ? `/pages/interview/session?sessionId=${sessionId}`
       : '/pages/interview/setup',
   })
@@ -85,6 +124,22 @@ const goToReport = (sessionId: string) => {
   uni.navigateTo({
     url: `/pages/interview/report?sessionId=${sessionId}`,
   })
+}
+
+const handlePrimaryAction = (item: InterviewSessionSummary) => {
+  if (item.status === 'IN_PROGRESS') {
+    goToSession(item.sessionId)
+    return
+  }
+  goToReport(item.sessionId)
+}
+
+const handleSecondaryAction = (item: InterviewSessionSummary) => {
+  if (item.status === 'IN_PROGRESS') {
+    goToReport(item.sessionId)
+    return
+  }
+  goToSession()
 }
 
 const goHome = () => {
