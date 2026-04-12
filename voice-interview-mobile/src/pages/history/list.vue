@@ -11,8 +11,27 @@
       </text>
     </view>
 
-    <view class="history-list">
-      <view v-for="item in historyItems" :key="item.sessionId" class="history-card">
+    <view class="filter-panel">
+      <view class="filter-head">
+        <text class="section-title">筛选状态</text>
+        <text class="filter-summary">{{ filterSummary }}</text>
+      </view>
+      <view class="filter-row">
+        <view
+          v-for="option in filterOptions"
+          :key="option.value"
+          class="filter-pill"
+          :class="{ active: activeFilter === option.value }"
+          @click="activeFilter = option.value"
+        >
+          <text class="filter-pill-label">{{ option.label }}</text>
+          <text class="filter-pill-count">{{ option.count }}</text>
+        </view>
+      </view>
+    </view>
+
+    <view v-if="filteredHistoryItems.length" class="history-list">
+      <view v-for="item in filteredHistoryItems" :key="item.sessionId" class="history-card">
         <view class="card-head">
           <view>
             <text class="card-title">{{ item.title }}</text>
@@ -34,6 +53,14 @@
         </view>
       </view>
     </view>
+    <view v-else class="empty-state">
+      <text class="empty-title">{{ emptyStateTitle }}</text>
+      <text class="empty-text">{{ emptyStateCopy }}</text>
+      <view class="empty-actions">
+        <button class="secondary-btn" @click="resetFilter">查看全部</button>
+        <button class="primary-btn" @click="() => goToSession()">再来一轮练习</button>
+      </view>
+    </view>
 
     <view class="action-panel">
       <button class="primary-btn" @click="() => goToSession()">再来一轮练习</button>
@@ -43,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 
 import { API_BASE_URL } from '@/config/api'
@@ -53,6 +80,7 @@ import type { InterviewSessionSummary } from '@/types/interview'
 import { ensureAuthenticated } from '@/utils/auth'
 
 const historyItems = ref<InterviewSessionSummary[]>([])
+const activeFilter = ref<'ALL' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'>('ALL')
 const userStore = useUserStore()
 
 onLoad(async () => {
@@ -88,6 +116,54 @@ const statusLabel = (status: string) => {
 }
 
 const statusClass = (status: string) => status.toLowerCase()
+
+const countByStatus = (status: 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED') =>
+  historyItems.value.filter((item) => item.status === status).length
+
+const filterOptions = computed(() => [
+  { value: 'ALL' as const, label: '全部', count: historyItems.value.length },
+  { value: 'IN_PROGRESS' as const, label: '进行中', count: countByStatus('IN_PROGRESS') },
+  { value: 'COMPLETED' as const, label: '已完成', count: countByStatus('COMPLETED') },
+  { value: 'CANCELLED' as const, label: '已结束', count: countByStatus('CANCELLED') },
+])
+
+const filteredHistoryItems = computed(() => {
+  if (activeFilter.value === 'ALL') {
+    return historyItems.value
+  }
+  return historyItems.value.filter((item) => item.status === activeFilter.value)
+})
+
+const filterSummary = computed(() => {
+  const current = filterOptions.value.find((option) => option.value === activeFilter.value)
+  return `${current?.label || '全部'} · ${filteredHistoryItems.value.length} 条`
+})
+
+const emptyStateTitle = computed(() => {
+  switch (activeFilter.value) {
+    case 'IN_PROGRESS':
+      return '没有进行中的会话'
+    case 'COMPLETED':
+      return '还没有已完成的报告'
+    case 'CANCELLED':
+      return '还没有已结束的会话'
+    default:
+      return '还没有历史会话'
+  }
+})
+
+const emptyStateCopy = computed(() => {
+  switch (activeFilter.value) {
+    case 'IN_PROGRESS':
+      return '开始一轮新的模拟面试后，这里会显示可继续恢复的进行中会话。'
+    case 'COMPLETED':
+      return '完整完成一轮面试后，这里会保留可回看的历史报告。'
+    case 'CANCELLED':
+      return '手动结束的会话会集中展示在这里，方便做中途复盘。'
+    default:
+      return '先开始一轮练习，后续这里会累积你的历史记录。'
+  }
+})
 
 const scoreLabel = (item: InterviewSessionSummary) => {
   if (item.status === 'CANCELLED') {
@@ -180,6 +256,10 @@ const goHome = () => {
     url: '/pages/index/index',
   })
 }
+
+const resetFilter = () => {
+  activeFilter.value = 'ALL'
+}
 </script>
 
 <style>
@@ -192,7 +272,7 @@ const goHome = () => {
   gap: 24rpx;
 }
 
-.hero-panel, .action-panel {
+.hero-panel, .action-panel, .filter-panel {
   padding: 28rpx;
   border-radius: var(--studio-radius-lg);
   background: var(--studio-bg-soft);
@@ -200,6 +280,23 @@ const goHome = () => {
 }
 
 /* hero-top / eyebrow / hero-chip / title / subtitle 已在 studio.css 全局定义 */
+
+.filter-head { display: flex; justify-content: space-between; align-items: center; gap: 16rpx; margin-bottom: 14rpx; }
+.filter-summary { font-size: 22rpx; color: var(--studio-text-soft); }
+.filter-row { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.filter-pill {
+  min-width: 156rpx;
+  padding: 14rpx 16rpx;
+  border-radius: var(--studio-radius);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+}
+.filter-pill.active {
+  background: rgba(129, 140, 248, 0.08);
+  border-color: rgba(129, 140, 248, 0.2);
+}
+.filter-pill-label { display: block; font-size: 24rpx; color: var(--studio-text); }
+.filter-pill-count { display: block; margin-top: 6rpx; font-size: 22rpx; color: var(--studio-text-soft); }
 
 .history-list { display: flex; flex-direction: column; gap: 14rpx; }
 
@@ -231,8 +328,16 @@ const goHome = () => {
 .mini-btn.primary { background: var(--studio-signal-strong); color: #fff; font-weight: 600; border: none; }
 .mini-btn.secondary { background: rgba(255, 255, 255, 0.06); color: var(--studio-text-muted); }
 
-.empty-state { padding: 60rpx 20rpx; text-align: center; }
-.empty-text { font-size: 26rpx; color: var(--studio-text-soft); }
+.empty-state {
+  padding: 54rpx 28rpx;
+  border-radius: var(--studio-radius-lg);
+  background: var(--studio-bg-soft);
+  border: 1rpx solid rgba(255, 255, 255, 0.06);
+  text-align: center;
+}
+.empty-title { display: block; font-size: 30rpx; font-weight: 600; color: var(--studio-text); }
+.empty-text { display: block; margin-top: 10rpx; font-size: 26rpx; line-height: 1.6; color: var(--studio-text-soft); }
+.empty-actions { display: flex; gap: 12rpx; margin-top: 20rpx; }
 
 /* primary-btn / secondary-btn 已在 studio.css 全局定义 */
 </style>
