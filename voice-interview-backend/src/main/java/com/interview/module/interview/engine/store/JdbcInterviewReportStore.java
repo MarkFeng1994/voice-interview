@@ -18,7 +18,7 @@ import com.interview.module.interview.engine.model.InterviewReportView;
 @ConditionalOnProperty(prefix = "app.interview", name = "session-store", havingValue = "jdbc")
 public class JdbcInterviewReportStore implements InterviewReportStore {
 
-	private static final String REPORT_VERSION = "v1";
+	private static final String LATEST_REPORT_VERSION = "v2";
 
 	private final SessionMapper sessionMapper;
 	private final ReportMapper reportMapper;
@@ -31,21 +31,24 @@ public class JdbcInterviewReportStore implements InterviewReportStore {
 	}
 
 	@Override
-	public Optional<InterviewReportView> findBySessionId(String sessionId) {
+	public Optional<PersistedInterviewReport> findPersistedReportBySessionId(String sessionId) {
 		Optional<Long> internalId = findInternalSessionId(sessionId);
 		if (internalId.isEmpty()) return Optional.empty();
 
 		ReportEntity entity = reportMapper.selectOne(
 				new LambdaQueryWrapper<ReportEntity>().eq(ReportEntity::getSessionId, internalId.get()));
 		if (entity == null) return Optional.empty();
-		return Optional.of(deserializeReport(entity.getReportJson()));
+		return Optional.of(new PersistedInterviewReport(
+				deserializeReport(entity.getReportJson()),
+				entity.getReportVersion()));
 	}
 
 	@Override
-	public void save(InterviewReportView report) {
+	public void save(InterviewReportView report, String reportVersion) {
 		long internalSessionId = findInternalSessionId(report.sessionId())
 				.orElseThrow(() -> new IllegalArgumentException("Interview session not found: " + report.sessionId()));
 		String reportJson = serializeReport(report);
+		String normalizedReportVersion = normalizeReportVersion(reportVersion);
 
 		ReportEntity existing = reportMapper.selectOne(
 				new LambdaQueryWrapper<ReportEntity>().eq(ReportEntity::getSessionId, internalSessionId));
@@ -56,15 +59,20 @@ public class JdbcInterviewReportStore implements InterviewReportStore {
 			entity.setOverallScore(report.overallScore());
 			entity.setOverallComment(report.overallComment());
 			entity.setReportJson(reportJson);
-			entity.setReportVersion(REPORT_VERSION);
+			entity.setReportVersion(normalizedReportVersion);
 			reportMapper.insert(entity);
 		} else {
 			existing.setOverallScore(report.overallScore());
 			existing.setOverallComment(report.overallComment());
 			existing.setReportJson(reportJson);
-			existing.setReportVersion(REPORT_VERSION);
+			existing.setReportVersion(normalizedReportVersion);
 			reportMapper.updateById(existing);
 		}
+	}
+
+	@Override
+	public void save(InterviewReportView report) {
+		save(report, LATEST_REPORT_VERSION);
 	}
 
 	private Optional<Long> findInternalSessionId(String sessionKey) {
@@ -87,5 +95,12 @@ public class JdbcInterviewReportStore implements InterviewReportStore {
 		} catch (JsonProcessingException ex) {
 			throw new IllegalStateException("Failed to deserialize interview report", ex);
 		}
+	}
+
+	private String normalizeReportVersion(String reportVersion) {
+		if (reportVersion == null || reportVersion.isBlank()) {
+			return LATEST_REPORT_VERSION;
+		}
+		return reportVersion;
 	}
 }

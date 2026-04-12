@@ -6,7 +6,15 @@ import com.interview.module.interview.engine.model.InterviewReportView;
 
 public interface InterviewReportStore {
 
-	Optional<InterviewReportView> findBySessionId(String sessionId);
+	Optional<PersistedInterviewReport> findPersistedReportBySessionId(String sessionId);
 
-	void save(InterviewReportView report);
+	default Optional<InterviewReportView> findBySessionId(String sessionId) {
+		return findPersistedReportBySessionId(sessionId).map(PersistedInterviewReport::report);
+	}
+
+	default void save(InterviewReportView report) {
+		save(report, "v2");
+	}
+
+	void save(InterviewReportView report, String reportVersion);
 }
