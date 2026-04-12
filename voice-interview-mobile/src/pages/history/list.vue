@@ -18,12 +18,13 @@
             <text class="card-title">{{ item.title }}</text>
             <text class="card-meta">{{ item.startedAt || '尚未开始' }}</text>
           </view>
-          <text class="score-pill">{{ item.overallScore ?? '--' }} 分</text>
+          <text class="score-pill" :class="statusClass(item.status)">{{ scoreLabel(item) }}</text>
         </view>
-        <text class="card-copy">{{ item.summary }}</text>
+        <text class="card-copy">{{ summaryLabel(item) }}</text>
         <view class="card-tags">
           <text class="tag">已答 {{ item.answeredRounds }} 轮</text>
           <text class="tag" :class="statusClass(item.status)">{{ statusLabel(item.status) }}</text>
+          <text v-if="item.lastUpdatedAt" class="tag subtle">最近更新 {{ item.lastUpdatedAt }}</text>
         </view>
         <view class="card-actions">
           <button class="mini-btn" @click="() => handlePrimaryAction(item)">{{ primaryActionLabel(item.status) }}</button>
@@ -88,6 +89,26 @@ const statusLabel = (status: string) => {
 
 const statusClass = (status: string) => status.toLowerCase()
 
+const scoreLabel = (item: InterviewSessionSummary) => {
+  if (item.status === 'CANCELLED') {
+    return '已结束'
+  }
+  if (item.status === 'IN_PROGRESS') {
+    return item.overallScore == null ? '进行中' : `${item.overallScore} 分`
+  }
+  return item.overallScore == null ? '-- 分' : `${item.overallScore} 分`
+}
+
+const summaryLabel = (item: InterviewSessionSummary) => {
+  if (item.status === 'CANCELLED') {
+    return item.summary || '这轮面试已手动结束，可以查看报告后决定是否重新开始。'
+  }
+  if (item.status === 'IN_PROGRESS') {
+    return item.summary || '当前仍可继续作答，系统会从上一次的题目和进度恢复。'
+  }
+  return item.summary || '本轮报告已生成，可直接查看原报告或再来一轮。'
+}
+
 const secondaryActionLabel = (status: string) => {
   switch (status) {
     case 'IN_PROGRESS':
@@ -122,7 +143,7 @@ const goToSession = (sessionId?: string) => {
 
 const goToReport = (sessionId: string) => {
   uni.navigateTo({
-    url: `/pages/interview/report?sessionId=${sessionId}`,
+    url: `/pages/interview/report?sessionId=${sessionId}&source=history`,
   })
 }
 
@@ -181,12 +202,17 @@ const goHome = () => {
 .card-title { font-size: 28rpx; font-weight: 600; color: var(--studio-text); flex: 1; min-width: 0; }
 .card-meta { font-size: 22rpx; color: var(--studio-text-soft); margin-top: 4rpx; }
 .score-pill { padding: 6rpx 14rpx; border-radius: 8rpx; font-size: 22rpx; font-weight: 600; background: rgba(129, 140, 248, 0.1); color: var(--studio-signal); flex-shrink: 0; }
+.score-pill.in_progress { background: rgba(129, 140, 248, 0.12); color: var(--studio-signal); }
+.score-pill.completed { background: rgba(74, 222, 128, 0.12); color: var(--studio-success); }
+.score-pill.cancelled { background: rgba(248, 113, 113, 0.12); color: var(--studio-danger); }
 .card-copy { display: block; margin-top: 10rpx; font-size: 24rpx; line-height: 1.6; color: var(--studio-text-muted); }
 
 .card-tags { display: flex; flex-wrap: wrap; gap: 8rpx; margin-top: 12rpx; }
 .card-tags .tag { padding: 6rpx 14rpx; border-radius: 8rpx; font-size: 20rpx; background: rgba(255, 255, 255, 0.04); color: var(--studio-text-soft); border: 1rpx solid rgba(255, 255, 255, 0.06); }
 .card-tags .tag.in_progress { background: rgba(129, 140, 248, 0.1); color: var(--studio-signal); border-color: rgba(129, 140, 248, 0.2); }
 .card-tags .tag.completed { background: rgba(74, 222, 128, 0.1); color: var(--studio-success); border-color: rgba(74, 222, 128, 0.2); }
+.card-tags .tag.cancelled { background: rgba(248, 113, 113, 0.1); color: var(--studio-danger); border-color: rgba(248, 113, 113, 0.2); }
+.card-tags .tag.subtle { background: rgba(255, 255, 255, 0.03); color: var(--studio-text-muted); }
 
 .card-actions { display: flex; gap: 10rpx; margin-top: 14rpx; }
 .mini-btn { flex: 1; border: none; border-radius: var(--studio-radius); background: rgba(255, 255, 255, 0.04); color: var(--studio-text-muted); font-size: 24rpx; border: 1rpx solid rgba(255, 255, 255, 0.08); padding: 14rpx 0; }

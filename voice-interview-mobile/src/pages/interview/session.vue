@@ -820,7 +820,7 @@ const goToReport = (sessionId?: string | Event) => {
 
   disconnectInterviewSocket()
   uni.navigateTo({
-    url: `/pages/interview/report?sessionId=${finalSessionId}`,
+    url: `/pages/interview/report?sessionId=${finalSessionId}&source=session-end`,
   })
 }
 

@@ -17,6 +17,22 @@
       <text class="score-copy">状态：{{ report?.status || '暂无' }} · {{ report?.questionReports.length || 0 }} 题回顾</text>
     </view>
 
+    <view v-if="report && contextBanner" class="section-card context-card">
+      <text class="section-title">进入上下文</text>
+      <text class="bullet-copy">{{ contextBanner }}</text>
+    </view>
+
+    <view v-if="report?.status === 'CANCELLED'" class="section-card cancelled-card">
+      <text class="section-title">本轮已手动结束</text>
+      <text class="bullet-copy">
+        这轮面试是在未完成全部题目的情况下结束的，当前报告更适合作为中途复盘，而不是完整成绩单。
+      </text>
+      <view class="chip-row">
+        <text class="chip warn">可继续复盘当前回答</text>
+        <text class="chip warn">建议再完整练一轮</text>
+      </view>
+    </view>
+
     <view v-if="report?.overallExplanation" class="section-card explanation-card">
       <view class="section-head">
         <text class="section-title">为什么是这个结论</text>
@@ -134,7 +150,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 
 import { API_BASE_URL } from '@/config/api'
@@ -145,6 +161,7 @@ import { ensureAuthenticated } from '@/utils/auth'
 
 const report = ref<InterviewReport | null>(null)
 const missingSession = ref(false)
+const source = ref<'history' | 'session-end' | 'direct'>('direct')
 const userStore = useUserStore()
 
 type DiagnosisTone = 'strong' | 'medium' | 'weak' | 'neutral'
@@ -178,9 +195,31 @@ const getGeneratedByLabel = (generatedBy: ExplanationGeneratedBy): string => {
   return generatedBy === 'RULE_PLUS_LLM' ? 'AI 润色' : '规则生成'
 }
 
+const contextBanner = computed(() => {
+  if (!report.value) {
+    return ''
+  }
+  if (source.value === 'session-end') {
+    return report.value.status === 'CANCELLED'
+      ? '你刚刚结束了当前面试，这是一份基于已完成内容生成的即时复盘。'
+      : '你刚刚完成了一轮面试，这是一份即时生成的报告。'
+  }
+  if (source.value === 'history') {
+    return report.value.status === 'CANCELLED'
+      ? '这是你从历史记录打开的一份已结束会话报告。'
+      : '这是你从历史记录打开的原始报告，可用于继续复盘。'
+  }
+  return report.value.status === 'CANCELLED'
+    ? '这是当前会话的已结束报告。'
+    : '这是当前会话的面试报告。'
+})
+
 onLoad(async (query) => {
   if (!ensureAuthenticated(userStore, typeof query?.sessionId === 'string' ? `/pages/interview/report?sessionId=${query.sessionId}` : '/pages/interview/report')) {
     return
+  }
+  if (query?.source === 'history' || query?.source === 'session-end') {
+    source.value = query.source
   }
   const sessionId = typeof query?.sessionId === 'string' ? query.sessionId : ''
   if (!sessionId) {
@@ -249,6 +288,15 @@ const goHome = () => {
 .score-label { display: block; font-size: 22rpx; letter-spacing: 1.2rpx; color: var(--studio-text-soft); text-transform: uppercase; }
 .score-value { display: block; margin-top: 10rpx; font-family: var(--studio-font-display); font-size: 72rpx; font-weight: 700; line-height: 1; color: var(--studio-text); }
 .score-copy { display: block; margin-top: 8rpx; font-size: 24rpx; color: var(--studio-signal); }
+
+.context-card {
+  background: linear-gradient(180deg, rgba(129, 140, 248, 0.08), rgba(129, 140, 248, 0.03));
+}
+
+.cancelled-card {
+  background: linear-gradient(180deg, rgba(248, 113, 113, 0.08), rgba(248, 113, 113, 0.03));
+  border-color: rgba(248, 113, 113, 0.16);
+}
 
 .section-head {
   display: flex;
@@ -325,6 +373,12 @@ const goHome = () => {
   color: var(--studio-text-soft);
   background: rgba(148, 163, 184, 0.12);
   border-color: rgba(148, 163, 184, 0.2);
+}
+
+.chip.warn {
+  background: rgba(248, 113, 113, 0.12);
+  color: #fecaca;
+  border-color: rgba(248, 113, 113, 0.18);
 }
 
 .evidence-item {
