@@ -12,5 +12,7 @@ public interface UserAccountRepository {
 
 	UserAccount save(UserAccount account);
 
+	UserAccount updateCredentials(String userId, String username, String password, String nickname);
+
 	UserAccount updateNickname(String userId, String nickname);
 }

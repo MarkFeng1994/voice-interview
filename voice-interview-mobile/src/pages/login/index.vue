@@ -27,7 +27,7 @@
           v-model="form.username"
           class="input-core"
           type="text"
-          placeholder="用户名，如 coff0xc"
+          placeholder="用户名，如 admin"
         />
       </view>
       <view class="field-shell">
@@ -72,9 +72,9 @@ const loading = ref(false)
 const redirectUrl = ref('/pages/index/index')
 
 const form = reactive({
-  username: 'coff0xc',
+  username: 'admin',
   password: '123456',
-  nickname: 'Coff0xc',
+  nickname: 'Admin',
 })
 
 onLoad((query) => {

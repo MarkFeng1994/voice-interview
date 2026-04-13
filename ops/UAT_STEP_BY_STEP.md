@@ -18,7 +18,7 @@
 
 ## 测试账号
 
-- 手机端 / 管理端：`coff0xc / 123456`
+- 手机端 / 管理端：`admin / 123456`
 
 ## 参考文档
 
@@ -58,7 +58,7 @@
 如果需要直接验证 provider 运行链路，请在登录后带 token 请求：
 
 ```powershell
-$login = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8080/api/auth/login" -ContentType "application/json" -Body '{"username":"coff0xc","password":"123456"}'
+$login = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8080/api/auth/login" -ContentType "application/json" -Body '{"username":"admin","password":"123456"}'
 $token = $login.data.token
 Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:8080/api/system/providers" -Headers @{ Authorization = "Bearer $token" }
 ```

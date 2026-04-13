@@ -1,6 +1,6 @@
 param(
   [string]$ApiBaseUrl = 'http://127.0.0.1:8080',
-  [string]$Username = 'coff0xc',
+  [string]$Username = 'admin',
   [string]$Password = '123456',
   [string]$PresetKey = 'backend-core',
   [string]$ResumePdfPath = '',

@@ -44,6 +44,19 @@ public class JdbcUserAccountRepository implements UserAccountRepository {
 	}
 
 	@Override
+	public UserAccount updateCredentials(String userId, String username, String password, String nickname) {
+		UserEntity entity = userMapper.selectById(parseId(userId));
+		if (entity == null) {
+			throw new IllegalArgumentException("用户不存在");
+		}
+		entity.setUsername(username);
+		entity.setPassword(password);
+		entity.setNickname(nickname);
+		userMapper.updateById(entity);
+		return toRecord(entity);
+	}
+
+	@Override
 	public UserAccount updateNickname(String userId, String nickname) {
 		UserEntity entity = userMapper.selectById(parseId(userId));
 		if (entity == null) {
