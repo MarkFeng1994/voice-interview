@@ -97,7 +97,7 @@ If available, also test:
 Before running UAT:
 
 - `GET /actuator/health` returns `UP`
-- `GET /api/system/providers` matches expected provider mix
+- `GET /api/system/providers` matches expected provider mix after login or with Bearer token
 - backend and static frontend are both reachable from the device
 
 ## Release Gate

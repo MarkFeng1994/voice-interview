@@ -6,7 +6,7 @@
 - service env file prepared from `ops/voice-interview-backend.env.example`
 - `systemctl status voice-interview-backend`
 - `GET /actuator/health` returns `UP`
-- `GET /api/system/providers` returns expected provider mix
+- `GET /api/system/providers` returns expected provider mix after login or with Bearer token
 
 ## Mobile H5
 
@@ -30,7 +30,7 @@
 
 ## Voice Chain
 
-- `GET /api/system/providers` shows `ASR = dashscope` and `TTS = dashscope`
+- `GET /api/system/providers` shows `ASR = dashscope` and `TTS = dashscope` after login or with Bearer token
 - `reply-preview` returns playable audio URL
 - audio upload + ASR transcription works
 

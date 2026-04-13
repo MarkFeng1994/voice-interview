@@ -10,7 +10,6 @@ Verify first:
 
 - backend service is running
 - `/actuator/health` is `UP`
-- `/api/system/providers` matches the expected provider mix
 
 ## Step 2. Authentication
 
@@ -19,6 +18,7 @@ Run these before touching interview flows:
 1. Login with a known account
 2. Refresh page / reopen app
 3. Logout and verify protected routes redirect to login
+4. Call `/api/system/providers` with `Authorization: Bearer <token>` and verify the provider mix
 
 If auth fails, stop here. Do not continue to session testing.
 
@@ -56,7 +56,7 @@ If session updates do not appear in real time, check:
 
 If this step fails, inspect:
 
-- `/api/system/providers`
+- `/api/system/providers` with `Authorization: Bearer <token>`
 - `t_media_file`
 - `/api/system/media/cleanup`
 

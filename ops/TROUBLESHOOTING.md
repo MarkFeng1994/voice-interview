@@ -60,7 +60,7 @@ Meaning:
 
 Check:
 
-- `/api/system/providers`
+- `/api/system/providers` with `Authorization: Bearer <token>`
 - sherpa `/healthz`
 - provider base URL in env
 

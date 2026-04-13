@@ -43,7 +43,7 @@ Custom API base URL:
 After backend starts, verify:
 
 - `GET /actuator/health`
-- `GET /api/system/providers`
+- login, then `GET /api/system/providers` with `Authorization: Bearer <token>`
 - login -> create interview -> answer -> report
 
 Or run:

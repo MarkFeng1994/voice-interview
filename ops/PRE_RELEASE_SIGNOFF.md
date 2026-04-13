@@ -9,7 +9,7 @@
 ## Backend Runtime
 
 - [ ] `/actuator/health` returns `UP`
-- [ ] `/api/system/providers` returns expected provider mix
+- [ ] `/api/system/providers` returns expected provider mix after login or with Bearer token
 - [ ] JWT login/profile flow verified
 - [ ] WebSocket session sync verified
 - [ ] `POST /api/system/media/cleanup` verified

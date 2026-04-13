@@ -31,15 +31,10 @@
 先在浏览器打开：
 
 1. `http://127.0.0.1:8080/actuator/health`
-2. `http://127.0.0.1:8080/api/system/providers`
 
 预期结果：
 
 - `health` 返回 `UP`
-- provider 运行链路显示：
-  - `AI = openai`
-  - `ASR = dashscope`
-  - `TTS = dashscope`
 
 如果这一步失败，不要继续后面的业务验收。
 
@@ -59,6 +54,21 @@
 - 登录成功并进入首页
 - 首页显示当前账号昵称
 - “服务状态”显示 `openai / dashscope / dashscope`
+
+如果需要直接验证 provider 运行链路，请在登录后带 token 请求：
+
+```powershell
+$login = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8080/api/auth/login" -ContentType "application/json" -Body '{"username":"coff0xc","password":"123456"}'
+$token = $login.data.token
+Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:8080/api/system/providers" -Headers @{ Authorization = "Bearer $token" }
+```
+
+预期结果：
+
+- provider 运行链路显示：
+  - `AI = openai`
+  - `ASR = dashscope`
+  - `TTS = dashscope`
 
 ## Step 3. 配置页与开始面试
 
