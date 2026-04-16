@@ -31,11 +31,19 @@ public class InterviewWsTicketService {
 	}
 
 	public String issue(String userId, String sessionId) {
+		return issueWithPurpose(userId, sessionId, "interview-ws");
+	}
+
+	public String issueRealtimeTicket(String userId, String sessionId) {
+		return issueWithPurpose(userId, sessionId, "realtime-ws");
+	}
+
+	private String issueWithPurpose(String userId, String sessionId, String purpose) {
 		Instant now = Instant.now();
 		return Jwts.builder()
 				.subject(userId)
 				.claim("sessionId", sessionId)
-				.claim("purpose", "interview-ws")
+				.claim("purpose", purpose)
 				.issuer(jwtProperties.getIssuer())
 				.issuedAt(Date.from(now))
 				.expiration(Date.from(now.plusSeconds(expireSeconds)))
@@ -44,10 +52,18 @@ public class InterviewWsTicketService {
 	}
 
 	public InterviewWsTicketPrincipal parse(String ticket) {
+		return parseWithPurpose(ticket, "interview-ws");
+	}
+
+	public InterviewWsTicketPrincipal parseRealtimeTicket(String ticket) {
+		return parseWithPurpose(ticket, "realtime-ws");
+	}
+
+	private InterviewWsTicketPrincipal parseWithPurpose(String ticket, String purpose) {
 		Claims claims = Jwts.parser()
 				.verifyWith((javax.crypto.SecretKey) signingKey)
 				.requireIssuer(jwtProperties.getIssuer())
-				.require("purpose", "interview-ws")
+				.require("purpose", purpose)
 				.build()
 				.parseSignedClaims(ticket)
 				.getPayload();

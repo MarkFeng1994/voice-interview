@@ -192,12 +192,25 @@ class RealtimeFullDuplexPocTest {
             for (byte[] chunk : chunks) {
                 conversation.appendAudio(Base64.getEncoder().encodeToString(chunk));
             }
+
+            // 3.5 追加 1.5 秒静音，帮助 VAD 检测语音结束
+            byte[] silence = new byte[INPUT_SAMPLE_RATE * 2 * 3 / 2]; // 1.5s, 16-bit mono
+            for (byte[] silenceChunk : PcmAudioUtils.chunk(silence, CHUNK_SIZE)) {
+                conversation.appendAudio(Base64.getEncoder().encodeToString(silenceChunk));
+            }
             conversation.commit();
             long sendDuration = System.currentTimeMillis() - sendStart;
-            System.out.println("音频发送完成: " + chunks.size() + " chunks, 耗时 " + sendDuration + " ms");
+            System.out.println("音频发送完成: " + chunks.size() + " chunks + 1.5s 静音, 耗时 " + sendDuration + " ms");
+
+            // 3.6 等待 VAD 触发，若 5 秒内无响应则用 createResponse() 显式触发
+            boolean vadTriggered = responseDone.await(8, TimeUnit.SECONDS);
+            if (!vadTriggered && responseDone.getCount() > 0) {
+                System.out.println("VAD 未在 8s 内触发，尝试 createResponse() 显式触发...");
+                conversation.createResponse(null, List.of(OmniRealtimeModality.TEXT, OmniRealtimeModality.AUDIO));
+            }
 
             // 4. 等待响应
-            boolean completed = responseDone.await(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            boolean completed = vadTriggered || responseDone.await(TIMEOUT_SECONDS - 8, TimeUnit.SECONDS);
 
             // 5. 输出结果
             System.out.println("\n========== PoC 0.1 结果 ==========");
@@ -322,12 +335,15 @@ class RealtimeFullDuplexPocTest {
             conversation.updateSession(config);
 
             // 发送音频
-            for (byte[] chunk : PcmAudioUtils.chunk(testPcm, CHUNK_SIZE)) {
-                conversation.appendAudio(Base64.getEncoder().encodeToString(chunk));
-            }
-            conversation.commit();
+            sendAudioWithSilence(conversation, testPcm);
 
-            boolean completed = responseDone.await(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            // 等待 VAD 触发，若超时则显式触发
+            boolean completed = responseDone.await(8, TimeUnit.SECONDS);
+            if (!completed && responseDone.getCount() > 0) {
+                System.out.println("VAD 未在 8s 内触发，尝试 createResponse() 显式触发...");
+                conversation.createResponse(null, List.of(OmniRealtimeModality.TEXT, OmniRealtimeModality.AUDIO));
+                completed = responseDone.await(TIMEOUT_SECONDS - 8, TimeUnit.SECONDS);
+            }
 
             System.out.println("\n========== PoC 0.2b 结果 ==========");
             System.out.println("响应完成: " + completed);
@@ -422,12 +438,15 @@ class RealtimeFullDuplexPocTest {
             conv.connect();
             conv.updateSession(buildFullDuplexConfig(instructions));
 
-            for (byte[] chunk : PcmAudioUtils.chunk(pcm, CHUNK_SIZE)) {
-                conv.appendAudio(Base64.getEncoder().encodeToString(chunk));
-            }
-            conv.commit();
+            sendAudioWithSilence(conv, pcm);
 
-            boolean completed = done.await(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            // 等待 VAD 触发，若超时则显式触发
+            boolean completed = done.await(8, TimeUnit.SECONDS);
+            if (!completed && done.getCount() > 0) {
+                System.out.println("  [" + label + "] VAD 未触发，createResponse()...");
+                conv.createResponse(null, List.of(OmniRealtimeModality.TEXT, OmniRealtimeModality.AUDIO));
+                completed = done.await(TIMEOUT_SECONDS - 8, TimeUnit.SECONDS);
+            }
             return new RoundResult(
                     completed && errorRef.get() == null,
                     aiText.toString(),
@@ -498,11 +517,14 @@ class RealtimeFullDuplexPocTest {
 
             // Round 1
             System.out.println("  [Round 1] 发送音频...");
-            for (byte[] chunk : PcmAudioUtils.chunk(pcm, CHUNK_SIZE)) {
-                conv.appendAudio(Base64.getEncoder().encodeToString(chunk));
+            sendAudioWithSilence(conv, pcm);
+
+            boolean r1 = round1Done.await(8, TimeUnit.SECONDS);
+            if (!r1 && round1Done.getCount() > 0) {
+                System.out.println("  [Round 1] VAD 未触发，createResponse()...");
+                conv.createResponse(null, List.of(OmniRealtimeModality.TEXT, OmniRealtimeModality.AUDIO));
+                r1 = round1Done.await(TIMEOUT_SECONDS - 8, TimeUnit.SECONDS);
             }
-            conv.commit();
-            round1Done.await(TIMEOUT_SECONDS, TimeUnit.SECONDS);
             System.out.println("  [Round 1] 完成, AI: " + round1Text);
 
             // 更新 instructions
@@ -512,11 +534,14 @@ class RealtimeFullDuplexPocTest {
 
             // Round 2 — 再发一段音频
             System.out.println("  [Round 2] 发送音频...");
-            for (byte[] chunk : PcmAudioUtils.chunk(pcm, CHUNK_SIZE)) {
-                conv.appendAudio(Base64.getEncoder().encodeToString(chunk));
+            sendAudioWithSilence(conv, pcm);
+
+            boolean r2 = round2Done.await(8, TimeUnit.SECONDS);
+            if (!r2 && round2Done.getCount() > 0) {
+                System.out.println("  [Round 2] VAD 未触发，createResponse()...");
+                conv.createResponse(null, List.of(OmniRealtimeModality.TEXT, OmniRealtimeModality.AUDIO));
+                r2 = round2Done.await(TIMEOUT_SECONDS - 8, TimeUnit.SECONDS);
             }
-            conv.commit();
-            round2Done.await(TIMEOUT_SECONDS, TimeUnit.SECONDS);
             System.out.println("  [Round 2] 完成, AI: " + round2Text);
 
             return new RoundResult(
@@ -615,6 +640,22 @@ class RealtimeFullDuplexPocTest {
             return null;
         }
         return obj.get(field).getAsString();
+    }
+
+    /**
+     * 发送音频 + 追加 1.5s 静音 + commit，帮助 VAD 检测语音结束。
+     */
+    private void sendAudioWithSilence(OmniRealtimeConversation conv, byte[] pcm) {
+        List<byte[]> chunks = PcmAudioUtils.chunk(pcm, CHUNK_SIZE);
+        for (byte[] chunk : chunks) {
+            conv.appendAudio(Base64.getEncoder().encodeToString(chunk));
+        }
+        // 追加 1.5 秒静音 (16kHz, 16-bit mono = 48000 bytes)
+        byte[] silence = new byte[INPUT_SAMPLE_RATE * 2 * 3 / 2];
+        for (byte[] silenceChunk : PcmAudioUtils.chunk(silence, CHUNK_SIZE)) {
+            conv.appendAudio(Base64.getEncoder().encodeToString(silenceChunk));
+        }
+        conv.commit();
     }
 
     private static void safeClose(OmniRealtimeConversation conversation) {

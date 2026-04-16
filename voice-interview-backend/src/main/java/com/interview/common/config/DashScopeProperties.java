@@ -9,6 +9,7 @@ public class DashScopeProperties {
 	private String apiKey = "";
 	private final AsrEndpointProperties asr = new AsrEndpointProperties();
 	private final TtsEndpointProperties tts = new TtsEndpointProperties();
+	private final RealtimeEndpointProperties realtime = new RealtimeEndpointProperties();
 
 	public String getBaseUrl() {
 		return baseUrl;
@@ -32,6 +33,10 @@ public class DashScopeProperties {
 
 	public TtsEndpointProperties getTts() {
 		return tts;
+	}
+
+	public RealtimeEndpointProperties getRealtime() {
+		return realtime;
 	}
 
 	public String resolveAsrBaseUrl() {
@@ -72,6 +77,26 @@ public class DashScopeProperties {
 
 	public String resolveTtsInstructions() {
 		return firstNonBlank(tts.getInstructions(), "Speak like a calm but professional technical interviewer.");
+	}
+
+	public String resolveRealtimeBaseUrl() {
+		return firstNonBlank(realtime.getBaseUrl(), baseUrl);
+	}
+
+	public String resolveRealtimeApiKey() {
+		return firstNonBlank(realtime.getApiKey(), apiKey);
+	}
+
+	public String resolveRealtimeModel() {
+		return firstNonBlank(realtime.getModel(), "qwen-omni-turbo-realtime");
+	}
+
+	public String resolveRealtimeVoice() {
+		return firstNonBlank(realtime.getVoice(), "Cherry");
+	}
+
+	public boolean resolveRealtimeEnableTurnDetection() {
+		return realtime.isEnableTurnDetection();
 	}
 
 	private String firstNonBlank(String preferred, String fallback) {
@@ -153,6 +178,28 @@ public class DashScopeProperties {
 
 		public void setInstructions(String instructions) {
 			this.instructions = instructions;
+		}
+	}
+
+	public static class RealtimeEndpointProperties extends EndpointProperties {
+
+		private String voice = "Cherry";
+		private boolean enableTurnDetection = true;
+
+		public String getVoice() {
+			return voice;
+		}
+
+		public void setVoice(String voice) {
+			this.voice = voice;
+		}
+
+		public boolean isEnableTurnDetection() {
+			return enableTurnDetection;
+		}
+
+		public void setEnableTurnDetection(boolean enableTurnDetection) {
+			this.enableTurnDetection = enableTurnDetection;
 		}
 	}
 }

@@ -24,6 +24,7 @@ import com.interview.module.interview.engine.model.InterviewSessionView;
 import com.interview.module.interview.resume.ResumeInterviewPlan;
 import com.interview.module.interview.service.InterviewPracticeService;
 import com.interview.module.interview.service.InterviewPresetCatalog.InterviewPresetView;
+import com.interview.module.interview.service.RealtimeFallbackService;
 import com.interview.module.interview.websocket.InterviewWsTicketService;
 import com.interview.module.media.service.LocalMediaStorageService;
 import com.interview.module.media.service.StoredMediaFile;
@@ -45,6 +46,7 @@ public class InterviewController {
 	private final InterviewPracticeService interviewPracticeService;
 	private final CurrentUserResolver currentUserResolver;
 	private final InterviewWsTicketService interviewWsTicketService;
+	private final RealtimeFallbackService realtimeFallbackService;
 
 	public InterviewController(
 			AiService aiService,
@@ -53,7 +55,8 @@ public class InterviewController {
 			AsrService asrService,
 			InterviewPracticeService interviewPracticeService,
 			CurrentUserResolver currentUserResolver,
-			InterviewWsTicketService interviewWsTicketService
+			InterviewWsTicketService interviewWsTicketService,
+			RealtimeFallbackService realtimeFallbackService
 	) {
 		this.aiService = aiService;
 		this.ttsService = ttsService;
@@ -62,6 +65,7 @@ public class InterviewController {
 		this.interviewPracticeService = interviewPracticeService;
 		this.currentUserResolver = currentUserResolver;
 		this.interviewWsTicketService = interviewWsTicketService;
+		this.realtimeFallbackService = realtimeFallbackService;
 	}
 
 	@PostMapping
@@ -129,6 +133,24 @@ public class InterviewController {
 		interviewPracticeService.getState(sessionId, profile.id());
 		return ApiResponse.success(new WsTicketPayload(
 				interviewWsTicketService.issue(profile.id(), sessionId),
+				sessionId
+		));
+	}
+
+	@GetMapping("/realtime-capability")
+	public ApiResponse<RealtimeFallbackService.RealtimeCapability> checkRealtimeCapability() {
+		return ApiResponse.success(realtimeFallbackService.checkCapability());
+	}
+
+	@PostMapping("/{sessionId}/realtime-ticket")
+	public ApiResponse<WsTicketPayload> issueRealtimeTicket(
+			@PathVariable String sessionId,
+			HttpServletRequest request
+	) {
+		UserProfile profile = currentUserResolver.requireProfile(request);
+		interviewPracticeService.getState(sessionId, profile.id());
+		return ApiResponse.success(new WsTicketPayload(
+				interviewWsTicketService.issueRealtimeTicket(profile.id(), sessionId),
 				sessionId
 		));
 	}

@@ -2,10 +2,15 @@ package com.interview.module.interview.engine.store;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.interview.module.interview.engine.model.InterviewStage;
 import com.interview.module.interview.engine.model.InterviewQuestionSnapshot;
 import com.interview.module.interview.engine.model.InterviewRoundRecord;
+import com.interview.module.interview.engine.model.InterviewSessionView;
+import com.interview.module.interview.engine.model.RealtimeMetrics;
+import com.interview.module.interview.service.AnswerEvidence;
+import com.interview.module.interview.service.FollowUpDecision;
 
 public class InterviewSessionState {
 
@@ -22,6 +27,10 @@ public class InterviewSessionState {
 	private int durationMinutes;
 	private int currentQuestionIndex = 0;
 	private int followUpIndex = 0;
+	private String interviewMode = "standard";
+	private Long lastInterruptedAt;
+	private int realtimeTurnCount;
+	private RealtimeMetrics realtimeMetrics;
 
 	public InterviewSessionState(
 			String sessionId,
@@ -139,6 +148,79 @@ public class InterviewSessionState {
 		this.followUpIndex = followUpIndex;
 	}
 
+	public String getInterviewMode() {
+		return interviewMode;
+	}
+
+	public void setInterviewMode(String interviewMode) {
+		this.interviewMode = interviewMode;
+	}
+
+	public Long getLastInterruptedAt() {
+		return lastInterruptedAt;
+	}
+
+	public void setLastInterruptedAt(Long lastInterruptedAt) {
+		this.lastInterruptedAt = lastInterruptedAt;
+	}
+
+	public int getRealtimeTurnCount() {
+		return realtimeTurnCount;
+	}
+
+	public void setRealtimeTurnCount(int realtimeTurnCount) {
+		this.realtimeTurnCount = realtimeTurnCount;
+	}
+
+	public RealtimeMetrics getRealtimeMetrics() {
+		return realtimeMetrics;
+	}
+
+	public void setRealtimeMetrics(RealtimeMetrics realtimeMetrics) {
+		this.realtimeMetrics = realtimeMetrics;
+	}
+
+	public InterviewQuestionSnapshot getCurrentQuestion() {
+		if (currentQuestionIndex < 0 || currentQuestionIndex >= questions.size()) {
+			return null;
+		}
+		return questions.get(currentQuestionIndex);
+	}
+
+	public void appendRealtimeUserAnswer(String text) {
+		String now = java.time.Instant.now().toString();
+		InterviewRoundRecord round = new InterviewRoundRecord(
+				UUID.randomUUID().toString(),
+				currentQuestionIndex,
+				followUpIndex,
+				"USER",
+				null, null, 0, null,
+				text, null, "REALTIME",
+				now, now,
+				null, null, null, null
+		);
+		rounds.add(round);
+		realtimeTurnCount++;
+	}
+
+	public void appendRealtimeAiReply(String text, AnswerEvidence evidence, FollowUpDecision decision) {
+		String now = java.time.Instant.now().toString();
+		InterviewRoundRecord round = new InterviewRoundRecord(
+				UUID.randomUUID().toString(),
+				currentQuestionIndex,
+				followUpIndex,
+				"ASSISTANT",
+				text, null, 0, null,
+				null, null, "REALTIME",
+				now, null,
+				evidence != null ? evidence.summaryReason() : null,
+				decision != null ? decision.action().name() : null,
+				decision != null ? decision.reasonText() : null,
+				evidence != null ? evidence.missingPoints() : null
+		);
+		rounds.add(round);
+	}
+
 	public InterviewSessionSnapshot toSnapshot() {
 		return new InterviewSessionSnapshot(
 				sessionId,
@@ -153,7 +235,10 @@ public class InterviewSessionState {
 				status,
 				currentQuestionIndex,
 				followUpIndex,
-				List.copyOf(rounds)
+				List.copyOf(rounds),
+				interviewMode,
+				realtimeTurnCount,
+				realtimeMetrics
 		);
 	}
 
@@ -173,6 +258,28 @@ public class InterviewSessionState {
 		state.setCurrentQuestionIndex(snapshot.currentQuestionIndex());
 		state.setFollowUpIndex(snapshot.followUpIndex());
 		state.getRounds().addAll(snapshot.rounds());
+		state.setInterviewMode(snapshot.interviewMode());
+		state.setRealtimeTurnCount(snapshot.realtimeTurnCount());
+		state.setRealtimeMetrics(snapshot.realtimeMetrics());
 		return state;
+	}
+
+	public InterviewSessionView toView() {
+		InterviewQuestionSnapshot currentQ = getCurrentQuestion();
+		return new InterviewSessionView(
+				sessionId,
+				status,
+				stage,
+				durationMinutes,
+				currentQuestionIndex + 1,
+				questions.size(),
+				followUpIndex,
+				maxFollowUpPerQuestion,
+				currentQ != null ? currentQ.titleSnapshot() : null,
+				currentQ != null ? currentQ.promptSnapshot() : null,
+				List.copyOf(questions),
+				List.copyOf(rounds),
+				List.of()
+		);
 	}
 }

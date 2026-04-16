@@ -5,6 +5,7 @@ import java.util.List;
 import com.interview.module.interview.engine.model.InterviewStage;
 import com.interview.module.interview.engine.model.InterviewQuestionSnapshot;
 import com.interview.module.interview.engine.model.InterviewRoundRecord;
+import com.interview.module.interview.engine.model.RealtimeMetrics;
 
 public record InterviewSessionSnapshot(
 		String sessionId,
@@ -19,7 +20,10 @@ public record InterviewSessionSnapshot(
 		String status,
 		int currentQuestionIndex,
 		int followUpIndex,
-		List<InterviewRoundRecord> rounds
+		List<InterviewRoundRecord> rounds,
+		String interviewMode,
+		int realtimeTurnCount,
+		RealtimeMetrics realtimeMetrics
 ) {
 
 	public InterviewSessionSnapshot(
@@ -48,7 +52,10 @@ public record InterviewSessionSnapshot(
 				status,
 				currentQuestionIndex,
 				followUpIndex,
-				rounds
+				rounds,
+				"standard",
+				0,
+				null
 		);
 	}
 }
