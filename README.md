@@ -7,24 +7,24 @@
   - 技术栈：`uni-app + Vue 3 + TypeScript + Pinia`
 - `voice-interview-admin`
   - 管理端 Web
-  - 技术栈：`Vue 3 + Vite + TypeScript`
+  - 技术栈：`Vue 3 + Vite + TypeScript + Ant Design Vue`
 - `voice-interview-backend`
   - 后端服务
-  - 技术栈：`Spring Boot 3 + Java 21`
+  - 技术栈：`Spring Boot 3.5.7 + Java 21 + Spring AI 1.0.5`
 
 ## 当前状态
 
-当前仓库已经具备最小可运行闭环：
+所有里程碑已完成：
 
-- 登录 / 注册
-- 首页工作台
-- 面试配置
-- 实时面试会话
-- 历史记录
-- 面试报告
-- 个人中心
+| 里程碑 | 目标 | 状态 |
+|--------|------|------|
+| M0 | 方向验证 / 技术 Spike | ✅ |
+| M1 | MVP 核心链路（半双工语音面试） | ✅ |
+| M2 | 稳定性与体验补强（追问、报告解释、历史回填） | ✅ |
+| M3 | 管理端 Web（分类、题库、导入、报表） | ✅ |
+| M4 | 全双工升级（DashScope Realtime 代理模式） | ✅ |
 
-推荐把它理解为：`M1 核心链路已打通，正在补 M2 稳定性与体验`。
+具备完整闭环：登录 → 面试配置 → 半双工/全双工面试 → 历史记录 → 面试报告 → 个人中心。
 
 ## 环境要求
 
@@ -72,7 +72,7 @@ cd .\voice-interview-backend
 mvn spring-boot:run
 ```
 
-如果启用本地 JDBC + OpenAI 兼容 Provider：
+如果启用本地 JDBC + Spring AI：
 
 ```powershell
 $env:SPRING_PROFILES_ACTIVE='dev,openai'
@@ -107,20 +107,35 @@ mvn spring-boot:run
 
 ## Provider 布局
 
-- `langchain4j`
-  - 当前默认 LLM 编排层
-  - 便于后续扩展 `tools / memory / RAG / agent`
-- `openai`
-  - legacy direct HTTP fallback
+- `springai`
+  - 当前默认 LLM 编排层（Spring AI + ChatClient + 结构化输出）
+  - OpenAI 兼容代理，配置 `spring.ai.openai.*` 属性
 - `mock`
   - 本地稳定测试
 - `ASR/TTS`
   - 独立 provider 配置，不与 LLM provider 强绑定
+  - DashScope: `qwen3-asr-flash-realtime` / `qwen3-tts-flash-realtime`
+- `Realtime`
+  - DashScope `qwen-omni-turbo-realtime` 全双工代理
+  - 浏览器 WS ↔ Spring Boot WS ↔ DashScope WS 桥接
 
-当前仓库内推荐的语音方案：
+## 全双工语音架构
 
-- `ASR -> qwen3-asr-flash-realtime`
-- `TTS -> qwen3-tts-flash-realtime`
+```
+浏览器 (AudioWorklet PCM 16kHz)
+  ↕ WebSocket /ws/realtime
+Spring Boot (RealtimeProxyWebSocketHandler)
+  ↕ DashScope WebSocket
+qwen-omni-turbo-realtime (PCM 24kHz)
+```
+
+关键组件：
+- `audio-processor.js` — AudioWorklet PCM 采集
+- `useRealtimeInterview.ts` — 全双工 composable
+- `RealtimeControls.vue` — 模式切换 + 实时转写 + 打断
+- `RealtimeProxyWebSocketHandler` — 音频桥接 + 指标采集
+- `RealtimeInterviewStateMachine` — 事件驱动状态机
+- `RealtimeFallbackService` — 可用性探测 + 半双工降级
 
 ## 说明
 
