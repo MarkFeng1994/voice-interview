@@ -8,6 +8,8 @@ public class RealtimeMetrics {
 	private long effectiveDurationMs;
 	private long realtimeStartedAt;
 	private long realtimeEndedAt;
+	private long totalResponseLatencyMs;
+	private long lastTurnStartedAt;
 
 	public int getTotalTurns() {
 		return totalTurns;
@@ -57,11 +59,47 @@ public class RealtimeMetrics {
 		this.realtimeEndedAt = realtimeEndedAt;
 	}
 
+	public long getTotalResponseLatencyMs() {
+		return totalResponseLatencyMs;
+	}
+
+	public void setTotalResponseLatencyMs(long totalResponseLatencyMs) {
+		this.totalResponseLatencyMs = totalResponseLatencyMs;
+	}
+
+	public long getLastTurnStartedAt() {
+		return lastTurnStartedAt;
+	}
+
+	public void setLastTurnStartedAt(long lastTurnStartedAt) {
+		this.lastTurnStartedAt = lastTurnStartedAt;
+	}
+
 	public void incrementTurns() {
 		this.totalTurns++;
 	}
 
 	public void incrementInterrupts() {
 		this.interruptCount++;
+	}
+
+	public void markTurnStart() {
+		this.lastTurnStartedAt = System.currentTimeMillis();
+	}
+
+	public void markTurnEnd() {
+		if (lastTurnStartedAt > 0) {
+			long latency = System.currentTimeMillis() - lastTurnStartedAt;
+			totalResponseLatencyMs += latency;
+			avgResponseLatencyMs = totalTurns > 0 ? totalResponseLatencyMs / totalTurns : 0;
+		}
+		incrementTurns();
+	}
+
+	public void markSessionEnd() {
+		this.realtimeEndedAt = System.currentTimeMillis();
+		if (realtimeStartedAt > 0) {
+			this.effectiveDurationMs = realtimeEndedAt - realtimeStartedAt;
+		}
 	}
 }

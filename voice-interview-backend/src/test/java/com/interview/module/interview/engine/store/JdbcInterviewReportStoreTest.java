@@ -182,6 +182,6 @@ class JdbcInterviewReportStoreTest {
 				List.of("Suggestion"),
 				List.of(),
 				null
-		);
+		, null);
 	}
 }

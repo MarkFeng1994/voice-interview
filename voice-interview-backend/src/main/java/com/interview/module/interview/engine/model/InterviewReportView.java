@@ -12,6 +12,7 @@ public record InterviewReportView(
 		List<String> weaknesses,
 		List<String> suggestions,
 		List<InterviewQuestionReportView> questionReports,
-		InterviewOverallExplanationView overallExplanation
+		InterviewOverallExplanationView overallExplanation,
+		RealtimeMetricsView realtimeMetrics
 ) {
 }

@@ -71,7 +71,8 @@ public class InterviewReportExplanationService {
 				ruleBackfilledReport.weaknesses(),
 				ruleBackfilledReport.suggestions(),
 				List.copyOf(explainedQuestionReports),
-				polishOverallExplanation(ruleBackfilledReport, ruleOverallExplanation)
+				polishOverallExplanation(ruleBackfilledReport, ruleOverallExplanation),
+				ruleBackfilledReport.realtimeMetrics()
 		);
 	}
 
@@ -102,7 +103,8 @@ public class InterviewReportExplanationService {
 				report.weaknesses(),
 				report.suggestions(),
 				List.copyOf(questionReportsWithoutExplanations),
-				null
+				null,
+				report.realtimeMetrics()
 		);
 		return backfillMissingExplanations(reportWithoutExplanations, questions, rounds);
 	}
@@ -152,7 +154,8 @@ public class InterviewReportExplanationService {
 				report.weaknesses(),
 				report.suggestions(),
 				List.copyOf(backfilledQuestionReports),
-				overallExplanation
+				overallExplanation,
+				report.realtimeMetrics()
 		);
 	}
 

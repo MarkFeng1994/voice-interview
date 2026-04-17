@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.interview.common.config.DashScopeProperties;
+import com.interview.module.interview.engine.model.RealtimeMetrics;
 import com.interview.module.interview.engine.store.InterviewSessionState;
 import com.interview.module.interview.engine.store.InterviewSessionStore;
 import com.interview.module.interview.service.RealtimeFallbackService;
@@ -68,6 +69,10 @@ public class RealtimeProxyWebSocketHandler extends TextWebSocketHandler {
 
 		state.setInterviewMode("realtime");
 
+			RealtimeMetrics metrics = new RealtimeMetrics();
+			metrics.setRealtimeStartedAt(System.currentTimeMillis());
+			state.setRealtimeMetrics(metrics);
+
 		OmniRealtimeConversation dashscopeWs = new OmniRealtimeConversation(
 				buildDashScopeParam(),
 				new ProxyCallback(clientSession, state)
@@ -101,6 +106,8 @@ public class RealtimeProxyWebSocketHandler extends TextWebSocketHandler {
 			case "conversation.interrupt" -> {
 				proxy.dashscopeWs().cancelResponse();
 				proxy.state().setLastInterruptedAt(System.currentTimeMillis());
+				RealtimeMetrics m = proxy.state().getRealtimeMetrics();
+				if (m != null) m.incrementInterrupts();
 				sendToClient(clientSession, Map.of("type", "interrupt.ack"));
 			}
 			case "conversation.commit" -> {

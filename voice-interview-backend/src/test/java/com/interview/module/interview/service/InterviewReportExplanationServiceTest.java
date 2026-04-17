@@ -331,7 +331,7 @@ class InterviewReportExplanationServiceTest {
 								null
 						)),
 						null
-				),
+				, null),
 				List.of(new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
 				List.of(new InterviewRoundRecord(
 						"r1",
@@ -411,7 +411,7 @@ class InterviewReportExplanationServiceTest {
 								)
 						),
 						existingOverallExplanation
-				),
+				, null),
 				List.of(
 						new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1),
 						new InterviewQuestionSnapshot(2, "消息队列", "请说明消息可靠性方案。", "PRESET", 2)
@@ -531,7 +531,7 @@ class InterviewReportExplanationServiceTest {
 								existingQuestionExplanation
 						)),
 						existingOverallExplanation
-				),
+				, null),
 				List.of(new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
 				List.of(new InterviewRoundRecord(
 						"r1",
@@ -622,7 +622,7 @@ class InterviewReportExplanationServiceTest {
 								null
 						)),
 						null
-				),
+				, null),
 				List.of(new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
 				List.of(new InterviewRoundRecord(
 						"r1",
@@ -707,7 +707,7 @@ class InterviewReportExplanationServiceTest {
 								null
 						)),
 						null
-				),
+				, null),
 				List.of(new InterviewQuestionSnapshot(1, "缓存设计", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
 				List.of(new InterviewRoundRecord(
 						"r1",
@@ -777,7 +777,7 @@ class InterviewReportExplanationServiceTest {
 								null
 						)),
 						null
-				),
+				, null),
 				List.of(new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
 				List.of(new InterviewRoundRecord(
 						"r1",
@@ -830,7 +830,7 @@ class InterviewReportExplanationServiceTest {
 								null
 						)),
 						null
-				),
+				, null),
 				List.of(new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
 				List.of(new InterviewRoundRecord(
 						"r1",
@@ -899,7 +899,7 @@ class InterviewReportExplanationServiceTest {
 								null
 						)),
 						null
-				),
+				, null),
 				List.of(new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
 				List.of(new InterviewRoundRecord(
 						"r1",
@@ -967,7 +967,7 @@ class InterviewReportExplanationServiceTest {
 								null
 						)),
 						null
-				),
+				, null),
 				List.of(new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
 				List.of(new InterviewRoundRecord(
 						"r1",
@@ -1035,7 +1035,7 @@ class InterviewReportExplanationServiceTest {
 								null
 						)),
 						null
-				),
+				, null),
 				List.of(new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
 				List.of(new InterviewRoundRecord(
 						"r1",
@@ -1103,7 +1103,7 @@ class InterviewReportExplanationServiceTest {
 								null
 						)),
 						null
-				),
+				, null),
 				List.of(new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
 				List.of(new InterviewRoundRecord(
 						"r1",
@@ -1171,7 +1171,7 @@ class InterviewReportExplanationServiceTest {
 								null
 						)),
 						null
-				),
+				, null),
 				List.of(new InterviewQuestionSnapshot(1, "分布式事务", "请说明你们系统里分布式事务的处理方案。", "PRESET", 1)),
 				List.of(
 						new InterviewRoundRecord(
@@ -1260,7 +1260,7 @@ class InterviewReportExplanationServiceTest {
 								null
 						)),
 						null
-				),
+				, null),
 				List.of(new InterviewQuestionSnapshot(1, "Redis", "请说明 Redis 的使用场景和一致性策略。", "PRESET", 1)),
 				List.of(new InterviewRoundRecord(
 						"r1",

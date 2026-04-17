@@ -1,7 +1,7 @@
 # 全双工实时语音面试 - 设计文档
 
 > **日期**: 2026-04-15
-> **状态**: Draft
+> **状态**: Implemented
 > **方案**: DashScope Qwen-Omni-Realtime API 后端代理模式
 
 ---

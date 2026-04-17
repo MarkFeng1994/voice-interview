@@ -21,6 +21,8 @@ import com.interview.module.interview.engine.model.InterviewQuestionCard;
 import com.interview.module.interview.engine.model.InterviewQuestionReportView;
 import com.interview.module.interview.engine.model.InterviewQuestionSnapshot;
 import com.interview.module.interview.engine.model.InterviewReportView;
+import com.interview.module.interview.engine.model.RealtimeMetrics;
+import com.interview.module.interview.engine.model.RealtimeMetricsView;
 import com.interview.module.interview.engine.model.InterviewRoundRecord;
 import com.interview.module.interview.engine.model.InterviewStage;
 import com.interview.module.interview.engine.model.InterviewSessionOwner;
@@ -598,6 +600,17 @@ public class SimpleInterviewEngine implements InterviewEngine {
 		}
 
 		String title = sessionState.getQuestions().isEmpty() ? "模拟面试报告" : sessionState.getQuestions().get(0).titleSnapshot();
+		RealtimeMetricsView metricsView = null;
+		RealtimeMetrics rm = sessionState.getRealtimeMetrics();
+		if ("realtime".equals(sessionState.getInterviewMode()) && rm != null && rm.getTotalTurns() > 0) {
+			metricsView = new RealtimeMetricsView(
+					rm.getTotalTurns(),
+					rm.getInterruptCount(),
+					rm.getAvgResponseLatencyMs(),
+					rm.getEffectiveDurationMs()
+			);
+		}
+
 		InterviewReportView report = new InterviewReportView(
 				sessionState.getSessionId(),
 				sessionState.getStatus(),
@@ -608,7 +621,8 @@ public class SimpleInterviewEngine implements InterviewEngine {
 				List.copyOf(weaknesses),
 				List.copyOf(suggestions),
 				List.copyOf(questionReports),
-				null
+				null,
+				metricsView
 		);
 		return interviewReportExplanationService.enrichReport(
 				report,

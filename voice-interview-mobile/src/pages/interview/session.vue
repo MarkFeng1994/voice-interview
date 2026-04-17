@@ -146,6 +146,21 @@
       <view id="stream-anchor-bottom" class="stream-anchor" />
     </scroll-view>
 
+    <!-- Realtime Controls -->
+    <RealtimeControls
+      v-if="sessionStatus === 'IN_PROGRESS'"
+      :is-realtime-mode="isRealtimeMode"
+      :realtime-available="realtimeAvailable"
+      :connection-status="realtimeConnectionStatus"
+      :is-ai-speaking="isAiSpeaking"
+      :can-interrupt="canInterrupt"
+      :user-transcript="userTranscript"
+      :assistant-transcript="assistantTranscript"
+      @switch-to-half-duplex="switchToHalfDuplex"
+      @switch-to-realtime="switchToRealtime"
+      @interrupt="interruptAi"
+    />
+
     <view class="dock-card">
       <view class="dock-head">
         <view class="dock-copy">
@@ -232,8 +247,10 @@ import { useInterviewSession } from '@/composables/useInterviewSession'
 import { useMediaUpload } from '@/composables/useMediaUpload'
 import { useWaveform } from '@/composables/useWaveform'
 import { useInterviewSocket } from '@/composables/useInterviewSocket'
+import { useRealtimeInterview } from '@/composables/useRealtimeInterview'
 import { useUserStore } from '@/stores/user'
 import WaveformVisualizer from '@/components/voice/WaveformVisualizer.vue'
+import RealtimeControls from '@/components/interview/RealtimeControls.vue'
 import type { InterviewMessage } from '@/types/interview'
 import { ensureAuthenticated } from '@/utils/auth'
 import { readInterviewVoiceSettings } from '@/utils/interviewSettings'
@@ -302,6 +319,15 @@ const isRefreshing = ref(false)
 const isReconnecting = ref(false)
 const isSkipping = ref(false)
 const isEnding = ref(false)
+
+// Realtime mode state
+const isRealtimeMode = ref(false)
+const realtimeAvailable = ref(true)
+const realtimeConnectionStatus = ref<'connected' | 'connecting' | 'disconnected' | 'error'>('disconnected')
+const isAiSpeaking = ref(false)
+const canInterrupt = ref(false)
+const userTranscript = ref('')
+const assistantTranscript = ref('')
 
 const voiceToneMap: Record<number, string> = {
   33: 'Cherry',
@@ -530,6 +556,41 @@ const {
   },
   onAudioSamples: (samples) => {
     waveform.pushSamples(samples)
+  },
+})
+
+// Realtime interview composable
+const {
+  isConnected: realtimeIsConnected,
+  isAiSpeaking: realtimeIsAiSpeaking,
+  canInterrupt: realtimeCanInterrupt,
+  connect: connectRealtime,
+  disconnect: disconnectRealtime,
+  interrupt: interruptRealtime,
+  checkRealtimeCapability,
+} = useRealtimeInterview({
+  apiBaseUrl: API_BASE_URL,
+  onUserTranscript: (text) => {
+    userTranscript.value = text
+  },
+  onAssistantTranscript: (text) => {
+    assistantTranscript.value = text
+  },
+  onSessionUpdated: (session) => {
+    applyIncomingSessionState(session)
+  },
+  onStatusChange: (status) => {
+    setUiStatus('全双工状态', status)
+  },
+  onError: (error) => {
+    setUiStatus('全双工错误', error)
+    realtimeConnectionStatus.value = 'error'
+  },
+  onFallbackToHalfDuplex: (reason, session) => {
+    isRealtimeMode.value = false
+    realtimeConnectionStatus.value = 'disconnected'
+    setUiStatus('已切换到半双工', reason)
+    applyIncomingSessionState(session)
   },
 })
 
@@ -859,6 +920,59 @@ const goToHistory = () => {
     url: '/pages/history/list',
   })
 }
+
+// Realtime mode switching
+const switchToRealtime = async () => {
+  if (!lastSessionId.value) {
+    setUiStatus('无法切换', '请先开始面试')
+    return
+  }
+
+  const cap = checkRealtimeCapability()
+  if (!cap.available) {
+    realtimeAvailable.value = false
+    setUiStatus('不支持全双工', cap.reason || '当前浏览器不支持全双工模式')
+    return
+  }
+
+  isRealtimeMode.value = true
+  realtimeConnectionStatus.value = 'connecting'
+  setUiStatus('切换到全双工', '正在建立实时语音连接...')
+
+  try {
+    await connectRealtime(lastSessionId.value)
+    realtimeConnectionStatus.value = 'connected'
+    setUiStatus('全双工已连接', '现在可以自由对话，随时打断 AI')
+  } catch (error) {
+    isRealtimeMode.value = false
+    realtimeConnectionStatus.value = 'error'
+    setUiStatus('全双工连接失败', error instanceof Error ? error.message : '请重试或使用半双工模式')
+  }
+}
+
+const switchToHalfDuplex = () => {
+  disconnectRealtime()
+  isRealtimeMode.value = false
+  realtimeConnectionStatus.value = 'disconnected'
+  setUiStatus('已切换到半双工', '按住说话模式')
+}
+
+const interruptAi = () => {
+  interruptRealtime()
+  setUiStatus('已打断 AI', '你可以继续说话')
+}
+
+watch(realtimeIsConnected, (connected) => {
+  realtimeConnectionStatus.value = connected ? 'connected' : 'disconnected'
+})
+
+watch(realtimeIsAiSpeaking, (speaking) => {
+  isAiSpeaking.value = speaking
+})
+
+watch(realtimeCanInterrupt, (can) => {
+  canInterrupt.value = can
+})
 </script>
 
 <style>

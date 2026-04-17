@@ -942,7 +942,7 @@ class SimpleInterviewEngineIntegrationTest {
 						null
 				)),
 				null
-		);
+		, null);
 	}
 
 	private static InterviewReportView backfilledPersistedReport(String sessionId) {
@@ -976,7 +976,7 @@ class SimpleInterviewEngineIntegrationTest {
 						List.of("按题型整理每题必须覆盖的关键点，先保证回答完整度。"),
 						"RULE"
 				)
-		);
+		, null);
 	}
 
 	private static FollowUpDecisionEngine defaultDecisionEngine() {

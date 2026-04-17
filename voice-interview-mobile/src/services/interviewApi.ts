@@ -46,6 +46,9 @@ export const getInterviewSessionState = (apiBaseUrl: string, sessionId: string) 
 export const issueInterviewWsTicket = (apiBaseUrl: string, sessionId: string) =>
   request<InterviewWsTicketResponse>(`${apiBaseUrl}/api/interviews/${sessionId}/ws-ticket`, 'POST')
 
+export const issueRealtimeWsTicket = (apiBaseUrl: string, sessionId: string) =>
+  request<InterviewWsTicketResponse>(`${apiBaseUrl}/api/interviews/${sessionId}/realtime-ticket`, 'POST')
+
 export const submitInterviewAnswer = (
   apiBaseUrl: string,
   payload: { sessionId: string; fileId: string | null; textAnswer: string | null },
