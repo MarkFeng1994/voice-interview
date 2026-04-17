@@ -41,15 +41,15 @@ public class ProviderRuntimeStatusService {
 			return new CapabilityStatus("mock", "UP", "mock LLM", Map.of());
 		}
 		if ("openai".equalsIgnoreCase(aiProvider)) {
-			return inspectOpenAiCompatibleAi("openai");
+			return inspectSpringAi("openai");
 		}
-		if ("langchain4j".equalsIgnoreCase(aiProvider)) {
-			return inspectOpenAiCompatibleAi("langchain4j");
+		if ("springai".equalsIgnoreCase(aiProvider)) {
+			return inspectSpringAi("springai");
 		}
 		return new CapabilityStatus(aiProvider, "UNKNOWN", "Unknown LLM provider", Map.of());
 	}
 
-	private CapabilityStatus inspectOpenAiCompatibleAi(String providerName) {
+	private CapabilityStatus inspectSpringAi(String providerName) {
 		String baseUrl = openAiProperties.resolveAiBaseUrl();
 		String apiKey = openAiProperties.resolveAiApiKey();
 		String model = openAiProperties.resolveAiModel();

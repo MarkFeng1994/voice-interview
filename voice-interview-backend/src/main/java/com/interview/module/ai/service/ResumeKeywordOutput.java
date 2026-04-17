@@ -1,4 +1,4 @@
-package com.interview.module.ai.service.langchain4j;
+package com.interview.module.ai.service;
 
 import java.util.List;
 
