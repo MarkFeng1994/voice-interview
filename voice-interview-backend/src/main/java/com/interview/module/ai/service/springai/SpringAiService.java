@@ -54,9 +54,9 @@ public class SpringAiService implements AiService {
 							maxFollowUpPerQuestion: {maxFollowUpPerQuestion}
 							expectedPoints: {expectedPoints}
 							""")
-							.param("question", command == null ? "" : command.question())
-							.param("answer", command == null ? "" : command.answer())
-							.param("stage", command == null ? "" : command.stage())
+							.param("question", defaultString(command == null ? null : command.question()))
+							.param("answer", defaultString(command == null ? null : command.answer()))
+							.param("stage", defaultString(command == null ? null : command.stage()))
 							.param("followUpIndex", String.valueOf(command == null ? 0 : command.followUpIndex()))
 							.param("maxFollowUpPerQuestion", String.valueOf(command == null ? 0 : command.maxFollowUpPerQuestion()))
 							.param("expectedPoints", command == null ? List.of() : command.expectedPoints()))
@@ -80,7 +80,7 @@ public class SpringAiService implements AiService {
 			ResumeKeywordOutput output = chatClient.prompt()
 					.system("你是技术简历分析助手。\n只返回符合 ResumeKeywordOutput 的 JSON。")
 					.user(u -> u.text("resumeText:\n{resumeText}")
-							.param("resumeText", resumeText == null ? "" : resumeText))
+							.param("resumeText", defaultString(resumeText)))
 					.call()
 					.entity(ResumeKeywordOutput.class);
 
@@ -110,10 +110,10 @@ public class SpringAiService implements AiService {
 							missingKeywords: {missingKeywords}
 							questionCount: {questionCount}
 							""")
-							.param("resumeSummary", command.resumeSummary())
-							.param("keywords", command.keywords())
-							.param("existingQuestionTitles", command.existingQuestionTitles())
-							.param("missingKeywords", command.missingKeywords())
+							.param("resumeSummary", defaultString(command.resumeSummary()))
+							.param("keywords", command.keywords() == null ? List.of() : command.keywords())
+							.param("existingQuestionTitles", command.existingQuestionTitles() == null ? List.of() : command.existingQuestionTitles())
+							.param("missingKeywords", command.missingKeywords() == null ? List.of() : command.missingKeywords())
 							.param("questionCount", String.valueOf(command.questionCount())))
 					.call()
 					.entity(ResumeQuestionListOutput.class);
